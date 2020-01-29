@@ -37,7 +37,11 @@ public abstract class IlocInstruction {
 
   public abstract String getOpcode();
 
-  public abstract void emit(PrintWriter pw);
+  public void emit(PrintWriter pw) {
+    pw.println(getStringRep());
+  }
+
+  public abstract String getStringRep();
 
   public abstract void setOperandTypes(Hashtable<String, Integer> typeHash);
 
@@ -129,6 +133,36 @@ public abstract class IlocInstruction {
         || this instanceof FstoreInstruction || this instanceof FstoreAIInstruction
         || this instanceof FstoreAOInstruction || this instanceof CreadInstruction || this instanceof FreadInstruction
         || this instanceof IreadInstruction);
+  }
+
+  public boolean isBranchInstruction() {
+    return (isConditionalBranchInstruction() || isUnconditionalBranchInstruction());
+  }
+
+  public boolean isConditionalBranchInstruction() {
+    return (this instanceof CbrInstruction || this instanceof CbrneInstruction);
+  }
+
+  public boolean isUnconditionalBranchInstruction() {
+    return (this instanceof JumpIInstruction || this instanceof JumpInstruction || this instanceof RetInstruction
+        || this instanceof HaltInstruction);
+  }
+
+  public boolean isEndInstruction() {
+    return (this instanceof RetInstruction || this instanceof HaltInstruction);
+  }
+
+  public String getBranchTargetLabel() {
+    if (this instanceof JumpIInstruction)
+      return ((JumpIInstruction) this).getTargetLabel();
+    else if (this instanceof JumpInstruction)
+      return ((JumpInstruction) this).getTargetLabel();
+    else if (this instanceof CbrInstruction)
+      return ((CbrInstruction) this).getTargetLabel();
+    else if (this instanceof CbrneInstruction)
+      return ((CbrneInstruction) this).getTargetLabel();
+    else
+      return null;
   }
 
   public abstract boolean operandIsLValue(Operand operand);

@@ -58,4 +58,9 @@ public class CallInstruction extends InvocationInstruction {
     VirtualRegisterOperand vr = (VirtualRegisterOperand) operands.elementAt(index);
     return vr.getType();
   }
+
+  @Override
+  protected String getStringRepSpecific() {
+    return "";
+  }
 }

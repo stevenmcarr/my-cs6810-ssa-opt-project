@@ -1,6 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -44,18 +43,19 @@ public class FramePseudoOp extends PseudoOpInstruction {
     return ".frame";
   }
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
+      rep = label + ":";
 
-    pw.println("\t" + getOpcode() + "\t" + name + ", " + localSize);
+    rep += ("\t" + getOpcode() + "\t" + name + ", " + localSize);
 
     for (int i = 0; i < parameters.size(); i++) {
       VirtualRegisterOperand reg = (VirtualRegisterOperand) parameters.elementAt(i);
-      pw.print(", " + reg.toString());
+      rep += (", " + reg.toString());
     }
 
-    pw.println("");
+    return rep;
   }
 
   public String getName() {

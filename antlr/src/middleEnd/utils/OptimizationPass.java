@@ -1,16 +1,18 @@
-package middleEnd;
+package middleEnd.utils;
 
 import java.util.Vector;
 
-import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.ErrorNode;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Hashtable;
 import middleEnd.iloc.*;
-import middleEnd.utils.*;
 import parser.ilocParser.DataContext;
 import parser.ilocParser.FrameInstructionContext;
 import parser.ilocParser.IlocInstructionContext;
@@ -22,47 +24,29 @@ import parser.ilocParser.ProceduresContext;
 import parser.ilocParser.ProgramContext;
 import parser.ilocParser.PseudoOpContext;
 import parser.ilocParser.VirtualRegContext;
+import parser.ilocLexer;
+import parser.ilocParser;
 import parser.ilocVisitor;
 
-/**
- * <p>
- * Title: Nolife Compiler
- * </p>
- *
- * <p>
- * Description:
- * </p>
- *
- * <p>
- * Copyright: Copyright (c) 2006
- * </p>
- *
- * <p>
- * Company:
- * </p>
- *
- * @author Steve Carr
- * @version 1.0
- */
-public class IlocGenerator implements ilocVisitor<Void> {
+public abstract class OptimizationPass implements ilocVisitor<Void> {
 
-  IlocInstruction firstInst = null;
-  IlocInstruction lastInst = null;
-  IlocInstruction newI = null;
+  protected String prevPassAbbrev;
+  protected String passAbbrev;
+
+  protected IlocInstruction firstInst = null;
+  protected IlocInstruction lastInst = null;
+  protected IlocInstruction newI = null;
   private VirtualRegisterOperand lastVR = null;
   private ImmediateOperand lastOp = null;
 
-  Vector<IlocRoutine> routines = new Vector<IlocRoutine>();
+  protected Vector<IlocRoutine> routines = new Vector<IlocRoutine>();
 
-  Hashtable<String, Integer> instHash = new Hashtable<String, Integer>();
+  protected Hashtable<String, Integer> instHash = new Hashtable<String, Integer>();
 
-  int nextVirtualRegister = VirtualRegisterOperand.FREE_REG;
-  int maxVirtualRegister = 0;
+  protected int nextVirtualRegister = VirtualRegisterOperand.FREE_REG;
+  protected int maxVirtualRegister = 0;
 
-  Hashtable<String, Integer> typeHash = new Hashtable<String, Integer>();
-
-  public IlocGenerator() {
-  }
+  protected Hashtable<String, Integer> typeHash = new Hashtable<String, Integer>();
 
   public void emitCode(PrintWriter pw) {
     for (IlocInstruction inst = firstInst; inst != null; inst = inst.getNextInst()) {
@@ -201,26 +185,37 @@ public class IlocGenerator implements ilocVisitor<Void> {
     routines.add(routine);
     BasicBlock block = new BasicBlock();
     routine.addBlock(block);
+    HashMap<String, IlocInstruction> labelMap = new HashMap<String, IlocInstruction>();
 
     IlocInstruction inst = firstInst;
     block.add(inst);
+    inst.setBlock(block);
+    if (inst.getLabel() != null)
+      labelMap.put(inst.getLabel(), inst);
 
     inst = inst.getNextInst();
     while (inst != null) {
+
       if (inst instanceof FramePseudoOp) {
+        routine.setLabelMap(labelMap);
         routine = new IlocRoutine();
         routines.add(routine);
         block = new BasicBlock();
         routine.addBlock(block);
-      } else if (inst.getLabel() != null || inst.getPrevInst() instanceof CbrInstruction
-          || inst.getPrevInst() instanceof JumpInstruction || inst.getPrevInst() instanceof JumpIInstruction) {
+        labelMap = new HashMap<String, IlocInstruction>();
+      } else if (inst.getLabel() != null || inst.getPrevInst().isBranchInstruction()) {
         block = new BasicBlock();
         routine.addBlock(block);
       }
 
       block.add(inst);
+      inst.setBlock(block);
+      if (inst.getLabel() != null)
+        labelMap.put(inst.getLabel(), inst);
       inst = inst.getNextInst();
     }
+
+    routine.setLabelMap(labelMap);
   }
 
   private void initializeTypeHash(Hashtable<String, Integer> typeHash) {
@@ -747,5 +742,37 @@ public class IlocGenerator implements ilocVisitor<Void> {
     add(newI);
 
     return null;
+  }
+
+  private void readCode(CharStream code) throws IOException {
+
+    // create a lexer that feeds off of input CharStream
+    ilocLexer lexer = new ilocLexer(code);
+    // create a buffer of tokens pulled from the lexer
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    // create a parser that feeds off the tokens buffer
+    ilocParser parser = new ilocParser(tokens);
+    ParseTree t = null;
+    try {
+      t = parser.program();
+    } catch (RuntimeException e) {
+      System.err.println("Syntax error: " + e);
+      System.exit(-1);
+    }
+
+    visit(t);
+    buildRoutines();
+    performTypeAssignment();
+  }
+
+  protected abstract void optimizeCode();
+
+  public void processCode(String ilocFileName) throws IOException {
+    readCode(CharStreams.fromFileName(ilocFileName));
+    optimizeCode();
+
+    PrintWriter pw = new PrintWriter(ilocFileName.replace("." + prevPassAbbrev + ".il", "." + passAbbrev + ".il"));
+    emitCode(pw);
+    pw.close();
   }
 }

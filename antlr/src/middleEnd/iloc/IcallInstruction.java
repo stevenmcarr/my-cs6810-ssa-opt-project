@@ -1,6 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -72,8 +71,12 @@ public class IcallInstruction extends InvocationInstruction {
       return Operand.INTEGER_TYPE;
   }
 
-  protected void emitInstSpecific(PrintWriter pw) {
-    pw.println("\t => " + returnRegister.toString());
+  public String getStringRep() {
+    String rep = "";
+    if (label != null)
+      rep = label + ":";
+    rep += ("\t => " + returnRegister.toString());
+    return rep;
   }
 
   public static String getHash(LabelOperand name, Vector<Operand> operands) {
@@ -82,5 +85,10 @@ public class IcallInstruction extends InvocationInstruction {
       key += ((Operand) operands.elementAt(i)).toString();
 
     return key;
+  }
+
+  @Override
+  protected String getStringRepSpecific() {
+    return "";
   }
 }

@@ -1,7 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
-
 /**
  * <p>
  * Title: Nolife Compiler
@@ -42,11 +40,12 @@ public class FloatPseudoOp extends PseudoOpInstruction {
     return ".float";
   }
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
-
-    pw.println("\t" + getOpcode() + "\t" + name + ", " + val);
+      rep = label + ":";
+    rep += ("\t" + getOpcode() + "\t" + name + ", " + val);
+    return rep;
   }
 
   public String getName() {

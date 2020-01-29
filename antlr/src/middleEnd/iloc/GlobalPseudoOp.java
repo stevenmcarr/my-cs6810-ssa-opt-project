@@ -1,7 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
-
 /**
  * <p>
  * Title: Nolife Compiler
@@ -43,11 +41,13 @@ public class GlobalPseudoOp extends PseudoOpInstruction {
     return ".global";
   }
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
+      rep = label + ":";
 
-    pw.println("\t" + getOpcode() + "\t" + name + ", " + size + ", " + align);
+    rep += ("\t" + getOpcode() + "\t" + name + ", " + size + ", " + align);
+    return rep;
   }
 
   public String getName() {

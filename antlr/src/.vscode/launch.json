@@ -6,18 +6,10 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Debug (Launch) - Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-            "args" ""
-        },
-        {
-            "type": "java",
-            "name": "Debug (Launch)-CodeGenerator<src_dda3e096>",
+            "name": "Debug (Launch)-CodeGenerator",
             "request": "launch",
             "mainClass": "driver.CodeGenerator",
-            "projectName": "src_dda3e096"
-            "args": "../../input/check.il"
+            "args": "-gv -dbre ../../input/newdyn.il"
         }
     ]
 }

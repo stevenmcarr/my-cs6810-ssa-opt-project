@@ -1,6 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
 import java.util.Hashtable;
 
 /**
@@ -28,11 +27,13 @@ public abstract class ThreeAddressIlocInstruction extends IlocInstruction {
   Operand source2;
   Operand dest;
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
+      rep = label + ":";
 
-    pw.println("\t" + getOpcode() + "\t" + source1.toString() + ", " + source2.toString() + " => " + dest.toString());
+    rep += ("\t" + getOpcode() + "\t" + source1.toString() + ", " + source2.toString() + " => " + dest.toString());
+    return rep;
   }
 
   public Operand getLeftOperand() {

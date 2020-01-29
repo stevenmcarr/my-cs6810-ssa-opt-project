@@ -28,6 +28,10 @@ public class JumpIInstruction extends OneAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public String getTargetLabel() {
+    return ((LabelOperand) source).getLabel();
+  }
+
   /**
    * getOpcode
    *

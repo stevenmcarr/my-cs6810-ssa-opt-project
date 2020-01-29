@@ -1,7 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
-
 /**
  * <p>
  * Title: Nolife Compiler
@@ -28,6 +26,10 @@ public class JumpInstruction extends OneAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public String getTargetLabel() {
+    return ((LabelOperand) source).getLabel();
+  }
+
   /**
    * getOpcode
    *
@@ -38,11 +40,12 @@ public class JumpInstruction extends OneAddressIlocInstruction {
     return "jump";
   }
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
-
-    pw.println("\t" + getOpcode() + "\t-> " + source.toString());
+      rep = label + ":";
+    rep += ("\t" + getOpcode() + "\t-> " + source.toString());
+    return rep;
   }
 
   protected int getOperandType(Operand operand) {

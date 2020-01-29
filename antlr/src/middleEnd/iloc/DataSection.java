@@ -1,7 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
-
 /**
  * <p>
  * Title: CS4131 Nolife Compiler
@@ -36,11 +34,13 @@ public class DataSection extends PseudoOpInstruction {
     return ".data";
   }
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
+      rep = label + ":";
 
-    pw.println("\t" + getOpcode());
+    rep += ("\t" + getOpcode());
+    return rep;
   }
 
   protected int getOperandType(Operand operand) {

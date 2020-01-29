@@ -23,7 +23,7 @@ import middleEnd.iloc.*;
  * @author not attributable
  * @version 1.0
  */
-public class BasicBlock {
+public class BasicBlock extends CfgNode {
 
   IlocInstruction firstInst = null;
   IlocInstruction lastInst = null;
@@ -79,5 +79,18 @@ public class BasicBlock {
 
   public IlocInstruction getLastInst() {
     return lastInst;
+  }
+
+  @Override
+  public String getCfgNodeLabel() {
+    String label = "Node " + Integer.toString(nodeId);
+
+    for (IlocInstruction inst = firstInst; inst != lastInst; inst = inst.getNextInst()) {
+      label += "\n" + inst.getStringRep();
+    }
+    if (lastInst != null)
+      label += "\n" + lastInst.getStringRep();
+
+    return label;
   }
 }

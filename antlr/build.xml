@@ -31,7 +31,7 @@
 	</target>
 
 	<target name = "build-jar">
-   		<jar destfile = "lvn.jar">
+   		<jar destfile = "ssa.jar">
 			<fileset dir="${build.dir}" includes="**/*.class"/>
 			<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
       			<manifest>
