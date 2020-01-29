@@ -71,15 +71,16 @@ public class FcallInstruction extends InvocationInstruction {
       return Operand.FLOAT_TYPE;
   }
 
-  protected void emitInstSpecific() {
-    System.out.println("\t => " + returnRegister.toString());
-  }
-
   public static String getHash(LabelOperand name, Vector<Operand> operands) {
     String key = new String("fcall" + name.getLabel());
     for (int i = 0; i < operands.size(); i++)
       key += ((Operand) operands.elementAt(i)).toString();
 
     return key;
+  }
+
+  @Override
+  protected String getStringRepSpecific() {
+    return ("\t => " + returnRegister.toString());
   }
 }

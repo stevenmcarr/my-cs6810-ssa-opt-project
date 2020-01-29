@@ -29,7 +29,7 @@ public class IlocRoutine {
 
   private Vector<BasicBlock> basicBlocks = new Vector<BasicBlock>();
   private Cfg cfg;
-  private HashMap<String, IlocInstruction> labelMap = new HashMap<String, IlocInstruction>();
+  private HashMap<String, IlocInstruction> labelMap = null;
 
   public IlocRoutine() {
     super();
@@ -43,7 +43,7 @@ public class IlocRoutine {
     basicBlocks.add(block);
   }
 
-  public void addLabelMap(HashMap<String, IlocInstruction> lm) {
+  public void setLabelMap(HashMap<String, IlocInstruction> lm) {
     labelMap = lm;
   }
 
@@ -54,27 +54,45 @@ public class IlocRoutine {
   public void buildCfg() {
     cfg = new Cfg();
 
-    BasicBlock entry = basicBlocks.firstElement();
+    Vector<BasicBlock> work = new Vector<BasicBlock>(basicBlocks);
+
+    BasicBlock entry = new BasicBlock();
     cfg.addEntryNode(entry);
+
+    BasicBlock target = basicBlocks.firstElement();
+    entry.addSuccessorEdge(target);
+    target.addPredecessorEdge(entry);
 
     BasicBlock exit = new BasicBlock();
     cfg.addExitNode(exit);
 
-    Vector<BasicBlock> work = new Vector<BasicBlock>(basicBlocks);
-
     while (!work.isEmpty()) {
       BasicBlock b = work.firstElement();
       work.remove(b);
+      cfg.addNode(b);
+
       IlocInstruction last = b.getLastInst();
+
       if (last.isBranchInstruction()) {
-        BasicBlock target = labelMap.get(last.getBranchTargetLabel()).getBlock();
-        b.addSuccessorEdge(b, target);
-        target.addPredecessorEdge(b, target);
+        if (!last.isEndInstruction())
+          target = labelMap.get(last.getBranchTargetLabel()).getBlock();
+        else
+          target = exit;
+        b.addSuccessorEdge(target);
+        target.addPredecessorEdge(b);
       }
+
       if (!last.isUnconditionalBranchInstruction()) {
-        BasicBlock target = last.getNextInst().getBlock();
-        b.addSuccessorEdge(b, target);
-        target.addPredecessorEdge(b, target);
+        target = last.getNextInst().getBlock();
+        //
+        // Because the instrucgtions are in one large list, the next instruction may be
+        // in a different routine. Make sure we are still in the same routine
+        // Otherwise, the target block is the exit block.
+        //
+        if (basicBlocks.contains(target)) {
+          b.addSuccessorEdge(target);
+          target.addPredecessorEdge(b);
+        }
       }
     }
   }

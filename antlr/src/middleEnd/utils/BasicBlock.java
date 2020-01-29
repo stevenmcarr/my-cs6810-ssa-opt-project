@@ -80,4 +80,17 @@ public class BasicBlock extends CfgNode {
   public IlocInstruction getLastInst() {
     return lastInst;
   }
+
+  @Override
+  public String getCfgNodeLabel() {
+    String label = "Node " + Integer.toString(nodeId);
+
+    for (IlocInstruction inst = firstInst; inst != lastInst; inst = inst.getNextInst()) {
+      label += "\n" + inst.getStringRep();
+    }
+    if (lastInst != null)
+      label += "\n" + lastInst.getStringRep();
+
+    return label;
+  }
 }

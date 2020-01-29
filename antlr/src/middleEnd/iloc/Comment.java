@@ -3,7 +3,6 @@
  */
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
 import java.util.Hashtable;
 
 /**
@@ -27,8 +26,12 @@ public class Comment extends IlocInstruction {
 	 * @see middleEnd.iloc.IlocInstruction#emit()
 	 */
 	@Override
-	public void emit(PrintWriter pw) {
-		pw.println("# " + commentString);
+	public String getStringRep() {
+		String rep = "";
+		if (label != null)
+			rep = label + ":";
+		rep += ("# " + commentString);
+		return rep;
 	}
 
 	/*

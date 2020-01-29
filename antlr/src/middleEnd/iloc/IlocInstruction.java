@@ -37,7 +37,11 @@ public abstract class IlocInstruction {
 
   public abstract String getOpcode();
 
-  public abstract void emit(PrintWriter pw);
+  public void emit(PrintWriter pw) {
+    pw.println(getStringRep());
+  }
+
+  public abstract String getStringRep();
 
   public abstract void setOperandTypes(Hashtable<String, Integer> typeHash);
 
@@ -132,8 +136,7 @@ public abstract class IlocInstruction {
   }
 
   public boolean isBranchInstruction() {
-    return (this instanceof JumpIInstruction || this instanceof JumpInstruction || this instanceof CbrInstruction
-        || this instanceof CbrneInstruction);
+    return (isConditionalBranchInstruction() || isUnconditionalBranchInstruction());
   }
 
   public boolean isConditionalBranchInstruction() {
@@ -141,7 +144,12 @@ public abstract class IlocInstruction {
   }
 
   public boolean isUnconditionalBranchInstruction() {
-    return (this instanceof JumpIInstruction || this instanceof JumpInstruction);
+    return (this instanceof JumpIInstruction || this instanceof JumpInstruction || this instanceof RetInstruction
+        || this instanceof HaltInstruction);
+  }
+
+  public boolean isEndInstruction() {
+    return (this instanceof RetInstruction || this instanceof HaltInstruction);
   }
 
   public String getBranchTargetLabel() {

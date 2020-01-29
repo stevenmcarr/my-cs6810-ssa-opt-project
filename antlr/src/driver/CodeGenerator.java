@@ -16,6 +16,8 @@ import middleEnd.utils.OptimizationPass;
  */
 public class CodeGenerator {
 
+	public static boolean emitCfg = false;
+
 	/**
 	 * @param args
 	 * @throws FileNotFoundException
@@ -26,12 +28,15 @@ public class CodeGenerator {
 		String prevPass = "";
 
 		for (int i = 0; i < numargs - 1; i++) {
-			if (args[i] == "-lvn") {
+			if (args[i].equals("-lvn")) {
 				pass = new LocalValueNumbering(prevPass, "lvn");
 				prevPass = "lvn";
-			} else if (args[i] == "-dbre") {
+			} else if (args[i].equals("-dbre")) {
 				pass = new DominatorBasedRedundancyElimination(prevPass, "dbre");
 				prevPass = "dbre";
+			} else if (args[i].equals("-gv")) {
+				emitCfg = true;
+				continue;
 			} else {
 				System.err.println("Invalid command option: " + args[i]);
 				break;

@@ -1,6 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
 import java.util.Vector;
 
 /**
@@ -36,11 +35,14 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
     return ((LabelOperand) dest).getLabel();
   }
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
+      rep = label + ":";
 
-    pw.println("\t" + getOpcode() + "\t" + source.toString() + " " + " -> " + dest.toString());
+    rep += ("\t" + getOpcode() + "\t" + source.toString() + " " + " -> " + dest.toString());
+
+    return rep;
   }
 
   /**

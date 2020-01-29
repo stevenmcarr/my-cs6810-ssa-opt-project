@@ -1,6 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
 import java.util.Hashtable;
 
 /**
@@ -28,11 +27,13 @@ public abstract class OneAddressIlocInstruction extends IlocInstruction {
 
   public abstract String getOpcode();
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
+      rep = label + ":";
 
-    pw.println("\t" + getOpcode() + "\t" + source.toString());
+    rep += ("\t" + getOpcode() + "\t" + source.toString());
+    return rep;
   }
 
   public Operand getOperand() {

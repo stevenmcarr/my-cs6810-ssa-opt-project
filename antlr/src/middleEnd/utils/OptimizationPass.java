@@ -47,7 +47,6 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
   protected int maxVirtualRegister = 0;
 
   protected Hashtable<String, Integer> typeHash = new Hashtable<String, Integer>();
-  protected HashMap<String, IlocInstruction> labelMap = new HashMap<String, IlocInstruction>();
 
   public void emitCode(PrintWriter pw) {
     for (IlocInstruction inst = firstInst; inst != null; inst = inst.getNextInst()) {
@@ -186,6 +185,7 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
     routines.add(routine);
     BasicBlock block = new BasicBlock();
     routine.addBlock(block);
+    HashMap<String, IlocInstruction> labelMap = new HashMap<String, IlocInstruction>();
 
     IlocInstruction inst = firstInst;
     block.add(inst);
@@ -195,11 +195,14 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
 
     inst = inst.getNextInst();
     while (inst != null) {
+
       if (inst instanceof FramePseudoOp) {
+        routine.setLabelMap(labelMap);
         routine = new IlocRoutine();
         routines.add(routine);
         block = new BasicBlock();
         routine.addBlock(block);
+        labelMap = new HashMap<String, IlocInstruction>();
       } else if (inst.getLabel() != null || inst.getPrevInst().isBranchInstruction()) {
         block = new BasicBlock();
         routine.addBlock(block);
@@ -211,6 +214,8 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
         labelMap.put(inst.getLabel(), inst);
       inst = inst.getNextInst();
     }
+
+    routine.setLabelMap(labelMap);
   }
 
   private void initializeTypeHash(Hashtable<String, Integer> typeHash) {

@@ -1,11 +1,13 @@
 package middleEnd.utils;
 
 public class CfgEdge {
+    private static int numEdges = 0;
     protected CfgNode pred;
     protected CfgNode succ;
+    private int edgeId;
 
     public CfgEdge() {
-
+        edgeId = numEdges++;
     }
 
     public CfgEdge addPred(CfgNode n) {

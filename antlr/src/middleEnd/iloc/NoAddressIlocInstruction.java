@@ -1,6 +1,5 @@
 package middleEnd.iloc;
 
-import java.io.PrintWriter;
 import java.util.Hashtable;
 
 /**
@@ -25,11 +24,13 @@ import java.util.Hashtable;
  */
 public abstract class NoAddressIlocInstruction extends IlocInstruction {
 
-  public void emit(PrintWriter pw) {
+  public String getStringRep() {
+    String rep = "";
     if (label != null)
-      pw.print(label + ":");
+      rep = label + ":";
 
-    pw.println("\t" + getOpcode());
+    rep += ("\t" + getOpcode());
+    return rep;
   }
 
   public void setOperandTypes(Hashtable<String, Integer> typeMap) {

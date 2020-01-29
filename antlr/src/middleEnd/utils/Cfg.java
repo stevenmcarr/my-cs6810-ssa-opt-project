@@ -28,6 +28,11 @@ public class Cfg {
         return this;
     }
 
+    public Cfg addNode(CfgNode n) {
+        nodes.add(n);
+        return this;
+    }
+
     public CfgNode getEntryNode() {
         return entryNode;
     }
@@ -49,7 +54,7 @@ public class Cfg {
         pw.println("digraph cfg {");
 
         for (CfgNode n : nodes) {
-            pw.println(n.getNodeId());
+            pw.println(n.getNodeId() + " [ label = \"" + n.getCfgNodeLabel().replace('"', ' ') + "\", shape = square]");
             for (CfgEdge e : n.getPreds()) {
                 pw.println(e.getPred().getNodeId() + "->" + e.getSucc().getNodeId());
             }
@@ -57,6 +62,5 @@ public class Cfg {
 
         pw.println("}");
 
-        pw.close();
     }
 }
