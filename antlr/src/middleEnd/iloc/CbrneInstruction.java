@@ -32,6 +32,10 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public String getTargetLabel() {
+    return ((LabelOperand) dest).getLabel();
+  }
+
   public void emit(PrintWriter pw) {
     if (label != null)
       pw.print(label + ":");

@@ -131,6 +131,32 @@ public abstract class IlocInstruction {
         || this instanceof IreadInstruction);
   }
 
+  public boolean isBranchInstruction() {
+    return (this instanceof JumpIInstruction || this instanceof JumpInstruction || this instanceof CbrInstruction
+        || this instanceof CbrneInstruction);
+  }
+
+  public boolean isConditionalBranchInstruction() {
+    return (this instanceof CbrInstruction || this instanceof CbrneInstruction);
+  }
+
+  public boolean isUnconditionalBranchInstruction() {
+    return (this instanceof JumpIInstruction || this instanceof JumpInstruction);
+  }
+
+  public String getBranchTargetLabel() {
+    if (this instanceof JumpIInstruction)
+      return ((JumpIInstruction) this).getTargetLabel();
+    else if (this instanceof JumpInstruction)
+      return ((JumpInstruction) this).getTargetLabel();
+    else if (this instanceof CbrInstruction)
+      return ((CbrInstruction) this).getTargetLabel();
+    else if (this instanceof CbrneInstruction)
+      return ((CbrneInstruction) this).getTargetLabel();
+    else
+      return null;
+  }
+
   public abstract boolean operandIsLValue(Operand operand);
 
   public abstract boolean operandIsRValue(Operand operand);

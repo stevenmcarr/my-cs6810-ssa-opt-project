@@ -1,13 +1,21 @@
-package middleEnd.opt;
+package middleEnd.lvn;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
@@ -15,8 +23,7 @@ package middleEnd.opt;
 public class LabelValueTableEntry extends ValueTableEntry {
   String label;
 
-  public LabelValueTableEntry(int valueNumber,
-                              String label) {
+  public LabelValueTableEntry(int valueNumber, String label) {
     this.valueNumber = valueNumber;
     this.label = label;
   }
@@ -32,7 +39,7 @@ public class LabelValueTableEntry extends ValueTableEntry {
    * @todo Implement this middleEnd.opt.ValueTableEntry method
    */
   public ValueTableEntry copy() {
-    LabelValueTableEntry newEntry = new LabelValueTableEntry(valueNumber,new String(label));
+    LabelValueTableEntry newEntry = new LabelValueTableEntry(valueNumber, new String(label));
     return newEntry;
   }
 }

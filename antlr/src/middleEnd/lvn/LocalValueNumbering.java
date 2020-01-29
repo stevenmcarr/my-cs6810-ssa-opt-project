@@ -1,8 +1,7 @@
-package middleEnd.opt;
+package middleEnd.lvn;
 
 import java.util.*;
 
-import middleEnd.*;
 import middleEnd.iloc.*;
 import middleEnd.utils.*;
 
@@ -26,18 +25,18 @@ import middleEnd.utils.*;
  * @author Steve Carr
  * @version 1.0
  */
-public class LocalValueNumbering {
-
-  IlocGenerator ilocGen;
+public class LocalValueNumbering extends OptimizationPass {
 
   private int nextValueNumber;
 
-  public LocalValueNumbering(IlocGenerator ilocGen) {
-    this.ilocGen = ilocGen;
+  public LocalValueNumbering(String prevPassA, String passA) {
+    prevPassAbbrev = prevPassA;
+    passAbbrev = passA;
   }
 
-  public void performValueNumbering() {
-    Vector<IlocRoutine> routines = ilocGen.getRoutines();
+  @Override
+  protected void optimizeCode() {
+    Vector<IlocRoutine> routines = getRoutines();
     BitSet liveVariables = new BitSet();
 
     for (int i = 0; i < routines.size(); i++) {
@@ -96,7 +95,7 @@ public class LocalValueNumbering {
       //
       if (valueEntry != null && !(inst instanceof InvocationInstruction) && !inst.isMemoryStoreInstruction()) {
         if (inst.getLValue().getRegisterId() == valueEntry.getVirtualRegister())
-          ilocGen.removeInst(inst);
+          removeInst(inst);
         else {
           VirtualRegisterOperand lValue = inst.getLValue();
           IlocInstruction newInst;
@@ -104,7 +103,7 @@ public class LocalValueNumbering {
             newInst = new I2iInstruction(new VirtualRegisterOperand(valueEntry.getVirtualRegister()), lValue.copy());
           else
             newInst = new F2fInstruction(new VirtualRegisterOperand(valueEntry.getVirtualRegister()), lValue.copy());
-          ilocGen.replaceInst(inst, newInst);
+          replaceInst(inst, newInst);
           valueTable.put(inst.getLValue().toString(), valueEntry.copy());
         }
       } else {
@@ -192,7 +191,7 @@ public class LocalValueNumbering {
     if (allConstant) {
       IlocInstruction newInst = inst.constantFold(constVals);
       if (newInst != null) {
-        ilocGen.replaceInst(inst, newInst);
+        replaceInst(inst, newInst);
         returnInst = newInst;
         Vector<Integer> newValueNums = getValueNumbers(valueTable, newInst.getRValues());
         valueNumbers.removeAllElements();
@@ -203,7 +202,7 @@ public class LocalValueNumbering {
       IlocInstruction newInst = inst.constantPropagate(constVals);
 
       if (newInst != null) {
-        ilocGen.replaceInst(inst, newInst);
+        replaceInst(inst, newInst);
         returnInst = newInst;
       }
     }
@@ -217,7 +216,7 @@ public class LocalValueNumbering {
     if (identityInst == null)
       return inst;
     else {
-      ilocGen.replaceInst(inst, identityInst);
+      replaceInst(inst, identityInst);
       Vector<Integer> newValueNums = getValueNumbers(valueTable, identityInst.getRValues());
       valueNumbers.removeAllElements();
       valueNumbers.addAll(newValueNums);
@@ -248,7 +247,7 @@ public class LocalValueNumbering {
         live.clear(lValue.getRegisterId());
         updateLiveSet(live, inst.getRValues());
       } else
-        ilocGen.removeInst(inst);
+        removeInst(inst);
       inst = prevInst;
     }
   }
@@ -260,4 +259,5 @@ public class LocalValueNumbering {
         live.set(((VirtualRegisterOperand) operand).getRegisterId());
     }
   }
+
 }

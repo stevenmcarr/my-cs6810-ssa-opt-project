@@ -23,7 +23,7 @@ import middleEnd.iloc.*;
  * @author not attributable
  * @version 1.0
  */
-public class BasicBlock {
+public class BasicBlock extends CfgNode {
 
   IlocInstruction firstInst = null;
   IlocInstruction lastInst = null;
