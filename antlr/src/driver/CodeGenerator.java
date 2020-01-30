@@ -17,6 +17,7 @@ import middleEnd.utils.OptimizationPass;
 public class CodeGenerator {
 
 	public static boolean emitCfg = false;
+	public static boolean emitDT = false;
 
 	/**
 	 * @param args
@@ -34,8 +35,11 @@ public class CodeGenerator {
 			} else if (args[i].equals("-dbre")) {
 				pass = new DominatorBasedRedundancyElimination(prevPass, "dbre");
 				prevPass = "dbre";
-			} else if (args[i].equals("-gv")) {
+			} else if (args[i].equals("-cfg")) {
 				emitCfg = true;
+				continue;
+			} else if (args[i].equals("-dt")) {
+				emitDT = true;
 				continue;
 			} else {
 				System.err.println("Invalid command option: " + args[i]);

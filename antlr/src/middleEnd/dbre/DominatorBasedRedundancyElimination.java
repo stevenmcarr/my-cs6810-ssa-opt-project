@@ -19,14 +19,19 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter("cfg.gv");
+            pw = new PrintWriter("graph.dot");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         for (IlocRoutine ir : getRoutines()) {
             ir.buildCfg();
+            ir.getCfg().buildPreOrder();
+            ir.getCfg().buildPostOrder();
+            ir.getCfg().buildDT();
             if (driver.CodeGenerator.emitCfg)
-                ir.getCfg().emitGV(pw);
+                ir.getCfg().emitCfg(pw);
+            if (driver.CodeGenerator.emitDT)
+                ir.getCfg().emitDT(pw);
         }
         pw.close();
     }
