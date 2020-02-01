@@ -31,6 +31,7 @@ public class FramePseudoOp extends PseudoOpInstruction {
     this.name = name;
     this.localSize = localSize;
     this.parameters = parameters;
+    this.lValue = new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG);
   }
 
   /**

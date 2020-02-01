@@ -27,11 +27,14 @@ public class VirtualRegisterOperand extends Operand {
   public static final int INT_RET_REG = 2;
   public static final int FLOAT_RET_REG = 3;
   public static final int FREE_REG = 4;
+  public static int maxVirtualRegister = 4;
 
   private int registerId;
 
   public VirtualRegisterOperand(int registerId) {
     this.registerId = registerId;
+    if (registerId > maxVirtualRegister)
+      maxVirtualRegister = registerId;
   }
 
   public VirtualRegisterOperand copy() {

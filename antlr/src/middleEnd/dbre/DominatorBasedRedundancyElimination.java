@@ -19,7 +19,8 @@ import middleEnd.utils.IlocRoutine;
 
 public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
-    private HashMap<Integer, CfgNodeSet> iteratedDF = new HashMap<Integer, CfgNodeSet>();
+    private HashMap<String, CfgNodeSet> iteratedDFMap = new HashMap<String, CfgNodeSet>();
+    private HashMap<Integer, String> defSetMap = new HashMap<Integer, String>();
 
     public DominatorBasedRedundancyElimination(String prevPassA, String passA) {
         prevPassAbbrev = prevPassA;
@@ -45,10 +46,10 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
     private void computeIDF(Cfg cfg) {
 
-        for (int i = 0; i <= maxVirtualRegister; i++) {
+        for (int i = 0; i <= VirtualRegisterOperand.maxVirtualRegister; i++) {
             CfgNodeSet idf_v = new CfgNodeSet(cfg.getNodeMap());
             CfgNodeSet s_v = computeSv(cfg, i);
-            if (!s_v.isEmpty()) {
+            if (!iteratedDFMap.containsKey(s_v.toString())) {
                 LinkedList<CfgNode> work = new LinkedList<CfgNode>();
                 for (int j = s_v.nextSetBit(0); j >= 0; j = s_v.nextSetBit(j + 1)) {
                     CfgNode b = s_v.getCfgNode(j);
@@ -65,8 +66,9 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
                         }
                     }
                 }
+                iteratedDFMap.put(s_v.toString(), idf_v);
             }
-            iteratedDF.put(i, idf_v);
+            defSetMap.put(i, s_v.toString());
         }
     }
 
@@ -77,7 +79,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
         PrintWriter pw2 = null;
         try {
             pw = new PrintWriter("graph.dot");
-            pw2 = new PrintWriter("graph.df");
+            pw2 = new PrintWriter("df");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -103,14 +105,29 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
     private void emitIteratedDF(PrintWriter pw) {
         pw.println("Iterated Dominance Frontiers");
-        pw.println("----------------------------");
-        Set<Integer> keys = iteratedDF.keySet();
-        Iterator<Integer> ki = keys.iterator();
-        while (ki.hasNext()) {
-            int i = ki.next();
-            pw.println(i + ": " + iteratedDF.get(i).toString());
-            ki.remove();
+        pw.println("----------------------------\n");
+
+        pw.println("\tDef Set Map");
+        pw.println("\t-----------");
+        Set<Integer> defKeys = defSetMap.keySet();
+        Iterator<Integer> dki = defKeys.iterator();
+        while (dki.hasNext()) {
+            int i = dki.next();
+            pw.println("\t" + i + " -> " + defSetMap.get(i).toString());
+            dki.remove();
         }
+        pw.println("");
+
+        pw.println("\tIterated DF Map");
+        pw.println("\t---------------");
+        Set<String> idfKeys = iteratedDFMap.keySet();
+        Iterator<String> idfki = idfKeys.iterator();
+        while (idfki.hasNext()) {
+            String s = idfki.next();
+            pw.println("\t" + s + " -> " + iteratedDFMap.get(s).toString());
+            idfki.remove();
+        }
+
         pw.println("");
     }
 
