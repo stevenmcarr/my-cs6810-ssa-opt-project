@@ -23,6 +23,10 @@ public class CfgNodeSet extends BitSet {
         or(ds);
     }
 
+    public CfgNodeSet(HashMap<Integer,CfgNode> nm) {
+        nodeMap = nm;
+    }
+
     public void setNodeMap(HashMap<Integer, CfgNode> nm) {
         nodeMap = nm;
     }

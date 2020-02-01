@@ -48,12 +48,20 @@ public class Cfg {
         return exitNode;
     }
 
+    public List<CfgNode> getNodes() {
+        return nodes;
+    }
+
     public List<CfgNode> getPreOrder() {
         return preOrder;
     }
 
     public List<CfgNode> getPostOrder() {
         return postOrder;
+    }
+
+    public HashMap<Integer, CfgNode> getNodeMap() {
+        return nodeMap;
     }
 
     private void walkPreOrder(CfgNode n) {
@@ -210,8 +218,11 @@ public class Cfg {
     }
 
     public void emitDF(PrintWriter pw) {
+        pw.println("Dominance Frontiers");
+        pw.println("-------------------");
         for (CfgNode n : nodes) {
             pw.println("Node " + n.getNodeId() + ": " + n.getDominanceFrontier().toString());
         }
+        pw.println("");
     }
 }
