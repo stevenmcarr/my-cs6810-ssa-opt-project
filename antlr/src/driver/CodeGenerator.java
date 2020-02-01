@@ -18,6 +18,7 @@ public class CodeGenerator {
 
 	public static boolean emitCfg = false;
 	public static boolean emitDT = false;
+	public static boolean emitDF = false;
 
 	/**
 	 * @param args
@@ -40,6 +41,9 @@ public class CodeGenerator {
 				continue;
 			} else if (args[i].equals("-dt")) {
 				emitDT = true;
+				continue;
+			} else if (args[i].equals("-df")) {
+				emitDF = true;
 				continue;
 			} else {
 				System.err.println("Invalid command option: " + args[i]);

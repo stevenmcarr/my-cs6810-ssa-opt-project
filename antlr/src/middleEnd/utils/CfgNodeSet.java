@@ -3,20 +3,23 @@ package middleEnd.utils;
 import java.util.BitSet;
 import java.util.HashMap;
 
-public class DominatorSet extends BitSet {
+public class CfgNodeSet extends BitSet {
     /**
      *
      */
     private static final long serialVersionUID = 1L;
-    protected HashMap<Integer, CfgNode> nodeMap;
+    protected static HashMap<Integer, CfgNode> nodeMap;
 
-    public DominatorSet(int size) {
-        super(size);
-        nodeMap = new HashMap<Integer, CfgNode>(size);
+    public CfgNodeSet() {
+        super();
     }
 
-    public DominatorSet(DominatorSet ds) {
-        setNodeMap(ds.nodeMap);
+    public CfgNodeSet(int size) {
+        super(size);
+    }
+
+    public CfgNodeSet(CfgNodeSet ds) {
+        setNodeMap(nodeMap);
         or(ds);
     }
 

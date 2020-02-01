@@ -14,6 +14,7 @@ public class Cfg {
     private List<CfgNode> preOrder;
     private List<CfgNode> postOrder;
     private int maxIndex = 0;
+    private HashMap<Integer, CfgNode> nodeMap = new HashMap<Integer, CfgNode>();
 
     public Cfg() {
         nodes = new LinkedList<CfgNode>();
@@ -92,7 +93,6 @@ public class Cfg {
     }
 
     public void buildDT() {
-        HashMap<Integer, CfgNode> nodeMap = new HashMap<Integer, CfgNode>();
 
         for (CfgNode n : preOrder)
             nodeMap.put(n.getNodeId(), n);
@@ -100,13 +100,11 @@ public class Cfg {
         List<CfgNode> work = new ArrayList<CfgNode>(preOrder);
         work.remove(entryNode);
 
-        entryNode.initDominatorSet(maxIndex);
-        entryNode.getDominatorSet().setNodeMap(nodeMap);
-        entryNode.getDominatorSet().set(entryNode);
+        entryNode.getDominators().setNodeMap(nodeMap);
+        entryNode.getDominators().set(entryNode);
 
         for (CfgNode n : work) {
-            n.initDominatorSet(maxIndex);
-            DominatorSet ds = n.getDominatorSet();
+            CfgNodeSet ds = n.getDominators();
             ds.setNodeMap(nodeMap);
             ds.setAll();
         }
@@ -115,17 +113,17 @@ public class Cfg {
         do {
             changed = false;
             for (CfgNode n : work) {
-                DominatorSet ds = n.getDominatorSet();
-                DominatorSet temp = new DominatorSet(ds);
+                CfgNodeSet ds = n.getDominators();
+                CfgNodeSet temp = new CfgNodeSet(ds);
                 temp.setAll();
                 for (CfgEdge e : n.getPreds()) {
                     CfgNode p = e.getPred();
-                    temp.and(p.getDominatorSet());
+                    temp.and(p.getDominators());
                 }
                 temp.set(n);
                 if (!ds.equals(temp)) {
                     changed = true;
-                    n.setDominatorSet(temp);
+                    n.setDominators(temp);
                 }
             }
 
@@ -133,20 +131,52 @@ public class Cfg {
 
         entryNode.setImmediateDominator(null);
         for (CfgNode n : work) {
-            DominatorSet ds = new DominatorSet(n.getDominatorSet());
+            CfgNodeSet ds = new CfgNodeSet(n.getDominators());
             ds.clear(n);
             int minIndex = ds.nextSetBit(0);
             CfgNode idom = ds.getCfgNode(minIndex);
 
             for (int i = ds.nextSetBit(minIndex + 1); i >= 0; i = ds.nextSetBit(i + 1)) {
                 CfgNode next = ds.getCfgNode(i);
-                if (next.getDominatorSet().cardinality() > idom.getDominatorSet().cardinality()) {
+                if (next.getDominators().cardinality() > idom.getDominators().cardinality()) {
                     idom = next;
                 }
             }
 
             n.setImmediateDominator(idom);
         }
+    }
+
+    private void buildDFForNode(CfgNode n) {
+        n.getDominanceFrontier().setNodeMap(nodeMap);
+        for (DominatorTreeEdge e : n.getDTChildren()) {
+            CfgNode c = e.getSucc();
+            CfgNodeSet df = c.getDominanceFrontier();
+            for (int i = df.nextSetBit(0); i >= 0; i = df.nextSetBit(i + 1)) {
+                CfgNode m = df.getCfgNode(i);
+                if (!n.strictlyDominates(m))
+                    n.getDominanceFrontier().set(m);
+            }
+        }
+        for (CfgEdge e : n.getSuccs()) {
+            CfgNode m = e.getSucc();
+            if (!n.strictlyDominates(m))
+                n.getDominanceFrontier().set(m);
+        }
+    }
+
+    private void walkPostOrderDTToBuildDF(CfgNode n) {
+        for (DominatorTreeEdge e : n.getDTChildren()) {
+            CfgNode c = e.getSucc();
+            walkPostOrderDTToBuildDF(c);
+        }
+        buildDFForNode(n);
+    }
+
+    public void buildDF() {
+        for (CfgNode n : nodes)
+            n.clearMarked();
+        walkPostOrderDTToBuildDF(entryNode);
     }
 
     public void emitCfg(PrintWriter pw) {
@@ -177,5 +207,11 @@ public class Cfg {
 
         pw.println("}");
 
+    }
+
+    public void emitDF(PrintWriter pw) {
+        for (CfgNode n : nodes) {
+            pw.println("Node " + n.getNodeId() + ": " + n.getDominanceFrontier().toString());
+        }
     }
 }
