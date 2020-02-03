@@ -81,4 +81,8 @@ public class FramePseudoOp extends PseudoOpInstruction {
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
   }
+
+  public void replaceOperandAtIndex(int index, Operand operand) {
+    parameters.add(index, operand);
+  }
 }

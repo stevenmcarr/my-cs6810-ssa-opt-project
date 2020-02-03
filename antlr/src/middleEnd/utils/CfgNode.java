@@ -20,6 +20,7 @@ public class CfgNode {
         succs = new ArrayList<CfgEdge>();
         children = new ArrayList<DominatorTreeEdge>();
         nodeId = cfgNodeId++;
+
     }
 
     public CfgNode addPredecessorEdge(CfgNode pred) {

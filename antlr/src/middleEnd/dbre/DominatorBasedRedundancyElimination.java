@@ -8,19 +8,31 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.Vector;
 
+import middleEnd.dfa.LiveVariableAnalysis;
 import middleEnd.iloc.IlocInstruction;
+import middleEnd.iloc.Operand;
+import middleEnd.iloc.PhiNode;
+import middleEnd.iloc.SSAVROperand;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
 import middleEnd.utils.Cfg;
+import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.CfgNodeSet;
+import middleEnd.utils.DominatorTreeEdge;
 import middleEnd.utils.IlocRoutine;
 
 public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
     private HashMap<String, CfgNodeSet> iteratedDFMap = new HashMap<String, CfgNodeSet>();
     private HashMap<Integer, String> defSetMap = new HashMap<Integer, String>();
+    private LiveVariableAnalysis lva;
+    private HashMap<String, LinkedList<SSAVROperand>> nameStack;
+    private int lastName[];
+    private HashMap<String, IlocInstruction> definition;
+    private HashMap<String, LinkedList<IlocInstruction>> uses;
 
     public DominatorBasedRedundancyElimination(String prevPassA, String passA) {
         prevPassAbbrev = prevPassA;
@@ -72,6 +84,115 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
         }
     }
 
+    private void insertPhiNodes(Cfg g) {
+
+        for (int i = 0; i <= maxVirtualRegister; i++) {
+            CfgNodeSet idf = iteratedDFMap.get(defSetMap.get(i));
+            for (int j = idf.nextSetBit(0); j >= 0; j = idf.nextSetBit(j + 1)) {
+                BasicBlock b = (BasicBlock) idf.getCfgNode(j);
+                if (lva.getInMap().get(b.getNodeId()).get(i)) {
+                    int n = b.getPreds().size();
+                    Vector<Operand> operands = new Vector<Operand>(n);
+                    for (int k = 0; k < n; k++)
+                        operands.add(new SSAVROperand(i));
+                    PhiNode p = new PhiNode(operands, new SSAVROperand(i));
+                    b.addPhiNode(p);
+                }
+            }
+        }
+    }
+
+    private LinkedList<SSAVROperand> getNameStackList(String key) {
+        LinkedList<SSAVROperand> list;
+        if ((list = nameStack.get(key)) == null) {
+            list = new LinkedList<SSAVROperand>();
+            nameStack.put(key, list);
+        }
+        return list;
+    }
+
+    private LinkedList<SSAVROperand> getNameStackList(int id) {
+        SSAVROperand t = new SSAVROperand(id);
+        return getNameStackList(t.toString());
+    }
+
+    private LinkedList<IlocInstruction> getUseList(String key) {
+        LinkedList<IlocInstruction> list;
+        if ((list = uses.get(key)) == null) {
+            list = new LinkedList<IlocInstruction>();
+            uses.put(key, list);
+        }
+        return list;
+    }
+
+    private LinkedList<IlocInstruction> getUseList(int id) {
+        SSAVROperand t = new SSAVROperand(id);
+        return getUseList(t.toString());
+    }
+
+    private SSAVROperand newName(int index) {
+        lastName[index]++;
+        SSAVROperand t = new SSAVROperand(index, lastName[index]);
+
+        return t;
+    }
+
+    private void optRename(BasicBlock b) {
+        for (PhiNode p : b.getPhiNodes()) {
+            SSAVROperand t0 = (SSAVROperand) p.getLValue();
+            int index = t0.getRegisterId();
+            SSAVROperand t = newName(index);
+            getNameStackList(t.toString()).push(t);
+            definition.put(t.toString(), p);
+        }
+
+        for (IlocInstruction inst = b.getFirstInst(); inst != null
+                && inst != b.getLastInst().getNextInst(); inst = inst.getNextInst()) {
+            Vector<Operand> operands = inst.getRValues();
+            for (int i = 0; i < operands.size(); i++) {
+                Operand op = operands.elementAt(0);
+                if (op instanceof VirtualRegisterOperand) {
+                    VirtualRegisterOperand vr = (VirtualRegisterOperand) op;
+                    inst.replaceOperandAtIndex(i, getNameStackList(vr.getRegisterId()).getFirst().copy());
+                    getUseList(vr.getRegisterId()).add(inst);
+                }
+            }
+            VirtualRegisterOperand t = inst.getLValue();
+            if (t != null) {
+                int index = t.getRegisterId();
+                SSAVROperand tn = newName(index);
+                getNameStackList(tn.toString()).push(tn);
+                definition.put(tn.toString(), inst);
+            }
+
+        }
+        int j = 0;
+        for (CfgEdge e : b.getSuccs()) {
+            BasicBlock s = (BasicBlock) e.getSucc();
+            for (PhiNode p : s.getPhiNodes()) {
+                VirtualRegisterOperand tj = (VirtualRegisterOperand) p.getRValues().elementAt(j);
+                p.replaceOperandAtIndex(j, getNameStackList(tj.getRegisterId()).getFirst().copy());
+                getUseList(tj.getRegisterId()).add(p);
+            }
+        }
+
+        for (DominatorTreeEdge e : b.getDTChildren()) {
+            BasicBlock c = (BasicBlock) e.getSucc();
+            optRename(c);
+        }
+    }
+
+    private void rename(Cfg g) {
+        nameStack = new HashMap<String, LinkedList<SSAVROperand>>();
+        definition = new HashMap<String, IlocInstruction>();
+        uses = new HashMap<String, LinkedList<IlocInstruction>>();
+        lastName = new int[maxVirtualRegister];
+        for (int i = 0; i <= maxVirtualRegister; i++) {
+            lastName[i] = -1;
+        }
+        optRename((BasicBlock) g.getEntryNode());
+    }
+
     @Override
     protected void optimizeCode() {
 
@@ -98,6 +219,10 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
                 ir.getCfg().emitDF(pw2);
                 emitIteratedDF(pw2);
             }
+            lva = new LiveVariableAnalysis(maxVirtualRegister);
+            lva.computeDFResult(ir.getCfg());
+            insertPhiNodes(ir.getCfg());
+            rename(ir.getCfg());
         }
         pw.close();
         pw2.close();

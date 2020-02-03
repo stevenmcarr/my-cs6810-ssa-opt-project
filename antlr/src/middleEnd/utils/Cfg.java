@@ -225,4 +225,7 @@ public class Cfg {
         }
         pw.println("");
     }
+
+    public void insertPhiNode() {
+    }
 }

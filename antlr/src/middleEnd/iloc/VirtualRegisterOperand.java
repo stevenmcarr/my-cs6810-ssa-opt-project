@@ -29,7 +29,7 @@ public class VirtualRegisterOperand extends Operand {
   public static final int FREE_REG = 4;
   public static int maxVirtualRegister = 4;
 
-  private int registerId;
+  protected int registerId;
 
   public VirtualRegisterOperand(int registerId) {
     this.registerId = registerId;

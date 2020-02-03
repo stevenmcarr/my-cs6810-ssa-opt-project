@@ -59,4 +59,9 @@ public abstract class VariableAddressIlocInstruction extends IlocInstruction {
   }
 
   protected abstract String getStringRepSpecific();
+
+  public void replaceOperandAtIndex(int index, Operand operand) {
+    operands.add(index, operand);
+    rValues.add(index, operand);
+  }
 }
