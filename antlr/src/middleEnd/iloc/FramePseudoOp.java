@@ -83,7 +83,7 @@ public class FramePseudoOp extends PseudoOpInstruction {
   }
 
   public void replaceOperandAtIndex(int index, Operand operand) {
-    parameters.add(index, operand);
+    parameters.set(index, operand);
   }
 
   @Override

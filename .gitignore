@@ -4,4 +4,4 @@
 *.dot
 *.gv
 ssa.jar
-*.df
+df

@@ -59,7 +59,7 @@ public abstract class TwoAddressIlocInstruction extends IlocInstruction {
   public void replaceOperandAtIndex(int index, Operand operand) {
     if (index == 0)
       source = operand;
-    rValues.add(index, operand);
+    rValues.set(index, operand);
   }
 
   public void replaceLValue(Operand operand) {

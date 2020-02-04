@@ -67,7 +67,7 @@ public abstract class ThreeAddressIlocInstruction extends IlocInstruction {
       source1 = operand;
     else if (index == 1)
       source2 = operand;
-    rValues.add(index, operand);
+    rValues.set(index, operand);
   }
 
   public void replaceLValue(Operand operand) {
