@@ -47,7 +47,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
         for (CfgNode n : cfg.getNodes()) {
             BasicBlock b = (BasicBlock) n;
-            BasicBlockIterator bIter = new BasicBlockIterator(b);
+            BasicBlockIterator bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 VirtualRegisterOperand lval = inst.getLValue();
@@ -90,7 +90,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
     private void insertPhiNodes(Cfg g) {
 
-        for (int i = 0; i <= maxVirtualRegister; i++) {
+        for (int i = 0; i <= VirtualRegisterOperand.maxVirtualRegister; i++) {
             CfgNodeSet idf = iteratedDFMap.get(defSetMap.get(i));
             for (int j = idf.nextSetBit(0); j >= 0; j = idf.nextSetBit(j + 1)) {
                 BasicBlock b = (BasicBlock) idf.getCfgNode(j);
@@ -153,7 +153,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
         availTabStack.startBlock();
 
-        BasicBlockIterator bIter = new BasicBlockIterator(b);
+        BasicBlockIterator bIter = b.iterator();
         while (bIter.hasNext()) {
             IlocInstruction inst = bIter.next();
             Vector<Operand> operands = inst.getRValues();
@@ -199,7 +199,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
             optRename(c);
         }
 
-        bIter = new BasicBlockIterator(b, true);
+        bIter = b.reverseIterator();
         while (bIter.hasPrevious()) {
             IlocInstruction inst = bIter.previous();
             VirtualRegisterOperand vr = inst.getLValue();
@@ -224,9 +224,9 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
         nameStack = new HashMap<String, LinkedList<SSAVROperand>>();
         definition = new HashMap<String, IlocInstruction>();
         uses = new HashMap<String, LinkedList<IlocInstruction>>();
-        lastName = new int[maxVirtualRegister];
+        lastName = new int[VirtualRegisterOperand.maxVirtualRegister + 1];
         availTabStack = new AvailTableStack();
-        for (int i = 0; i <= maxVirtualRegister; i++) {
+        for (int i = 0; i <= VirtualRegisterOperand.maxVirtualRegister; i++) {
             lastName[i] = -1;
         }
         optRename((BasicBlock) g.getEntryNode());
@@ -237,7 +237,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
         for (CfgNode n : nl) {
             BasicBlock b = (BasicBlock) n;
-            BasicBlockIterator bIter = new BasicBlockIterator(b);
+            BasicBlockIterator bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 Vector<Operand> operands = inst.getRValues();
@@ -284,7 +284,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
                 ir.getCfg().emitDF(pw2);
                 emitIteratedDF(pw2);
             }
-            lva = new LiveVariableAnalysis(maxVirtualRegister);
+            lva = new LiveVariableAnalysis(VirtualRegisterOperand.maxVirtualRegister);
             lva.computeDFResult(ir.getCfg());
             insertPhiNodes(ir.getCfg());
             rename(ir.getCfg());

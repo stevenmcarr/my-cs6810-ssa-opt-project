@@ -26,7 +26,7 @@ public class BasicBlockIterator implements ListIterator<IlocInstruction> {
         if (instPtr == null)
             return thisBasicBlock.getFirstInst() != null;
         else
-            return instPtr != thisBasicBlock.getLastInst().getNextInst();
+            return instPtr != thisBasicBlock.getLastInst();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class BasicBlockIterator implements ListIterator<IlocInstruction> {
         if (instPtr == null)
             return thisBasicBlock.getLastInst() != null;
         else
-            return instPtr != thisBasicBlock.getFirstInst().getPrevInst();
+            return instPtr != thisBasicBlock.getFirstInst();
     }
 
     @Override

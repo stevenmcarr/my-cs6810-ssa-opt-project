@@ -11,16 +11,17 @@ import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.BasicBlock;
+import middleEnd.utils.BasicBlockIterator;
 import middleEnd.utils.VirtualRegisterSet;
 
 public class LiveVariableAnalysis extends IterativeFramework {
 
     private VirtualRegisterSet emptySet;
     private VirtualRegisterSet universe;
-    private HashMap<Integer, VirtualRegisterSet> inMap;
-    private HashMap<Integer, VirtualRegisterSet> outMap;
-    private HashMap<Integer, VirtualRegisterSet> genMap;
-    private HashMap<Integer, VirtualRegisterSet> prsvMap;
+    private HashMap<Integer, VirtualRegisterSet> inMap = new HashMap<Integer, VirtualRegisterSet>();
+    private HashMap<Integer, VirtualRegisterSet> outMap = new HashMap<Integer, VirtualRegisterSet>();
+    private HashMap<Integer, VirtualRegisterSet> genMap = new HashMap<Integer, VirtualRegisterSet>();
+    private HashMap<Integer, VirtualRegisterSet> prsvMap = new HashMap<Integer, VirtualRegisterSet>();
 
     public LiveVariableAnalysis(int size) {
         emptySet = new VirtualRegisterSet(size);
@@ -34,8 +35,9 @@ public class LiveVariableAnalysis extends IterativeFramework {
             outMap.put(b.getNodeId(), emptySet.clone());
             genMap.put(b.getNodeId(), emptySet.clone());
             prsvMap.put(b.getNodeId(), universe.clone());
-            for (IlocInstruction inst = b.getFirstInst(); inst != null
-                    && inst != b.getLastInst().getNextInst(); inst = inst.getNextInst()) {
+            BasicBlockIterator bIter = b.iterator();
+            while (bIter.hasNext()) {
+                IlocInstruction inst = bIter.next();
                 Vector<Operand> rv = inst.getRValues();
                 for (Operand op : rv) {
                     if (op instanceof VirtualRegisterOperand
@@ -45,7 +47,9 @@ public class LiveVariableAnalysis extends IterativeFramework {
                 }
                 if (inst.getLValue() != null)
                     prsvMap.get(b.getNodeId()).clear(inst.getLValue());
+
             }
+            setTransferResult(b, applyTransferFunc(b));
         }
     }
 
