@@ -46,4 +46,7 @@ public abstract class NoAddressIlocInstruction extends IlocInstruction {
 
   public void replaceOperandAtIndex(int index, Operand operand) {
   }
+
+  public void replaceLValue(Operand operand) {
+  }
 }

@@ -64,4 +64,8 @@ public abstract class VariableAddressIlocInstruction extends IlocInstruction {
     operands.add(index, operand);
     rValues.add(index, operand);
   }
+
+  public void replaceLValue(Operand operand) {
+    lValue = (VirtualRegisterOperand) operand;
+  }
 }

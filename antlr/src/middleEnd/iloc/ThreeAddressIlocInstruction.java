@@ -69,4 +69,9 @@ public abstract class ThreeAddressIlocInstruction extends IlocInstruction {
       source2 = operand;
     rValues.add(index, operand);
   }
+
+  public void replaceLValue(Operand operand) {
+    dest = operand;
+    lValue = (VirtualRegisterOperand) operand;
+  }
 }

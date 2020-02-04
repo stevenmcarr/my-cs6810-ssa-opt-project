@@ -170,4 +170,6 @@ public abstract class IlocInstruction {
   public abstract boolean operandIsRValue(Operand operand);
 
   public abstract void replaceOperandAtIndex(int index, Operand operand);
+
+  public abstract void replaceLValue(Operand operand);
 }

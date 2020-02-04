@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -17,6 +18,7 @@ import middleEnd.iloc.PhiNode;
 import middleEnd.iloc.SSAVROperand;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
+import middleEnd.utils.BasicBlockIterator;
 import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
@@ -33,6 +35,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
     private int lastName[];
     private HashMap<String, IlocInstruction> definition;
     private HashMap<String, LinkedList<IlocInstruction>> uses;
+    private AvailTableStack availTabStack;
 
     public DominatorBasedRedundancyElimination(String prevPassA, String passA) {
         prevPassAbbrev = prevPassA;
@@ -44,8 +47,9 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
 
         for (CfgNode n : cfg.getNodes()) {
             BasicBlock b = (BasicBlock) n;
-            for (IlocInstruction inst = b.getFirstInst(); inst != null
-                    && inst != b.getLastInst().getNextInst(); inst = inst.getNextInst()) {
+            BasicBlockIterator bIter = new BasicBlockIterator(b);
+            while (bIter.hasNext()) {
+                IlocInstruction inst = bIter.next();
                 VirtualRegisterOperand lval = inst.getLValue();
                 if (lval != null && lval.getRegisterId() == i) {
                     s_v.set(n);
@@ -138,6 +142,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
     }
 
     private void optRename(BasicBlock b) {
+        LinkedList<IlocInstruction> dead = new LinkedList<IlocInstruction>();
         for (PhiNode p : b.getPhiNodes()) {
             SSAVROperand t0 = (SSAVROperand) p.getLValue();
             int index = t0.getRegisterId();
@@ -146,8 +151,11 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
             definition.put(t.toString(), p);
         }
 
-        for (IlocInstruction inst = b.getFirstInst(); inst != null
-                && inst != b.getLastInst().getNextInst(); inst = inst.getNextInst()) {
+        availTabStack.startBlock();
+
+        BasicBlockIterator bIter = new BasicBlockIterator(b);
+        while (bIter.hasNext()) {
+            IlocInstruction inst = bIter.next();
             Vector<Operand> operands = inst.getRValues();
             for (int i = 0; i < operands.size(); i++) {
                 Operand op = operands.elementAt(0);
@@ -157,12 +165,22 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
                     getUseList(vr.getRegisterId()).add(inst);
                 }
             }
-            VirtualRegisterOperand t = inst.getLValue();
-            if (t != null) {
-                int index = t.getRegisterId();
-                SSAVROperand tn = newName(index);
-                getNameStackList(tn.toString()).push(tn);
-                definition.put(tn.toString(), inst);
+
+            SSAVROperand svr = null;
+            if ((svr = availTabStack.get(inst.toString())) != null) {
+                SSAVROperand t = new SSAVROperand(inst.getLValue().getRegisterId());
+                getNameStackList(t.toString()).push(svr);
+                dead.add(inst);
+
+            } else {
+                VirtualRegisterOperand t = inst.getLValue();
+                if (t != null) {
+                    int index = t.getRegisterId();
+                    SSAVROperand tn = newName(index);
+                    getNameStackList(tn.toString()).push(tn);
+                    definition.put(tn.toString(), inst);
+                    availTabStack.put(inst.toString(), tn);
+                }
             }
 
         }
@@ -180,6 +198,26 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
             BasicBlock c = (BasicBlock) e.getSucc();
             optRename(c);
         }
+
+        bIter = new BasicBlockIterator(b, true);
+        while (bIter.hasPrevious()) {
+            IlocInstruction inst = bIter.previous();
+            VirtualRegisterOperand vr = inst.getLValue();
+            if (vr != null) {
+                SSAVROperand x = getNameStackList(vr.getRegisterId()).pop().copy();
+                if (dead.contains(inst))
+                    bIter.remove();
+                else
+                    inst.replaceLValue(x);
+            }
+        }
+
+        for (PhiNode p : b.getPhiNodes()) {
+            VirtualRegisterOperand vr = p.getLValue();
+            p.replaceLValue(getNameStackList(vr.getRegisterId()).pop().copy());
+        }
+
+        availTabStack.endBlock();
     }
 
     private void rename(Cfg g) {
@@ -187,10 +225,37 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
         definition = new HashMap<String, IlocInstruction>();
         uses = new HashMap<String, LinkedList<IlocInstruction>>();
         lastName = new int[maxVirtualRegister];
+        availTabStack = new AvailTableStack();
         for (int i = 0; i <= maxVirtualRegister; i++) {
             lastName[i] = -1;
         }
         optRename((BasicBlock) g.getEntryNode());
+    }
+
+    private void removeSSA(Cfg g) {
+        List<CfgNode> nl = g.getNodes();
+
+        for (CfgNode n : nl) {
+            BasicBlock b = (BasicBlock) n;
+            BasicBlockIterator bIter = new BasicBlockIterator(b);
+            while (bIter.hasNext()) {
+                IlocInstruction inst = bIter.next();
+                Vector<Operand> operands = inst.getRValues();
+                for (int i = 0; i < operands.size(); i++) {
+                    Operand op = operands.elementAt(i);
+                    if (op instanceof SSAVROperand) {
+                        VirtualRegisterOperand vr = new VirtualRegisterOperand(((SSAVROperand) op).getRegisterId());
+                        inst.replaceOperandAtIndex(i, vr);
+                    }
+                }
+
+                VirtualRegisterOperand lval = inst.getLValue();
+                if (lval != null && lval instanceof SSAVROperand) {
+                    VirtualRegisterOperand vr = new VirtualRegisterOperand(((SSAVROperand) lval).getRegisterId());
+                    inst.replaceLValue(vr);
+                }
+            }
+        }
     }
 
     @Override
@@ -223,6 +288,7 @@ public class DominatorBasedRedundancyElimination extends OptimizationPass {
             lva.computeDFResult(ir.getCfg());
             insertPhiNodes(ir.getCfg());
             rename(ir.getCfg());
+            removeSSA(ir.getCfg());
         }
         pw.close();
         pw2.close();

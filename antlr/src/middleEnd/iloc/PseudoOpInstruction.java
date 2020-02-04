@@ -37,4 +37,7 @@ public abstract class PseudoOpInstruction extends IlocInstruction {
 
   public void replaceOperandAtIndex(int index, Operand operand) {
   }
+
+  public void replaceLValue(Operand operand) {
+  }
 }

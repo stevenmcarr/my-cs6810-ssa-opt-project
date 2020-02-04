@@ -57,4 +57,7 @@ public abstract class OneAddressIlocInstruction extends IlocInstruction {
       source = operand;
     rValues.add(index, operand);
   }
+
+  public void replaceLValue(Operand operand) {
+  }
 }

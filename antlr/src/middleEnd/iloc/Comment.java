@@ -89,4 +89,9 @@ public class Comment extends IlocInstruction {
 
 	}
 
+	@Override
+	public void replaceLValue(Operand operand) {
+
+	}
+
 }

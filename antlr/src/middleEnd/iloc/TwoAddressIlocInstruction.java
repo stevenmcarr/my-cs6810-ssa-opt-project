@@ -61,4 +61,9 @@ public abstract class TwoAddressIlocInstruction extends IlocInstruction {
       source = operand;
     rValues.add(index, operand);
   }
+
+  public void replaceLValue(Operand operand) {
+    dest = operand;
+    lValue = (VirtualRegisterOperand) operand;
+  }
 }
