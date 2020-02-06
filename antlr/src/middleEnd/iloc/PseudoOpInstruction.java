@@ -3,13 +3,21 @@ package middleEnd.iloc;
 import java.util.Hashtable;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
@@ -25,5 +33,11 @@ public abstract class PseudoOpInstruction extends IlocInstruction {
 
   public boolean operandIsRValue(Operand operand) {
     return false;
+  }
+
+  public void replaceOperandAtIndex(int index, Operand operand) {
+  }
+
+  public void replaceLValue(Operand operand) {
   }
 }

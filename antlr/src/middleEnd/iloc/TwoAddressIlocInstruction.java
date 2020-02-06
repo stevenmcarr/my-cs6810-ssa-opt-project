@@ -55,4 +55,15 @@ public abstract class TwoAddressIlocInstruction extends IlocInstruction {
   public boolean operandIsRValue(Operand operand) {
     return operand == source;
   }
+
+  public void replaceOperandAtIndex(int index, Operand operand) {
+    if (index == 0)
+      source = operand;
+    rValues.set(index, operand);
+  }
+
+  public void replaceLValue(Operand operand) {
+    dest = operand;
+    lValue = (VirtualRegisterOperand) operand;
+  }
 }

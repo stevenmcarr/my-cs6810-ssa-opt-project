@@ -27,8 +27,7 @@ public class BasicBlock extends CfgNode {
 
   IlocInstruction firstInst = null;
   IlocInstruction lastInst = null;
-  Vector<BasicBlock> preds = null;
-  Vector<BasicBlock> succs = null;
+  List<PhiNode> phiNodes = new ArrayList<PhiNode>();
 
   public BasicBlock() {
   }
@@ -81,6 +80,14 @@ public class BasicBlock extends CfgNode {
     return lastInst;
   }
 
+  public BasicBlockIterator iterator() {
+    return new BasicBlockIterator(this);
+  }
+
+  public BasicBlockIterator reverseIterator() {
+    return new BasicBlockIterator(this, true);
+  }
+
   @Override
   public String getCfgNodeLabel() {
     String label = "Node " + Integer.toString(nodeId);
@@ -92,5 +99,14 @@ public class BasicBlock extends CfgNode {
       label += "\n" + lastInst.getStringRep();
 
     return label;
+  }
+
+  public BasicBlock addPhiNode(PhiNode n) {
+    phiNodes.add(n);
+    return this;
+  }
+
+  public List<PhiNode> getPhiNodes() {
+    return phiNodes;
   }
 }

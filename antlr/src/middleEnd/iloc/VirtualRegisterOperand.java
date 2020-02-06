@@ -1,13 +1,21 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
@@ -19,11 +27,14 @@ public class VirtualRegisterOperand extends Operand {
   public static final int INT_RET_REG = 2;
   public static final int FLOAT_RET_REG = 3;
   public static final int FREE_REG = 4;
+  public static int maxVirtualRegister = 4;
 
-  private int registerId;
+  protected int registerId;
 
   public VirtualRegisterOperand(int registerId) {
     this.registerId = registerId;
+    if (registerId > maxVirtualRegister)
+      maxVirtualRegister = registerId;
   }
 
   public VirtualRegisterOperand copy() {
@@ -35,6 +46,6 @@ public class VirtualRegisterOperand extends Operand {
   }
 
   public String toString() {
-    return "%vr"+registerId;
+    return "%vr" + registerId;
   }
 }

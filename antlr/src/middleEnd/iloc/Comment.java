@@ -84,4 +84,14 @@ public class Comment extends IlocInstruction {
 
 	}
 
+	@Override
+	public void replaceOperandAtIndex(int index, Operand operand) {
+
+	}
+
+	@Override
+	public void replaceLValue(Operand operand) {
+
+	}
+
 }

@@ -31,6 +31,7 @@ public class FramePseudoOp extends PseudoOpInstruction {
     this.name = name;
     this.localSize = localSize;
     this.parameters = parameters;
+    this.lValue = new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG);
   }
 
   /**
@@ -79,5 +80,14 @@ public class FramePseudoOp extends PseudoOpInstruction {
 
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
+  }
+
+  public void replaceOperandAtIndex(int index, Operand operand) {
+    parameters.set(index, operand);
+  }
+
+  @Override
+  public void replaceLValue(Operand operand) {
+
   }
 }
