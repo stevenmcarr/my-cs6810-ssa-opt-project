@@ -4,9 +4,6 @@ import java.util.Vector;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.antlr.v4.runtime.tree.ErrorNode;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -18,18 +15,17 @@ import parser.ilocParser.FrameInstructionContext;
 import parser.ilocParser.IlocInstructionContext;
 import parser.ilocParser.ImmediateValContext;
 import parser.ilocParser.OperationContext;
-import parser.ilocParser.OperationListContext;
 import parser.ilocParser.ProcedureContext;
-import parser.ilocParser.ProceduresContext;
 import parser.ilocParser.ProgramContext;
 import parser.ilocParser.PseudoOpContext;
 import parser.ilocParser.VirtualRegContext;
 import parser.ilocLexer;
 import parser.ilocParser;
-import parser.ilocVisitor;
+import parser.ilocBaseVisitor;
 
-public abstract class OptimizationPass implements ilocVisitor<Void> {
+public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
 
+  protected String inputFileName;
   protected String prevPassAbbrev;
   protected String passAbbrev;
 
@@ -260,31 +256,6 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
   }
 
   @Override
-  public Void visit(ParseTree arg0) {
-
-    arg0.accept(this);
-    return null;
-  }
-
-  @Override
-  public Void visitChildren(RuleNode arg0) {
-
-    return null;
-  }
-
-  @Override
-  public Void visitErrorNode(ErrorNode arg0) {
-
-    return null;
-  }
-
-  @Override
-  public Void visitTerminal(TerminalNode arg0) {
-
-    return null;
-  }
-
-  @Override
   public Void visitProgram(ProgramContext ctx) {
     if (ctx.data() != null)
       ctx.data().accept(this);
@@ -297,13 +268,6 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
   public Void visitData(DataContext ctx) {
     add(new DataSection());
     for (ParseTree t : ctx.pseudoOp())
-      t.accept(this);
-    return null;
-  }
-
-  @Override
-  public Void visitProcedures(ProceduresContext ctx) {
-    for (ParseTree t : ctx.procedure())
       t.accept(this);
     return null;
   }
@@ -325,12 +289,6 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
     }
     int localSize = Integer.parseInt(ctx.NUMBER().getText());
     add(new FramePseudoOp(ctx.LABEL().getText(), localSize, vrs));
-    return null;
-  }
-
-  @Override
-  public Void visitOperationList(OperationListContext ctx) {
-    System.err.println("OperationList not supported");
     return null;
   }
 
@@ -768,10 +726,16 @@ public abstract class OptimizationPass implements ilocVisitor<Void> {
   protected abstract void optimizeCode();
 
   public void processCode(String ilocFileName) throws IOException {
+    inputFileName = ilocFileName;
     readCode(CharStreams.fromFileName(ilocFileName));
     optimizeCode();
 
-    PrintWriter pw = new PrintWriter(ilocFileName.replace("." + prevPassAbbrev + ".il", "." + passAbbrev + ".il"));
+    if (prevPassAbbrev.equals(""))
+      ilocFileName = ilocFileName.replace(".il", "." + passAbbrev + ".il");
+    else
+      ilocFileName = ilocFileName.replace("." + prevPassAbbrev + ".il", "." + passAbbrev + ".il");
+
+    PrintWriter pw = new PrintWriter(ilocFileName);
     emitCode(pw);
     pw.close();
   }

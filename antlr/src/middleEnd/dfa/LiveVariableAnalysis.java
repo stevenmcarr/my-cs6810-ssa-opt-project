@@ -1,6 +1,5 @@
 package middleEnd.dfa;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -11,6 +10,7 @@ import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.BasicBlock;
+import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.BasicBlockIterator;
 import middleEnd.utils.VirtualRegisterSet;
 
@@ -18,37 +18,40 @@ public class LiveVariableAnalysis extends IterativeFramework {
 
     private VirtualRegisterSet emptySet;
     private VirtualRegisterSet universe;
-    private HashMap<Integer, VirtualRegisterSet> inMap = new HashMap<Integer, VirtualRegisterSet>();
-    private HashMap<Integer, VirtualRegisterSet> outMap = new HashMap<Integer, VirtualRegisterSet>();
-    private HashMap<Integer, VirtualRegisterSet> genMap = new HashMap<Integer, VirtualRegisterSet>();
-    private HashMap<Integer, VirtualRegisterSet> prsvMap = new HashMap<Integer, VirtualRegisterSet>();
+    private BasicBlockDFMap inMap = new BasicBlockDFMap();
+    private BasicBlockDFMap outMap = new BasicBlockDFMap();
+    private BasicBlockDFMap genMap = new BasicBlockDFMap();
+    private BasicBlockDFMap prsvMap = new BasicBlockDFMap();
 
     public LiveVariableAnalysis(int size) {
-        emptySet = new VirtualRegisterSet(size);
-        universe = new VirtualRegisterSet(size);
+        emptySet = new VirtualRegisterSet(size + 1);
+        universe = new VirtualRegisterSet(size + 1);
+        universe.set(0, size + 1);
     }
 
     @Override
     public void initialize(Cfg g) {
         for (CfgNode n : getNodeOrder(g)) {
             BasicBlock b = (BasicBlock) n;
-            outMap.put(b.getNodeId(), emptySet.clone());
-            genMap.put(b.getNodeId(), emptySet.clone());
-            prsvMap.put(b.getNodeId(), universe.clone());
+            VirtualRegisterSet out = emptySet.clone();
+            VirtualRegisterSet gen = emptySet.clone();
+            VirtualRegisterSet prsv = universe.clone();
             BasicBlockIterator bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 Vector<Operand> rv = inst.getRValues();
                 for (Operand op : rv) {
-                    if (op instanceof VirtualRegisterOperand
-                            && prsvMap.get(b.getNodeId()).get((VirtualRegisterOperand) op)) {
-                        genMap.get(b.getNodeId()).set((VirtualRegisterOperand) op);
+                    if (op instanceof VirtualRegisterOperand && prsv.get((VirtualRegisterOperand) op)) {
+                        gen.set((VirtualRegisterOperand) op);
                     }
                 }
                 if (inst.getLValue() != null)
-                    prsvMap.get(b.getNodeId()).clear(inst.getLValue());
+                    prsv.clear(inst.getLValue());
 
             }
+            outMap.put(b, out);
+            genMap.put(b, gen);
+            prsvMap.put(b, prsv);
             setTransferResult(b, applyTransferFunc(b));
         }
     }
@@ -58,33 +61,33 @@ public class LiveVariableAnalysis extends IterativeFramework {
         VirtualRegisterSet result = universe.clone();
         for (CfgEdge e : n.getSuccs()) {
             BasicBlock s = (BasicBlock) e.getSucc();
-            result.or(inMap.get(s.getNodeId()));
+            result.or(inMap.get(s));
         }
         return result;
     }
 
     @Override
     public VirtualRegisterSet getCurrentMeetResult(BasicBlock n) {
-        return outMap.get(n.getNodeId());
+        return outMap.get(n);
     }
 
     @Override
     public void setMeetResult(BasicBlock n, VirtualRegisterSet vrs) {
-        outMap.put(n.getNodeId(), vrs);
+        outMap.put(n, vrs);
     }
 
     @Override
     public VirtualRegisterSet applyTransferFunc(BasicBlock n) {
         VirtualRegisterSet result = emptySet.clone();
-        result.or(outMap.get(n.getNodeId()));
-        result.and(prsvMap.get(n.getNodeId()));
-        result.or(genMap.get(n.getNodeId()));
+        result.or(outMap.get(n));
+        result.and(prsvMap.get(n));
+        result.or(genMap.get(n));
         return result;
     }
 
     @Override
     public void setTransferResult(BasicBlock n, VirtualRegisterSet vrs) {
-        inMap.put(n.getNodeId(), vrs);
+        inMap.put(n, vrs);
     }
 
     @Override
@@ -92,19 +95,19 @@ public class LiveVariableAnalysis extends IterativeFramework {
         return g.getPreOrder();
     }
 
-    public HashMap<Integer, VirtualRegisterSet> getInMap() {
+    public BasicBlockDFMap getInMap() {
         return inMap;
     }
 
-    public HashMap<Integer, VirtualRegisterSet> getOutMap() {
+    public BasicBlockDFMap getOutMap() {
         return outMap;
     }
 
-    public HashMap<Integer, VirtualRegisterSet> getGenMap() {
+    public BasicBlockDFMap getGenMap() {
         return genMap;
     }
 
-    public HashMap<Integer, VirtualRegisterSet> getPrsvMap() {
+    public BasicBlockDFMap getPrsvMap() {
         return prsvMap;
     }
 
