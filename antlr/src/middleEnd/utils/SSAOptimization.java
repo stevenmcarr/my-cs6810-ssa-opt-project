@@ -18,7 +18,7 @@ import middleEnd.iloc.PhiNode;
 import middleEnd.iloc.SSAVROperand;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
-import middleEnd.utils.BasicBlockIterator;
+import middleEnd.utils.BasicBlockInstructionsIterator;
 import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
@@ -64,7 +64,7 @@ public abstract class SSAOptimization extends OptimizationPass {
 
         for (CfgNode n : cfg.getNodes()) {
             BasicBlock b = (BasicBlock) n;
-            BasicBlockIterator bIter = b.iterator();
+            BasicBlockInstructionsIterator bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 VirtualRegisterOperand lval = inst.getLValue();
@@ -115,7 +115,7 @@ public abstract class SSAOptimization extends OptimizationPass {
                     int n = b.getPreds().size();
                     Vector<Operand> operands = new Vector<Operand>(n);
                     for (int k = 0; k < n; k++)
-                        operands.add(new SSAVROperand(i));
+                        operands.add(new VirtualRegisterOperand(i));
                     PhiNode p = new PhiNode(operands, new VirtualRegisterOperand(i));
                     b.addPhiNode(p);
                 }
@@ -164,7 +164,7 @@ public abstract class SSAOptimization extends OptimizationPass {
 
         availTabStack.startBlock();
 
-        BasicBlockIterator bIter = b.iterator();
+        BasicBlockInstructionsIterator bIter = b.iterator();
         while (bIter.hasNext()) {
             IlocInstruction inst = bIter.next();
             Vector<Operand> operands = inst.getRValues();
@@ -178,18 +178,17 @@ public abstract class SSAOptimization extends OptimizationPass {
             }
 
             SSAVROperand svr = null;
-            if ((svr = availTabStack.get(inst.toString())) != null) {
+            if (inst.isExpression() && ((svr = availTabStack.get(inst.getSSAAvailKey())) != null)) {
                 VirtualRegisterOperand t = inst.getLValue();
                 getNameStackList(t).push(svr);
                 dead.add(inst);
-
             } else {
                 VirtualRegisterOperand t = inst.getLValue();
                 if (t != null) {
                     int index = t.getRegisterId();
                     SSAVROperand tn = newName(index);
                     getNameStackList(t).push(tn);
-                    availTabStack.put(inst.toString(), tn);
+                    availTabStack.put(inst.getSSAAvailKey(), tn);
                 }
             }
 
@@ -217,7 +216,7 @@ public abstract class SSAOptimization extends OptimizationPass {
             if (vr != null) {
                 SSAVROperand x = getNameStackList(vr).pop().copy();
                 if (dead.contains(inst))
-                    bIter.remove();
+                    bIter.remove(this);
                 else
                     inst.replaceLValue(x);
             }
@@ -247,7 +246,7 @@ public abstract class SSAOptimization extends OptimizationPass {
 
         for (CfgNode n : nl) {
             BasicBlock b = (BasicBlock) n;
-            BasicBlockIterator bIter = b.iterator();
+            BasicBlockInstructionsIterator bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 Vector<Operand> operands = inst.getRValues();
@@ -296,6 +295,13 @@ public abstract class SSAOptimization extends OptimizationPass {
             }
             lva = new LiveVariableAnalysis(VirtualRegisterOperand.maxVirtualRegister);
             lva.computeDFResult(ir.getCfg());
+            try {
+                PrintWriter pwl = new PrintWriter("lva");
+                emitLVA(pwl, ir);
+                pwl.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
             insertPhiNodes(ir.getCfg());
             try {
                 PrintWriter pwf = new PrintWriter(inputFileName + ".ssa");
@@ -310,6 +316,29 @@ public abstract class SSAOptimization extends OptimizationPass {
         pw2.close();
     }
 
+    private void emitLVA(PrintWriter pwl, IlocRoutine ir) {
+        for (BasicBlock b : ir.getBasicBlocks()) {
+            pwl.println("Basic Block :" + b.getNodeId());
+
+            if (lva.getInMap().get(b) != null)
+                pwl.println("\tin  =  " + lva.getInMap().get(b).toString());
+            else
+                pwl.println("\tin  =  EmptySet");
+            if (lva.getGenMap().get(b) != null)
+                pwl.println("\tgen = " + lva.getGenMap().get(b).toString());
+            else
+                pwl.println("\tgen = EmptySet");
+            if (lva.getPrsvMap().get(b) != null)
+                pwl.println("\tprsv = " + lva.getPrsvMap().get(b).toString());
+            else
+                pwl.println("\tprsv = EmptySet");
+            if (lva.getOutMap().get(b) != null)
+                pwl.println("\tout = " + lva.getOutMap().get(b).toString() + "\n\n");
+            else
+                pwl.println("\tout = EmptySet");
+        }
+    }
+
     protected void computeNormalForm() {
 
         for (IlocRoutine ir : getRoutines())
@@ -320,7 +349,7 @@ public abstract class SSAOptimization extends OptimizationPass {
     private void buildVariableSet(IlocRoutine ir) {
         variables = new VirtualRegisterSet();
         for (BasicBlock b : ir.getBasicBlocks()) {
-            BasicBlockIterator bIter = b.iterator();
+            BasicBlockInstructionsIterator bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 for (Operand op : inst.getRValues()) {

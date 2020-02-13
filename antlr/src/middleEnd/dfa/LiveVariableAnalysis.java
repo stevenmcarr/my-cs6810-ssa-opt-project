@@ -11,7 +11,7 @@ import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.BasicBlock;
 import middleEnd.utils.BasicBlockDFMap;
-import middleEnd.utils.BasicBlockIterator;
+import middleEnd.utils.BasicBlockInstructionsIterator;
 import middleEnd.utils.VirtualRegisterSet;
 
 public class LiveVariableAnalysis extends IterativeFramework {
@@ -36,7 +36,7 @@ public class LiveVariableAnalysis extends IterativeFramework {
             VirtualRegisterSet out = emptySet.clone();
             VirtualRegisterSet gen = emptySet.clone();
             VirtualRegisterSet prsv = universe.clone();
-            BasicBlockIterator bIter = b.iterator();
+            BasicBlockInstructionsIterator bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 Vector<Operand> rv = inst.getRValues();
@@ -58,7 +58,7 @@ public class LiveVariableAnalysis extends IterativeFramework {
 
     @Override
     public VirtualRegisterSet meet(BasicBlock n) {
-        VirtualRegisterSet result = universe.clone();
+        VirtualRegisterSet result = emptySet.clone();
         for (CfgEdge e : n.getSuccs()) {
             BasicBlock s = (BasicBlock) e.getSucc();
             result.or(inMap.get(s));

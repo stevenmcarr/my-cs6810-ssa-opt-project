@@ -9,7 +9,7 @@
             "name": "Debug (Launch)-CodeGenerator",
             "request": "launch",
             "mainClass": "driver.CodeGenerator",
-            "args": "-df -dbre ../../input/check.il"
+            "args": "-dbre ../../input/check.il"
         }
     ]
 }

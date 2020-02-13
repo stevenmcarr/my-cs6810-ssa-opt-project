@@ -40,4 +40,8 @@ public abstract class PseudoOpInstruction extends IlocInstruction {
 
   public void replaceLValue(Operand operand) {
   }
+
+  public boolean isExpression() {
+    return false;
+  }
 }

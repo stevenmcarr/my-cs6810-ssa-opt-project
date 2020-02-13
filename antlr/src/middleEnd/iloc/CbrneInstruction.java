@@ -67,4 +67,9 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
     else
       return new NopInstruction();
   }
+
+  @Override
+  public boolean isExpression() {
+    return false;
+  }
 }

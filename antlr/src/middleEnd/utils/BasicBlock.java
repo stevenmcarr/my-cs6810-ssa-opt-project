@@ -80,12 +80,12 @@ public class BasicBlock extends CfgNode {
     return lastInst;
   }
 
-  public BasicBlockIterator iterator() {
-    return new BasicBlockIterator(this);
+  public BasicBlockInstructionsIterator iterator() {
+    return new BasicBlockInstructionsIterator(this);
   }
 
-  public BasicBlockIterator reverseIterator() {
-    return new BasicBlockIterator(this, true);
+  public BasicBlockInstructionsIterator reverseIterator() {
+    return new BasicBlockInstructionsIterator(this, true);
   }
 
   @Override

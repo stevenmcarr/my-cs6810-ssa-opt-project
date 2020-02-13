@@ -35,4 +35,9 @@ public class HaltInstruction extends NoAddressIlocInstruction {
 		return 0;
 	}
 
+	@Override
+	public boolean isExpression() {
+		return false;
+	}
+
 }

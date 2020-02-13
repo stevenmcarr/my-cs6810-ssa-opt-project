@@ -122,6 +122,15 @@ public abstract class IlocInstruction {
     return hashKey;
   }
 
+  public String getSSAAvailKey() {
+    String key = getOpcode();
+    for (Operand op : getRValues()) {
+      key += op.toString();
+    }
+
+    return key;
+  }
+
   public boolean isMemoryLoadInstruction() {
     return (this instanceof LoadInstruction || this instanceof LoadAIInstruction || this instanceof LoadAOInstruction
         || this instanceof FloadInstruction || this instanceof FloadAIInstruction
@@ -164,6 +173,8 @@ public abstract class IlocInstruction {
     else
       return null;
   }
+
+  public abstract boolean isExpression();
 
   public abstract boolean operandIsLValue(Operand operand);
 

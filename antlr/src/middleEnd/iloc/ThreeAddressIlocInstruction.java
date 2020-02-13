@@ -74,4 +74,8 @@ public abstract class ThreeAddressIlocInstruction extends IlocInstruction {
     dest = operand;
     lValue = (VirtualRegisterOperand) operand;
   }
+
+  public boolean isExpression() {
+    return true;
+  }
 }
