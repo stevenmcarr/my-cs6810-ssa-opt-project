@@ -23,7 +23,7 @@
 	loadI	4  => %vr13
 	mult	%vr12, %vr13 => %vr14
 	sub	%vr11, %vr14 => %vr15
-	store	%vr15  => %vr15
+	store	%vr4  => %vr15
 	add	%vr4, %vr5 => %vr16
 	i2i	%vr16  => %vr4
 	comp	%vr4, %vr6 => %vr7

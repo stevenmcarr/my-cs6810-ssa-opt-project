@@ -24,8 +24,8 @@ public class StoreInstruction extends TwoAddressIlocInstruction {
   public StoreInstruction(VirtualRegisterOperand source, VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
-    rValues.add(dest);
     rValues.add(source);
+    rValues.add(dest);
   }
 
   /**

@@ -28,13 +28,13 @@
 	loadI	4  => %vr19
 	mult	%vr18, %vr19 => %vr20
 	sub	%vr17, %vr20 => %vr21
-	store	%vr21  => %vr21
+	store	%vr12  => %vr21
 	i2i	%vr0  => %vr15
 	loadI	-124  => %vr22
 	add	%vr15, %vr22 => %vr23
 	mult	%vr12, %vr19 => %vr24
 	sub	%vr23, %vr24 => %vr25
-	store	%vr25  => %vr25
+	store	%vr6  => %vr25
 	add	%vr6, %vr9 => %vr26
 	i2i	%vr26  => %vr6
 	comp	%vr6, %vr5 => %vr10
@@ -56,7 +56,7 @@
 	loadI	4  => %vr19
 	mult	%vr32, %vr19 => %vr33
 	sub	%vr17, %vr33 => %vr34
-	store	%vr34  => %vr34
+	store	%vr29  => %vr34
 	loadI	2  => %vr35
 	mult	%vr35, %vr7 => %vr36
 	i2i	%vr0  => %vr15
@@ -64,7 +64,7 @@
 	add	%vr15, %vr22 => %vr23
 	mult	%vr29, %vr19 => %vr37
 	sub	%vr23, %vr37 => %vr38
-	store	%vr38  => %vr38
+	store	%vr36  => %vr38
 	add	%vr7, %vr9 => %vr39
 	i2i	%vr39  => %vr7
 	comp	%vr7, %vr4 => %vr27
@@ -101,7 +101,7 @@
 	sub	%vr46, %vr9 => %vr47
 	mult	%vr47, %vr19 => %vr48
 	sub	%vr17, %vr48 => %vr49
-	store	%vr49  => %vr49
+	store	%vr45  => %vr49
 	i2i	%vr0  => %vr15
 	loadI	-124  => %vr22
 	add	%vr15, %vr22 => %vr23
@@ -125,7 +125,7 @@
 	i2i	%vr0  => %vr15
 	add	%vr15, %vr16 => %vr17
 	sub	%vr17, %vr48 => %vr49
-	store	%vr49  => %vr49
+	store	%vr58  => %vr49
 .L8:	nop
 	add	%vr40, %vr7 => %vr59
 	i2i	%vr0  => %vr15
@@ -149,7 +149,7 @@
 	i2i	%vr0  => %vr15
 	add	%vr15, %vr16 => %vr17
 	sub	%vr17, %vr48 => %vr49
-	store	%vr49  => %vr49
+	store	%vr66  => %vr49
 .L9:	nop
 	add	%vr13, %vr29 => %vr67
 	i2i	%vr0  => %vr15
@@ -173,7 +173,7 @@
 	i2i	%vr0  => %vr15
 	add	%vr15, %vr16 => %vr17
 	sub	%vr17, %vr48 => %vr49
-	store	%vr49  => %vr49
+	store	%vr74  => %vr49
 .L10:	nop
 	add	%vr7, %vr9 => %vr39
 	i2i	%vr39  => %vr7

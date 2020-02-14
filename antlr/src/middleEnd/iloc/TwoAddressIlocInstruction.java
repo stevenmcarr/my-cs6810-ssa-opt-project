@@ -59,6 +59,8 @@ public abstract class TwoAddressIlocInstruction extends IlocInstruction {
   public void replaceOperandAtIndex(int index, Operand operand) {
     if (index == 0)
       source = operand;
+    else if (index == 1)
+      dest = operand;
     rValues.set(index, operand);
   }
 

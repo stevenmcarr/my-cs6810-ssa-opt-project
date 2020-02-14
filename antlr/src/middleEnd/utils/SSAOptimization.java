@@ -109,6 +109,7 @@ public abstract class SSAOptimization extends OptimizationPass {
 
         for (int i = variables.nextSetBit(0); i >= 0; i = variables.nextSetBit(i + 1)) {
             CfgNodeSet idf = iteratedDFMap.get(defSetMap.get(i));
+            idf.set(g.getEntryNode());
             for (int j = idf.nextSetBit(0); j >= 0; j = idf.nextSetBit(j + 1)) {
                 BasicBlock b = (BasicBlock) idf.getCfgNode(j);
                 if (lva.getInMap().get(b).get(i)) {
@@ -193,15 +194,14 @@ public abstract class SSAOptimization extends OptimizationPass {
             }
 
         }
-        int j = 0;
         for (CfgEdge e : b.getSuccs()) {
             BasicBlock s = (BasicBlock) e.getSucc();
+            int j = s.whichPredecessor(b);
             for (PhiNode p : s.getPhiNodes()) {
                 VirtualRegisterOperand tj = (VirtualRegisterOperand) p.getRValues().elementAt(j);
                 p.replaceOperandAtIndex(j, getNameStackList(tj).getFirst().copy());
                 getUseList(tj.getRegisterId()).add(p);
             }
-            j++;
         }
 
         for (DominatorTreeEdge e : b.getDTChildren()) {
@@ -270,50 +270,65 @@ public abstract class SSAOptimization extends OptimizationPass {
     protected void computeSSAForm() {
 
         PrintWriter pw = null;
-        PrintWriter pw2 = null;
-        try {
-            pw = new PrintWriter("graph.dot");
-            pw2 = new PrintWriter("df");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
         for (IlocRoutine ir : getRoutines()) {
             ir.buildCfg();
-            if (driver.CodeGenerator.emitCfg)
-                ir.getCfg().emitCfg(pw);
+            if (driver.CodeGenerator.emitCfg) {
+                try {
+                    pw = new PrintWriter(inputFileName + ".cfg.dot");
+                    ir.getCfg().emitCfg(pw);
+                    pw.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
             ir.getCfg().buildPreOrder();
             ir.getCfg().buildPostOrder();
             buildVariableSet(ir);
             ir.getCfg().buildDT();
-            if (driver.CodeGenerator.emitDT)
-                ir.getCfg().emitDT(pw);
+            if (driver.CodeGenerator.emitDT) {
+                try {
+                    pw = new PrintWriter(inputFileName + ".dt.dot");
+                    ir.getCfg().emitDT(pw);
+                    pw.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
             ir.getCfg().buildDF();
             computeIDF(ir.getCfg());
             if (driver.CodeGenerator.emitDF) {
-                ir.getCfg().emitDF(pw2);
-                emitIteratedDF(pw2);
+                try {
+                    pw = new PrintWriter(inputFileName + ".df");
+                    ir.getCfg().emitDF(pw);
+                    emitIteratedDF(pw);
+                    pw.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
             lva = new LiveVariableAnalysis(VirtualRegisterOperand.maxVirtualRegister);
             lva.computeDFResult(ir.getCfg());
-            try {
-                PrintWriter pwl = new PrintWriter("lva");
-                emitLVA(pwl, ir);
-                pwl.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            if (driver.CodeGenerator.emitLVA) {
+                try {
+                    pw = new PrintWriter(inputFileName + ".lva");
+                    emitLVA(pw, ir);
+                    pw.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
             insertPhiNodes(ir.getCfg());
-            try {
-                PrintWriter pwf = new PrintWriter(inputFileName + ".ssa");
-                emitCodeWithSSA(pwf);
-                pwf.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            if (driver.CodeGenerator.emitSSA) {
+                try {
+                    pw = new PrintWriter(inputFileName + ".ssa");
+                    emitCodeWithSSA(pw);
+                    pw.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
             rename(ir.getCfg());
         }
-        pw.close();
-        pw2.close();
     }
 
     private void emitLVA(PrintWriter pwl, IlocRoutine ir) {
