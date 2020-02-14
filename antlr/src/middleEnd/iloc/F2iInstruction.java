@@ -1,26 +1,32 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
  */
-public class F2iInstruction extends TwoAddressIlocInstruction {
-  public F2iInstruction(VirtualRegisterOperand source,
-                        VirtualRegisterOperand dest) {
+public class F2iInstruction extends CopyInstruction {
+  public F2iInstruction(VirtualRegisterOperand source, VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
     lValue = dest;
     rValues.add(source);
   }
-
 
   /**
    * getOpcode
@@ -33,7 +39,7 @@ public class F2iInstruction extends TwoAddressIlocInstruction {
   }
 
   public static String getHash(VirtualRegisterOperand source) {
-    return "f2i"+source.toString();
+    return "f2i" + source.toString();
   }
 
   protected int getOperandType(Operand operand) {

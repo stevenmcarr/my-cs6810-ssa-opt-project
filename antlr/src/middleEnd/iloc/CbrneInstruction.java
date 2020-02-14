@@ -27,8 +27,8 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
     super();
     this.source = source1;
     this.dest = dest;
-    rValues.add(dest);
     rValues.add(source);
+    rValues.add(dest);
   }
 
   public String getTargetLabel() {
@@ -66,5 +66,10 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
       return new JumpIInstruction((LabelOperand) dest);
     else
       return new NopInstruction();
+  }
+
+  @Override
+  public boolean isExpression() {
+    return false;
   }
 }

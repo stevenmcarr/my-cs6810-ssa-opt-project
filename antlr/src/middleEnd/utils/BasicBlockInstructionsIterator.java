@@ -1,27 +1,24 @@
 package middleEnd.utils;
 
-import java.util.ListIterator;
-
 import middleEnd.iloc.IlocInstruction;
 
-public class BasicBlockIterator implements ListIterator<IlocInstruction> {
+public class BasicBlockInstructionsIterator {
 
     private BasicBlock thisBasicBlock;
     private IlocInstruction instPtr;
     private boolean reverse = false;
 
-    public BasicBlockIterator(BasicBlock b, boolean reverse) {
+    public BasicBlockInstructionsIterator(BasicBlock b, boolean reverse) {
         thisBasicBlock = b;
         instPtr = null;
         this.reverse = reverse;
     }
 
-    public BasicBlockIterator(BasicBlock b) {
+    public BasicBlockInstructionsIterator(BasicBlock b) {
         thisBasicBlock = b;
         instPtr = null;
     }
 
-    @Override
     public boolean hasNext() {
         if (instPtr == null)
             return thisBasicBlock.getFirstInst() != null;
@@ -29,7 +26,6 @@ public class BasicBlockIterator implements ListIterator<IlocInstruction> {
             return instPtr != thisBasicBlock.getLastInst();
     }
 
-    @Override
     public IlocInstruction next() {
         if (instPtr == null)
             instPtr = thisBasicBlock.getFirstInst();
@@ -42,7 +38,6 @@ public class BasicBlockIterator implements ListIterator<IlocInstruction> {
         return instPtr;
     }
 
-    @Override
     public boolean hasPrevious() {
         if (instPtr == null)
             return thisBasicBlock.getLastInst() != null;
@@ -50,7 +45,6 @@ public class BasicBlockIterator implements ListIterator<IlocInstruction> {
             return instPtr != thisBasicBlock.getFirstInst();
     }
 
-    @Override
     public IlocInstruction previous() {
         if (instPtr == null)
             instPtr = thisBasicBlock.getLastInst();
@@ -63,18 +57,15 @@ public class BasicBlockIterator implements ListIterator<IlocInstruction> {
         return instPtr;
     }
 
-    @Override
     public int nextIndex() {
         return 0;
     }
 
-    @Override
     public int previousIndex() {
         return 0;
     }
 
-    @Override
-    public void remove() {
+    public void remove(OptimizationPass p) {
         if (instPtr == null)
             return;
         IlocInstruction remInst = instPtr;
@@ -82,15 +73,7 @@ public class BasicBlockIterator implements ListIterator<IlocInstruction> {
             instPtr = instPtr.getNextInst();
         else
             instPtr = instPtr.getPrevInst();
-        thisBasicBlock.removeInst(remInst);
-    }
-
-    @Override
-    public void set(IlocInstruction e) {
-    }
-
-    @Override
-    public void add(IlocInstruction e) {
+        p.removeInst(remInst);
     }
 
 }

@@ -94,4 +94,9 @@ public class Comment extends IlocInstruction {
 
 	}
 
+	@Override
+	public boolean isExpression() {
+		return false;
+	}
+
 }

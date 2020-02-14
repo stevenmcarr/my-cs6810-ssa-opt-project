@@ -26,8 +26,8 @@ public class CbrInstruction extends TwoAddressIlocInstruction {
   public CbrInstruction(VirtualRegisterOperand source1, LabelOperand dest) {
     this.source = source1;
     this.dest = dest;
-    rValues.add(dest);
     rValues.add(source);
+    rValues.add(dest);
   }
 
   public String getTargetLabel() {
@@ -65,5 +65,10 @@ public class CbrInstruction extends TwoAddressIlocInstruction {
       return new JumpIInstruction((LabelOperand) dest);
     else
       return new NopInstruction();
+  }
+
+  @Override
+  public boolean isExpression() {
+    return false;
   }
 }

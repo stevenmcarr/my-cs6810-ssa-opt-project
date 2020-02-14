@@ -12,11 +12,6 @@ public class PhiNode extends VariableAddressIlocInstruction {
     }
 
     @Override
-    protected String getStringRepSpecific() {
-        return "";
-    }
-
-    @Override
     public String getOpcode() {
         return "phi";
     }
@@ -40,12 +35,13 @@ public class PhiNode extends VariableAddressIlocInstruction {
             return Operand.INTEGER_TYPE;
     }
 
-    public String getStringRep() {
-        String rep = "";
-        if (label != null)
-            rep = label + ":";
-        rep += ("\t => " + lValue.toString());
-        return rep;
+    protected String getStringRepSpecific() {
+        return ("\t => " + lValue.toString());
+    }
+
+    @Override
+    public boolean isExpression() {
+        return false;
     }
 
 }

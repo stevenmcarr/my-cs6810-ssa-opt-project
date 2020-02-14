@@ -19,6 +19,8 @@ public class CodeGenerator {
 	public static boolean emitCfg = false;
 	public static boolean emitDT = false;
 	public static boolean emitDF = false;
+	public static boolean emitLVA = false;
+	public static boolean emitSSA = false;
 
 	/**
 	 * @param args
@@ -44,6 +46,12 @@ public class CodeGenerator {
 				continue;
 			} else if (args[i].equals("-df")) {
 				emitDF = true;
+				continue;
+			} else if (args[i].equals("-lva")) {
+				emitLVA = true;
+				continue;
+			} else if (args[i].equals("-ssa")) {
+				emitSSA = true;
 				continue;
 			} else {
 				System.err.println("Invalid command option: " + args[i]);

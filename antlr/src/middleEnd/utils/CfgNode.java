@@ -104,4 +104,19 @@ public class CfgNode {
         return !equals(m) && dominates(m);
     }
 
+    public int whichPredecessor(CfgNode n) {
+        int i = 0;
+        int nId = n.getNodeId();
+        int whichPred = -1;
+        for (CfgEdge e : preds) {
+            if (e.getPred().getNodeId() == nId) {
+                whichPred = i;
+                break;
+            }
+            i++;
+        }
+
+        return whichPred;
+    }
+
 }

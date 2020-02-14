@@ -55,4 +55,9 @@ public class FstoreAIInstruction extends ThreeAddressIlocInstruction {
     else
       return Operand.INTEGER_TYPE;
   }
+
+  @Override
+  public boolean isExpression() {
+    return false;
+  }
 }

@@ -49,4 +49,8 @@ public abstract class NoAddressIlocInstruction extends IlocInstruction {
 
   public void replaceLValue(Operand operand) {
   }
+
+  public boolean isExpression() {
+    return false;
+  }
 }

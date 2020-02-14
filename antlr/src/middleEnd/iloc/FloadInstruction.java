@@ -1,26 +1,32 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
  */
 public class FloadInstruction extends TwoAddressIlocInstruction {
-  public FloadInstruction(VirtualRegisterOperand source,
-                          VirtualRegisterOperand dest) {
+  public FloadInstruction(VirtualRegisterOperand source, VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
     lValue = dest;
     rValues.add(source);
   }
-
 
   /**
    * getOpcode
@@ -40,6 +46,11 @@ public class FloadInstruction extends TwoAddressIlocInstruction {
   }
 
   public static String getHash(VirtualRegisterOperand source) {
-    return "fload"+source.toString();
+    return "fload" + source.toString();
+  }
+
+  @Override
+  public boolean isExpression() {
+    return false;
   }
 }

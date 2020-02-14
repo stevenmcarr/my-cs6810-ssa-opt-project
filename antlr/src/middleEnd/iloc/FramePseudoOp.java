@@ -32,6 +32,9 @@ public class FramePseudoOp extends PseudoOpInstruction {
     this.localSize = localSize;
     this.parameters = parameters;
     this.lValue = new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG);
+    this.rValues.addAll(parameters);
+    this.rValues.add(new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG));
+    this.rValues.add(new VirtualRegisterOperand(VirtualRegisterOperand.SP_REG));
   }
 
   /**
@@ -83,7 +86,10 @@ public class FramePseudoOp extends PseudoOpInstruction {
   }
 
   public void replaceOperandAtIndex(int index, Operand operand) {
-    parameters.set(index, operand);
+    rValues.set(index, operand);
+    int rValIndex = parameters.indexOf(operand);
+    if (rValIndex >= 0)
+      parameters.set(rValIndex, operand);
   }
 
   @Override

@@ -1,26 +1,32 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
  */
 public class StoreInstruction extends TwoAddressIlocInstruction {
-  public StoreInstruction(VirtualRegisterOperand source,
-                          VirtualRegisterOperand dest) {
+  public StoreInstruction(VirtualRegisterOperand source, VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
-    rValues.add(dest);
     rValues.add(source);
+    rValues.add(dest);
   }
-
 
   /**
    * getOpcode
@@ -34,5 +40,10 @@ public class StoreInstruction extends TwoAddressIlocInstruction {
 
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
+  }
+
+  @Override
+  public boolean isExpression() {
+    return false;
   }
 }

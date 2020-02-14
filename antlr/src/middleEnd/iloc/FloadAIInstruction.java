@@ -1,21 +1,27 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
  */
 public class FloadAIInstruction extends ThreeAddressIlocInstruction {
-  public FloadAIInstruction(VirtualRegisterOperand source1,
-                            ImmediateOperand source2,
-                            VirtualRegisterOperand dest) {
+  public FloadAIInstruction(VirtualRegisterOperand source1, ImmediateOperand source2, VirtualRegisterOperand dest) {
     this.source1 = source1;
     this.source2 = source2;
     this.dest = dest;
@@ -23,7 +29,6 @@ public class FloadAIInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source1);
     rValues.add(source2);
   }
-
 
   /**
    * getOpcode
@@ -40,5 +45,10 @@ public class FloadAIInstruction extends ThreeAddressIlocInstruction {
       return Operand.FLOAT_TYPE;
     else
       return Operand.INTEGER_TYPE;
+  }
+
+  @Override
+  public boolean isExpression() {
+    return false;
   }
 }
