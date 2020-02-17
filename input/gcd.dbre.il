@@ -12,9 +12,11 @@
 	.frame	main, 8
 	loadI	main_fp  => %vr4
 	store	%vr0  => %vr4
-	addI	%vr0, -4 => %vr6
+	loadI	-4  => %vr5
+	add	%vr0, %vr5 => %vr6
 	iread	%vr6
-	addI	%vr0, -8 => %vr8
+	loadI	-8  => %vr7
+	add	%vr0, %vr7 => %vr8
 	iread	%vr8
 	load	%vr6  => %vr9
 	loadI	0  => %vr10
@@ -28,16 +30,11 @@
 	testeq	%vr17  => %vr18
 	cbr	%vr18  -> .L0
 .L1:	nop
-	addI	%vr0, -4 => %vr6
-	addI	%vr0, -8 => %vr8
-	icall	gcd, %vr6, %vr8 	 => %vr19
+	 => %vr19
 	iwrite	%vr19
-	addI	%vr0, -4 => %vr6
 	iread	%vr6
-	addI	%vr0, -8 => %vr8
 	iread	%vr8
 	load	%vr6  => %vr9
-	loadI	0  => %vr10
 	comp	%vr9, %vr10 => %vr11
 	testne	%vr11  => %vr12
 	load	%vr8  => %vr13
@@ -60,9 +57,10 @@
 	load	%vr4  => %vr10
 	load	%vr5  => %vr6
 	mod	%vr10, %vr6 => %vr11
-	addI	%vr0, -4 => %vr13
+	loadI	-4  => %vr12
+	add	%vr0, %vr12 => %vr13
 	store	%vr11  => %vr13
-	icall	gcd, %vr5, %vr13 	 => %vr14
+	 => %vr14
 	iret	%vr14
 .L3:	nop
 	ret

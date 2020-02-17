@@ -14,9 +14,8 @@
 	loadI	main_fp  => %vr4
 	store	%vr0  => %vr4
 	addI	%vr0, -4 => %vr6
-	call	init, %vr6 
-	addI	%vr0, -4 => %vr6
-	call	writearray, %vr6 
+	call	%vr6, %vr6 
+	call	%vr6, %vr6 
 	loadI	1  => %vr4
 	loadI	10  => %vr8
 	comp	%vr4, %vr8 => %vr9
@@ -30,28 +29,19 @@
 	sub	%vr12, %vr15 => %vr16
 	load	%vr16  => %vr17
 	mult	%vr4, %vr17 => %vr18
-	addI	%vr11, -4 => %vr12
-	subI	%vr4, 1 => %vr13
-	multI	%vr13, 4 => %vr15
 	store	%vr18  => %vr16
-	addI	%vr11, -4 => %vr12
-	subI	%vr4, 1 => %vr13
-	multI	%vr13, 4 => %vr15
-	call	inc, %vr16 
+	call	%vr16, %vr16 
 	addI	%vr4, 1 => %vr19
 	i2i	%vr19  => %vr4
-	loadI	10  => %vr8
 	comp	%vr4, %vr8 => %vr9
 	testle	%vr9  => %vr10
 	cbr	%vr10  -> .L1
 .L0:	nop
-	addI	%vr0, -4 => %vr6
-	call	writearray, %vr6 
+	call	%vr6, %vr6 
 	ret
 	.frame	init, 0, %vr8
 	loadI	1  => %vr4
 	loadI	10  => %vr10
-	loadI	10  => %vr5
 	comp	%vr4, %vr10 => %vr11
 	testgt	%vr11  => %vr12
 	cbr	%vr12  -> .L2
@@ -71,7 +61,6 @@
 	i2i	%vr24  => %vr4
 	addI	%vr5, 1 => %vr25
 	i2i	%vr25  => %vr5
-	loadI	10  => %vr10
 	comp	%vr4, %vr10 => %vr11
 	testle	%vr11  => %vr12
 	cbr	%vr12  -> .L3

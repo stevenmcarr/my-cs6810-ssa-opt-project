@@ -29,6 +29,7 @@ public class IcallInstruction extends InvocationInstruction {
   public IcallInstruction(LabelOperand name, Vector<Operand> parameters, VirtualRegisterOperand returnReg) {
     operands = new Vector<Operand>();
     operands.add(name);
+    rValues.add(name);
     for (int i = 0; i < parameters.size(); i++) {
       Operand parameter = (Operand) parameters.elementAt(i);
       operands.add(parameter);
@@ -71,14 +72,6 @@ public class IcallInstruction extends InvocationInstruction {
       return Operand.INTEGER_TYPE;
   }
 
-  public String getStringRep() {
-    String rep = "";
-    if (label != null)
-      rep = label + ":";
-    rep += ("\t => " + returnRegister.toString());
-    return rep;
-  }
-
   public static String getHash(LabelOperand name, Vector<Operand> operands) {
     String key = new String("icall" + name.getLabel()) + (counter++);
     for (int i = 0; i < operands.size(); i++)
@@ -89,6 +82,6 @@ public class IcallInstruction extends InvocationInstruction {
 
   @Override
   protected String getStringRepSpecific() {
-    return "";
+    return "\t => " + returnRegister.toString();
   }
 }

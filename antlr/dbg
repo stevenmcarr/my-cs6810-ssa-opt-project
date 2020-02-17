@@ -1,0 +1,2 @@
+#!/bin/bash
+jdb -sourcepath src/ -classpath ssa.jar driver.CodeGenerator $*

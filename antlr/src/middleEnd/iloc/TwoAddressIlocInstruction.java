@@ -72,4 +72,9 @@ public abstract class TwoAddressIlocInstruction extends IlocInstruction {
   public boolean isExpression() {
     return true;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return false;
+  }
 }

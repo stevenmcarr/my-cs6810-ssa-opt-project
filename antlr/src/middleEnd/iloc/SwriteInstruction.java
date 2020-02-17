@@ -52,4 +52,8 @@ public class SwriteInstruction extends OneAddressIlocInstruction {
     return false;
   }
 
+  @Override
+  public boolean isNecessary() {
+    return true;
+  }
 }

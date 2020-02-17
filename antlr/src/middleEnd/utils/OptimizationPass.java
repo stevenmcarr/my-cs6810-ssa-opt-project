@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 import middleEnd.iloc.*;
 import parser.ilocParser.DataContext;
 import parser.ilocParser.FrameInstructionContext;
@@ -29,11 +33,10 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
   protected String prevPassAbbrev;
   protected String passAbbrev;
 
-  protected IlocInstruction firstInst = null;
-  protected IlocInstruction lastInst = null;
-  protected IlocInstruction newI = null;
+  protected LinkedList<IlocInstruction> allInstructions = new LinkedList<IlocInstruction>();
   private VirtualRegisterOperand lastVR = null;
   private ImmediateOperand lastOp = null;
+  private IlocInstruction newI = null;
 
   protected Vector<IlocRoutine> routines = new Vector<IlocRoutine>();
 
@@ -45,83 +48,8 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
   protected Hashtable<String, Integer> typeHash = new Hashtable<String, Integer>();
 
   public void emitCode(PrintWriter pw) {
-    for (IlocInstruction inst = firstInst; inst != null; inst = inst.getNextInst()) {
-      inst.emit(pw);
-    }
-  }
-
-  public void add(IlocInstruction inst) {
-    if (firstInst == null) {
-      firstInst = inst;
-      lastInst = inst;
-    } else {
-      lastInst.setNextInst(inst);
-      inst.setPrevInst(lastInst);
-      lastInst = inst;
-    }
-  }
-
-  public void insertBefore(IlocInstruction inst, IlocInstruction newInst) {
-    IlocInstruction prevInst = inst.getPrevInst();
-
-    if (prevInst != null)
-      prevInst.setNextInst(newInst);
-    newInst.setPrevInst(prevInst);
-
-    newInst.setNextInst(inst);
-    inst.setPrevInst(newInst);
-
-    if (firstInst == inst)
-      firstInst = newInst;
-  }
-
-  public void insertAfter(IlocInstruction inst, IlocInstruction newInst) {
-    IlocInstruction nextInst = inst.getNextInst();
-
-    if (nextInst != null)
-      nextInst.setPrevInst(newInst);
-    newInst.setNextInst(nextInst);
-
-    newInst.setPrevInst(inst);
-    inst.setNextInst(newInst);
-
-    if (lastInst == inst)
-      lastInst = newInst;
-  }
-
-  public void replaceInst(IlocInstruction inst, IlocInstruction newInst) {
-    newInst.setPrevInst(inst.getPrevInst());
-    newInst.setNextInst(inst.getNextInst());
-
-    if (inst.getNextInst() != null)
-      inst.getNextInst().setPrevInst(newInst);
-
-    if (inst.getPrevInst() != null)
-      inst.getPrevInst().setNextInst(newInst);
-
-    if (firstInst == inst)
-      firstInst = newInst;
-
-    if (lastInst == inst)
-      lastInst = newInst;
-
-    inst.getBlock().replaceInst(inst, newInst);
-  }
-
-  public void removeInst(IlocInstruction inst) {
-    if (inst.getPrevInst() != null)
-      inst.getPrevInst().setNextInst(inst.getNextInst());
-
-    if (inst.getNextInst() != null)
-      inst.getNextInst().setPrevInst(inst.getPrevInst());
-
-    if (firstInst == inst)
-      firstInst = inst.getNextInst();
-
-    if (lastInst == inst)
-      lastInst = inst.getPrevInst();
-
-    inst.getBlock().removeInst(inst);
+    for (IlocRoutine rtn : routines)
+      rtn.emitCode(pw);
   }
 
   public VirtualRegisterOperand getTemporaryRegister(String inst) {
@@ -154,61 +82,27 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
     nextVirtualRegister = VirtualRegisterOperand.FREE_REG;
   }
 
-  public IlocInstruction getLastInstruction() {
-    return lastInst;
-  }
-
-  public IlocInstruction getFirstInstruction() {
-    return firstInst;
-  }
-
-  public IlocInstruction removeLastInstruction() {
-    IlocInstruction last = lastInst;
-
-    if (last != null) {
-      lastInst = last.getPrevInst();
-      last.setPrevInst(null);
-      if (lastInst == null)
-        firstInst = null;
-      else
-        last.setNextInst(null);
-    }
-    return last;
-  }
-
   public void buildRoutines() {
     IlocRoutine routine = new IlocRoutine();
     routines.add(routine);
-    BasicBlock block = new BasicBlock();
-    routine.addBlock(block);
     HashMap<String, IlocInstruction> labelMap = new HashMap<String, IlocInstruction>();
 
-    IlocInstruction inst = firstInst;
-    block.add(inst);
-    inst.setBlock(block);
+    ListIterator<IlocInstruction> lIter = allInstructions.listIterator();
+    IlocInstruction inst = lIter.next();
+    routine.addInstruction(inst);
     if (inst.getLabel() != null)
       labelMap.put(inst.getLabel(), inst);
-
-    inst = inst.getNextInst();
-    while (inst != null) {
-
+    while (lIter.hasNext()) {
+      inst = lIter.next();
       if (inst instanceof FramePseudoOp) {
         routine.setLabelMap(labelMap);
         routine = new IlocRoutine();
         routines.add(routine);
-        block = new BasicBlock();
-        routine.addBlock(block);
         labelMap = new HashMap<String, IlocInstruction>();
-      } else if (inst.getLabel() != null || inst.getPrevInst().isBranchInstruction()) {
-        block = new BasicBlock();
-        routine.addBlock(block);
       }
-
-      block.add(inst);
-      inst.setBlock(block);
+      routine.addInstruction(inst);
       if (inst.getLabel() != null)
         labelMap.put(inst.getLabel(), inst);
-      inst = inst.getNextInst();
     }
 
     routine.setLabelMap(labelMap);
@@ -229,11 +123,10 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
       Vector<BasicBlock> blocks = routine.getBasicBlocks();
       for (int j = 0; j < blocks.size(); j++) {
         BasicBlock block = (BasicBlock) blocks.elementAt(j);
-        IlocInstruction inst = block.getFirstInst();
-        IlocInstruction endInst = block.getLastInst().getNextInst();
-        while (inst != endInst) {
+        Iterator<IlocInstruction> iter = block.iterator();
+        while (iter.hasNext()) {
+          IlocInstruction inst = iter.next();
           inst.setOperandTypes(typeHash);
-          inst = inst.getNextInst();
         }
       }
     }
@@ -259,14 +152,14 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
   public Void visitProgram(ProgramContext ctx) {
     if (ctx.data() != null)
       ctx.data().accept(this);
-    add(new TextSection());
+    allInstructions.add(new TextSection());
     ctx.procedures().accept(this);
     return null;
   }
 
   @Override
   public Void visitData(DataContext ctx) {
-    add(new DataSection());
+    allInstructions.add(new DataSection());
     for (ParseTree t : ctx.pseudoOp())
       t.accept(this);
     return null;
@@ -288,7 +181,7 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
       vrs.add(lastVR);
     }
     int localSize = Integer.parseInt(ctx.NUMBER().getText());
-    add(new FramePseudoOp(ctx.LABEL().getText(), localSize, vrs));
+    allInstructions.add(new FramePseudoOp(ctx.LABEL().getText(), localSize, vrs));
     return null;
   }
 
@@ -301,6 +194,16 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
     VirtualRegisterOperand vr2 = lastVR;
 
     return new AddInstruction(vr0, vr1, vr2);
+  }
+
+  IlocInstruction makeAddIInstruction(OperationContext ctx) {
+    ctx.virtualReg(0).accept(this);
+    VirtualRegisterOperand vr0 = lastVR;
+    ctx.virtualReg(1).accept(this);
+    VirtualRegisterOperand vr1 = lastVR;
+    ImmediateOperand op = new ConstantOperand(Integer.parseInt(ctx.NUMBER().getText()));
+
+    return new AddIInstruction(vr0, op, vr1);
   }
 
   IlocInstruction makeAndInstruction(OperationContext ctx) {
@@ -493,6 +396,16 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
     return new MultInstruction(vr0, vr1, vr2);
   }
 
+  IlocInstruction makeMultIInstruction(OperationContext ctx) {
+    ctx.virtualReg(0).accept(this);
+    VirtualRegisterOperand vr0 = lastVR;
+    ctx.virtualReg(1).accept(this);
+    VirtualRegisterOperand vr1 = lastVR;
+    ImmediateOperand op = new ConstantOperand(Integer.parseInt(ctx.NUMBER().getText()));
+
+    return new MultIInstruction(vr0, op, vr1);
+  }
+
   IlocInstruction makeOrInstruction(OperationContext ctx) {
     ctx.virtualReg(0).accept(this);
     VirtualRegisterOperand vr0 = lastVR;
@@ -522,6 +435,16 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
     VirtualRegisterOperand vr2 = lastVR;
 
     return new SubInstruction(vr0, vr1, vr2);
+  }
+
+  IlocInstruction makeSubIInstruction(OperationContext ctx) {
+    ctx.virtualReg(0).accept(this);
+    VirtualRegisterOperand vr0 = lastVR;
+    ctx.virtualReg(1).accept(this);
+    VirtualRegisterOperand vr1 = lastVR;
+    ImmediateOperand op = new ConstantOperand(Integer.parseInt(ctx.NUMBER().getText()));
+
+    return new SubIInstruction(vr0, op, vr1);
   }
 
   IlocInstruction makeTesteqInstruction(OperationContext ctx) {
@@ -589,6 +512,8 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
   public Void visitOperation(OperationContext ctx) {
     if (ctx.ADD() != null)
       newI = makeAddInstruction(ctx);
+    else if (ctx.ADDI() != null)
+      newI = makeAddIInstruction(ctx);
     else if (ctx.AND() != null)
       newI = makeAndInstruction(ctx);
     else if (ctx.CALL() != null)
@@ -629,6 +554,8 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
       newI = makeModInstruction(ctx);
     else if (ctx.MULT() != null)
       newI = makeMultInstruction(ctx);
+    else if (ctx.MULTI() != null)
+      newI = makeMultIInstruction(ctx);
     else if (ctx.NOP() != null)
       newI = new NopInstruction();
     else if (ctx.OR() != null)
@@ -639,6 +566,8 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
       newI = makeStoreInstruction(ctx);
     else if (ctx.SUB() != null)
       newI = makeSubInstruction(ctx);
+    else if (ctx.SUBI() != null)
+      newI = makeSubIInstruction(ctx);
     else if (ctx.TESTEQ() != null)
       newI = makeTesteqInstruction(ctx);
     else if (ctx.TESTNE() != null)
@@ -665,11 +594,11 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
   public Void visitPseudoOp(PseudoOpContext ctx) {
     if (ctx.STRING() != null) {
       String str = ctx.STRING_CONST().getText();
-      add(new StringPseudoOp(ctx.LABEL().getText(), str.substring(1, str.length() - 1)));
+      allInstructions.add(new StringPseudoOp(ctx.LABEL().getText(), str.substring(1, str.length() - 1)));
     } else if (ctx.FLOAT() != null) {
-      add(new FloatPseudoOp(ctx.LABEL().getText(), Float.parseFloat(ctx.FLOAT_CONST().getText())));
+      allInstructions.add(new FloatPseudoOp(ctx.LABEL().getText(), Float.parseFloat(ctx.FLOAT_CONST().getText())));
     } else if (ctx.GLOBAL() != null)
-      add(new GlobalPseudoOp(ctx.LABEL().getText(), Integer.parseInt(ctx.NUMBER(0).getText()),
+      allInstructions.add(new GlobalPseudoOp(ctx.LABEL().getText(), Integer.parseInt(ctx.NUMBER(0).getText()),
           Integer.parseInt(ctx.NUMBER(1).getText())));
 
     return null;
@@ -697,7 +626,7 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
     if (ctx.LABEL() != null)
       newI.setLabel(ctx.LABEL().getText());
 
-    add(newI);
+    allInstructions.add(newI);
 
     return null;
   }

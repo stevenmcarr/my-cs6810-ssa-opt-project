@@ -61,4 +61,9 @@ public class FstoreAOInstruction extends ThreeAddressIlocInstruction {
   public boolean isExpression() {
     return false;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return true;
+  }
 }

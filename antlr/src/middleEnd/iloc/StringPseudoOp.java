@@ -60,5 +60,4 @@ public class StringPseudoOp extends PseudoOpInstruction {
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
   }
-
 }

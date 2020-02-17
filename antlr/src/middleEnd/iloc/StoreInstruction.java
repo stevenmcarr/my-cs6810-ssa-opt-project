@@ -46,4 +46,9 @@ public class StoreInstruction extends TwoAddressIlocInstruction {
   public boolean isExpression() {
     return false;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return true;
+  }
 }

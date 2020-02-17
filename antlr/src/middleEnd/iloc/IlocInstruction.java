@@ -28,8 +28,6 @@ import java.util.*;
 public abstract class IlocInstruction {
   protected String label = null;
 
-  protected IlocInstruction nextInst = null;
-  protected IlocInstruction prevInst = null;
   protected BasicBlock block = null;
 
   protected VirtualRegisterOperand lValue = null; // a VirtualRegisterOperand
@@ -53,22 +51,6 @@ public abstract class IlocInstruction {
 
   public void setLabel(String label) {
     this.label = label;
-  }
-
-  public IlocInstruction getPrevInst() {
-    return prevInst;
-  }
-
-  public IlocInstruction getNextInst() {
-    return nextInst;
-  }
-
-  public void setPrevInst(IlocInstruction inst) {
-    prevInst = inst;
-  }
-
-  public void setNextInst(IlocInstruction inst) {
-    nextInst = inst;
   }
 
   public void setBlock(BasicBlock block) {
@@ -183,4 +165,6 @@ public abstract class IlocInstruction {
   public abstract void replaceOperandAtIndex(int index, Operand operand);
 
   public abstract void replaceLValue(Operand operand);
+
+  public abstract boolean isNecessary();
 }

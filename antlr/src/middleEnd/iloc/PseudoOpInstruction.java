@@ -44,4 +44,9 @@ public abstract class PseudoOpInstruction extends IlocInstruction {
   public boolean isExpression() {
     return false;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return false;
+  }
 }

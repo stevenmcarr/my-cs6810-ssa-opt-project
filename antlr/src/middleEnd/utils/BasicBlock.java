@@ -1,5 +1,6 @@
 package middleEnd.utils;
 
+import java.io.PrintWriter;
 import java.util.*;
 import middleEnd.iloc.*;
 
@@ -25,78 +26,95 @@ import middleEnd.iloc.*;
  */
 public class BasicBlock extends CfgNode {
 
-  IlocInstruction firstInst = null;
-  IlocInstruction lastInst = null;
+  LinkedList<IlocInstruction> instructions = new LinkedList<IlocInstruction>();
   List<PhiNode> phiNodes = new ArrayList<PhiNode>();
+  IlocRoutine routine = null;
 
   public BasicBlock() {
   }
 
-  public void add(IlocInstruction inst) {
-    if (firstInst == null)
-      firstInst = inst;
-    lastInst = inst;
+  public BasicBlock addRoutine(IlocRoutine rtn) {
+    routine = rtn;
+    return this;
+  }
+
+  public Iterator<IlocInstruction> iterator() {
+    return instructions.iterator();
+  }
+
+  public ListIterator<IlocInstruction> listIterator() {
+    return instructions.listIterator();
+  }
+
+  public ListIterator<IlocInstruction> reverseIterator() {
+    return instructions.listIterator(instructions.size());
+  }
+
+  public void addInstruction(IlocInstruction inst) {
+    instructions.add(inst);
     inst.setBlock(this);
   }
 
   public void insertBefore(IlocInstruction inst, IlocInstruction newInst) {
-    if (firstInst == inst)
-      firstInst = newInst;
+    routine.insertBefore(inst, newInst);
+    int index = instructions.indexOf(inst);
+    instructions.add(index, newInst);
     newInst.setBlock(this);
   }
 
   public void insertAfter(IlocInstruction inst, IlocInstruction newInst) {
-    if (lastInst == inst)
-      lastInst = newInst;
+    routine.insertAfter(inst, newInst);
+    int index = instructions.indexOf(inst);
+    instructions.add(index + 1, newInst);
     newInst.setBlock(this);
   }
 
   public void replaceInst(IlocInstruction inst, IlocInstruction newInst) {
+    routine.replace(inst, newInst);
+    int index = instructions.indexOf(inst);
+    instructions.set(index, newInst);
     inst.setBlock(null);
     newInst.setBlock(this);
+  }
 
-    if (firstInst == inst)
-      firstInst = newInst;
-
-    if (lastInst == inst)
-      lastInst = newInst;
+  public void replaceWithIterator(ListIterator<IlocInstruction> iter, IlocInstruction oldI, IlocInstruction newI) {
+    if (oldI != newI) {
+      routine.replace(oldI, newI);
+      oldI.setBlock(null);
+      newI.setBlock(this);
+      iter.set(newI);
+    }
   }
 
   public void removeInst(IlocInstruction inst) {
+    routine.remove(inst);
+    instructions.remove(inst);
     inst.setBlock(null);
+  }
 
-    if (firstInst == inst)
-      firstInst = inst.getNextInst();
-
-    if (lastInst == inst)
-      lastInst = inst.getPrevInst();
+  public void removeWithIterator(ListIterator<IlocInstruction> iter, IlocInstruction inst) {
+    iter.remove();
+    routine.remove(inst);
+    inst.setBlock(null);
   }
 
   public IlocInstruction getFirstInst() {
-    return firstInst;
+    return instructions.getFirst();
   }
 
   public IlocInstruction getLastInst() {
-    return lastInst;
-  }
-
-  public BasicBlockInstructionsIterator iterator() {
-    return new BasicBlockInstructionsIterator(this);
-  }
-
-  public BasicBlockInstructionsIterator reverseIterator() {
-    return new BasicBlockInstructionsIterator(this, true);
+    return instructions.getLast();
   }
 
   @Override
   public String getCfgNodeLabel() {
     String label = "Node " + Integer.toString(nodeId);
 
-    for (IlocInstruction inst = firstInst; inst != lastInst; inst = inst.getNextInst()) {
+    Iterator<IlocInstruction> bIter = iterator();
+    while (bIter.hasNext()) {
+      IlocInstruction inst = bIter.next();
       label += "\n" + inst.getStringRep();
     }
-    if (lastInst != null)
-      label += "\n" + lastInst.getStringRep();
 
     return label;
   }
@@ -109,4 +127,37 @@ public class BasicBlock extends CfgNode {
   public List<PhiNode> getPhiNodes() {
     return phiNodes;
   }
+
+  public IlocInstruction getNextInst(IlocInstruction instPtr) {
+    int index = instructions.indexOf(instPtr) + 1;
+    if (index >= instructions.size())
+      return null;
+    else
+      return instructions.get(index);
+  }
+
+  public IlocInstruction getPreviousInst(IlocInstruction instPtr) {
+    int index = instructions.indexOf(instPtr) - 1;
+    if (index < 0)
+      return null;
+    else
+      return instructions.get(index);
+  }
+
+  public void emitCodeWithSSA(PrintWriter pw) {
+    if (!phiNodes.isEmpty()) {
+      pw.println("\n\tPhi Nodes for Block " + nodeId);
+      for (PhiNode p : phiNodes)
+        pw.println("\t" + p.getStringRep());
+      pw.println("");
+    }
+
+    emitCode(pw);
+  }
+
+  private void emitCode(PrintWriter pw) {
+    for (IlocInstruction inst : instructions)
+      inst.emit(pw);
+  }
+
 }

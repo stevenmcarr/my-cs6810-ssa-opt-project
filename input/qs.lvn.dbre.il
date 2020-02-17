@@ -55,7 +55,6 @@
 	iread	%vr18
 	addI	%vr4, 1 => %vr19
 	i2i	%vr19  => %vr4
-	loadI	20  => %vr7
 	comp	%vr4, %vr7 => %vr8
 	testlt	%vr8  => %vr9
 	cbr	%vr9  -> .L1
@@ -81,7 +80,6 @@
 	iwrite	%vr19
 	addI	%vr4, 1 => %vr20
 	i2i	%vr20  => %vr4
-	loadI	20  => %vr7
 	comp	%vr4, %vr7 => %vr8
 	testlt	%vr8  => %vr9
 	cbr	%vr9  -> .L3
@@ -165,7 +163,6 @@
 .L10:	nop
 	iret	%vr8
 .L11:	nop
-	loadI	.float_const_0  => %vr23
 	fload	%vr23  => %vr24
 	f2i	%vr24  => %vr25
 	cbr	%vr25  -> .L5
@@ -181,7 +178,6 @@
 	addI	%vr0, -4 => %vr13
 	store	%vr11  => %vr13
 	call	quicksort, %vr4, %vr5, %vr13 
-	addI	%vr0, -4 => %vr13
 	load	%vr13  => %vr14
 	addI	%vr14, 1 => %vr16
 	addI	%vr0, -8 => %vr18

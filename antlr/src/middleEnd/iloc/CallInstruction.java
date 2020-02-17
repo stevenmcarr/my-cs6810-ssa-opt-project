@@ -28,6 +28,7 @@ public class CallInstruction extends InvocationInstruction {
   public CallInstruction(LabelOperand name, Vector<Operand> parameters) {
     operands = new Vector<Operand>();
     operands.add(name);
+    rValues.add(name);
     for (int i = 0; i < parameters.size(); i++) {
       Operand parameter = (Operand) parameters.elementAt(i);
       operands.add(parameter);

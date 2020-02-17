@@ -24,14 +24,11 @@
 	store	%vr4  => %vr15
 	addI	%vr4, 1 => %vr16
 	i2i	%vr16  => %vr4
-	loadI	10  => %vr6
 	comp	%vr4, %vr6 => %vr7
 	testle	%vr7  => %vr8
 	cbr	%vr8  -> .L1
 .L0:	nop
-	loadI	1  => %vr5
 	i2i	%vr5  => %vr4
-	loadI	10  => %vr6
 	comp	%vr4, %vr6 => %vr7
 	testgt	%vr7  => %vr8
 	cbr	%vr8  -> .L2
@@ -54,7 +51,6 @@
 .L5:	nop
 	addI	%vr4, 1 => %vr16
 	i2i	%vr16  => %vr4
-	loadI	10  => %vr6
 	comp	%vr4, %vr6 => %vr7
 	testle	%vr7  => %vr8
 	cbr	%vr8  -> .L3
