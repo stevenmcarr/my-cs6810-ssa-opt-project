@@ -1,13 +1,21 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
@@ -26,5 +34,11 @@ public class LabelOperand extends ImmediateOperand {
 
   public String toString() {
     return label;
+  }
+
+  private static int newLabelId = 0;
+
+  public static LabelOperand makeLabelOperand() {
+    return new LabelOperand("GL" + newLabelId++);
   }
 }

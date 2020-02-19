@@ -47,6 +47,6 @@ public abstract class PseudoOpInstruction extends IlocInstruction {
 
   @Override
   public boolean isNecessary() {
-    return false;
+    return true;
   }
 }

@@ -2,13 +2,24 @@ package middleEnd.dce;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Vector;
 
 import middleEnd.iloc.IlocInstruction;
+import middleEnd.iloc.JumpIInstruction;
+import middleEnd.iloc.LabelOperand;
+import middleEnd.iloc.Operand;
+import middleEnd.iloc.PhiNode;
+import middleEnd.iloc.SSAVROperand;
+import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
+import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
+import middleEnd.utils.CfgNodeSet;
+import middleEnd.utils.IlocInstructionSet;
 import middleEnd.utils.IlocRoutine;
 import middleEnd.utils.SSAOptimization;
 
@@ -18,31 +29,98 @@ public class DeadCodeElimination extends SSAOptimization {
         super(prevPassA, passA);
     }
 
-    @Override
-    protected void optimizeCode() {
-        computeSSAForm();
-        computePDT();
-        computePDF();
-        removeDeadCode();
-        computeNormalForm();
-    }
-
     private void removeDeadCode() {
         for (IlocRoutine rtn : routines) {
-            List<IlocInstruction> work = new ArrayList<IlocInstruction>();
-            List<IlocInstruction> necessary = new ArrayList<IlocInstruction>();
+            buildMaps(rtn);
+            LinkedList<IlocInstruction> work = new LinkedList<IlocInstruction>();
+            IlocInstructionSet necessary = new IlocInstructionSet(rtn.getInstructionMap());
 
             for (CfgNode n : rtn.getCfg().getNodes()) {
                 Iterator<IlocInstruction> iter = ((BasicBlock) n).iterator();
                 while (iter.hasNext()) {
                     IlocInstruction i = iter.next();
                     if (i.isNecessary()) {
-                        necessary.add(i);
+                        necessary.set(i);
                         work.add(i);
                     }
                 }
             }
+
+            while (!work.isEmpty()) {
+                IlocInstruction inst = work.removeFirst();
+                BasicBlock b = inst.getBlock();
+                CfgNodeSet cd = b.getPostDominanceFrontier();
+                for (CfgEdge e : b.getPreds()) {
+                    BasicBlock c = (BasicBlock) e.getPred();
+                    if (cd.get(c)) {
+                        IlocInstruction j = c.getLastInst();
+                        if (j.isConditionalBranchInstruction() && !necessary.get(j)) {
+                            necessary.set(j);
+                            work.add(j);
+                        }
+                    }
+                }
+                Vector<Operand> rvals = inst.getRValues();
+                for (Operand t : rvals) {
+                    if (t instanceof SSAVROperand) {
+                        IlocInstruction j = rtn.getDefinitionMap().get(t.toString());
+                        if (!necessary.get(j)) {
+                            necessary.set(j);
+                            work.add(j);
+                        }
+                    }
+                }
+            }
+
+            for (CfgNode n : rtn.getCfg().getNodes()) {
+                ListIterator<IlocInstruction> iter = ((BasicBlock) n).listIterator();
+                while (iter.hasNext()) {
+                    IlocInstruction i = iter.next();
+                    if (!necessary.get(i))
+                        if (i.isConditionalBranchInstruction())
+                            ((BasicBlock) n).replaceWithIterator(iter, i, changeBranchToIPdom(i));
+                        else
+                            ((BasicBlock) n).removeWithIterator(iter, i);
+                }
+            }
         }
+    }
+
+    private void buildMaps(IlocRoutine rtn) {
+        HashMap<Integer, IlocInstruction> instMap = new HashMap<Integer, IlocInstruction>();
+        HashMap<String, IlocInstruction> definitionMap = new HashMap<String, IlocInstruction>();
+        for (PhiNode p : ((BasicBlock) rtn.getCfg().getEntryNode()).getPhiNodes())
+            instMap.put(p.getInstId(), p);
+        for (BasicBlock b : rtn.getBasicBlocks()) {
+            for (PhiNode p : b.getPhiNodes())
+                instMap.put(p.getInstId(), p);
+            Iterator<IlocInstruction> iter = b.iterator();
+            while (iter.hasNext()) {
+                IlocInstruction inst = iter.next();
+                instMap.put(inst.getInstId(), inst);
+                for (VirtualRegisterOperand op : inst.getAllLValues())
+                    if (op instanceof SSAVROperand)
+                        definitionMap.put(op.toString(), inst);
+            }
+        }
+
+        rtn.setDefintionMap(definitionMap);
+        rtn.setInstructionMap(instMap);
+    }
+
+    private IlocInstruction changeBranchToIPdom(IlocInstruction i) {
+        BasicBlock ipdom = (BasicBlock) i.getBlock().getImmediatePostDominator();
+        IlocInstruction first = ipdom.getFirstInst();
+        String label = first.getLabel();
+        LabelOperand labelOp = null;
+        if (label == null) {
+            labelOp = LabelOperand.makeLabelOperand();
+            first.setLabel(labelOp.getLabel());
+        } else
+            labelOp = new LabelOperand(label);
+        IlocInstruction inst = new JumpIInstruction(labelOp);
+
+        return inst;
     }
 
     private void computePDF() {
@@ -60,7 +138,8 @@ public class DeadCodeElimination extends SSAOptimization {
                 rtn.getCfg().emitPDF(pw);
             }
         }
-        pw.close();
+        if (driver.CodeGenerator.emitPDF)
+            pw.close();
     }
 
     private void computePDT() {
@@ -78,7 +157,20 @@ public class DeadCodeElimination extends SSAOptimization {
                 rtn.getCfg().emitPDT(pw);
             }
         }
-        pw.close();
+        if (driver.CodeGenerator.emitPDT)
+            pw.close();
+    }
+
+    @Override
+    protected void performSSAOptimization() {
+        computePDT();
+        computePDF();
+        buildInstructionMap();
+        removeDeadCode();
+
+    }
+
+    private void buildInstructionMap() {
     }
 
 }

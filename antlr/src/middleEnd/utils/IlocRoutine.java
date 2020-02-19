@@ -34,6 +34,8 @@ public class IlocRoutine {
   private Vector<BasicBlock> basicBlocks = new Vector<BasicBlock>();
   private Cfg cfg;
   private HashMap<String, IlocInstruction> labelMap = null;
+  private HashMap<String, IlocInstruction> definitionMap = null;
+  private HashMap<Integer, IlocInstruction> instMap = null;
 
   public IlocRoutine() {
   }
@@ -92,6 +94,14 @@ public class IlocRoutine {
 
   public void setLabelMap(HashMap<String, IlocInstruction> lm) {
     labelMap = lm;
+  }
+
+  public void setDefintionMap(HashMap<String, IlocInstruction> dm) {
+    definitionMap = dm;
+  }
+
+  public HashMap<String, IlocInstruction> getDefinitionMap() {
+    return definitionMap;
   }
 
   public Vector<BasicBlock> getBasicBlocks() {
@@ -189,5 +199,13 @@ public class IlocRoutine {
   public void emitCodeWithSSA(PrintWriter pw) {
     for (BasicBlock b : basicBlocks)
       b.emitCodeWithSSA(pw);
+  }
+
+  public void setInstructionMap(HashMap<Integer, IlocInstruction> instMap) {
+    this.instMap = instMap;
+  }
+
+  public HashMap<Integer, IlocInstruction> getInstructionMap() {
+    return instMap;
   }
 }

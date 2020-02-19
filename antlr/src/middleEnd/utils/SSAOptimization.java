@@ -57,13 +57,15 @@ public abstract class SSAOptimization extends OptimizationPass {
         for (CfgNode n : cfg.getNodes()) {
             BasicBlock b = (BasicBlock) n;
             Iterator<IlocInstruction> bIter = b.iterator();
-            while (bIter.hasNext()) {
+            boolean done = false;
+            while (!done && bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
-                VirtualRegisterOperand lval = inst.getLValue();
-                if (lval != null && lval.getRegisterId() == i) {
-                    s_v.set(n);
-                    break;
-                }
+                for (VirtualRegisterOperand lval : inst.getAllLValues())
+                    if (lval != null && lval.getRegisterId() == i) {
+                        s_v.set(n);
+                        done = true;
+                        break;
+                    }
             }
         }
         return s_v;
@@ -172,17 +174,17 @@ public abstract class SSAOptimization extends OptimizationPass {
 
             SSAVROperand svr = null;
             if (inst.isExpression() && ((svr = availTabStack.get(inst.getSSAAvailKey())) != null)) {
-                VirtualRegisterOperand t = inst.getLValue();
-                getNameStackList(t).push(svr);
+                for (VirtualRegisterOperand t : inst.getAllLValues())
+                    getNameStackList(t).push(svr);
                 dead.add(inst);
             } else {
-                VirtualRegisterOperand t = inst.getLValue();
-                if (t != null) {
-                    int index = t.getRegisterId();
-                    SSAVROperand tn = newName(index);
-                    getNameStackList(t).push(tn);
-                    availTabStack.put(inst.getSSAAvailKey(), tn);
-                }
+                for (VirtualRegisterOperand t : inst.getAllLValues())
+                    if (t != null) {
+                        int index = t.getRegisterId();
+                        SSAVROperand tn = newName(index);
+                        getNameStackList(t).push(tn);
+                        availTabStack.put(inst.getSSAAvailKey(), tn);
+                    }
             }
 
         }
@@ -204,13 +206,16 @@ public abstract class SSAOptimization extends OptimizationPass {
         ListIterator<IlocInstruction> rIter = b.reverseIterator();
         while (rIter.hasPrevious()) {
             IlocInstruction inst = rIter.previous();
-            VirtualRegisterOperand vr = inst.getLValue();
-            if (vr != null) {
-                SSAVROperand x = getNameStackList(vr).pop().copy();
-                if (dead.contains(inst)) {
-                    b.removeWithIterator(rIter, inst);
-                } else
-                    inst.replaceLValue(x);
+            int j = 0;
+            for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                if (vr != null) {
+                    SSAVROperand x = getNameStackList(vr).pop().copy();
+                    if (dead.contains(inst)) {
+                        b.removeWithIterator(rIter, inst);
+                    } else
+                        inst.replaceLValue(x, j);
+                }
+                j++;
             }
         }
 
@@ -250,10 +255,13 @@ public abstract class SSAOptimization extends OptimizationPass {
                     }
                 }
 
-                VirtualRegisterOperand lval = inst.getLValue();
-                if (lval != null && lval instanceof SSAVROperand) {
-                    VirtualRegisterOperand vr = new VirtualRegisterOperand(((SSAVROperand) lval).getRegisterId());
-                    inst.replaceLValue(vr);
+                int j = 0;
+                for (VirtualRegisterOperand lval : inst.getAllLValues()) {
+                    if (lval != null && lval instanceof SSAVROperand) {
+                        VirtualRegisterOperand vr = new VirtualRegisterOperand(((SSAVROperand) lval).getRegisterId());
+                        inst.replaceLValue(vr, j);
+                    }
+                    j++;
                 }
             }
         }
@@ -319,7 +327,9 @@ public abstract class SSAOptimization extends OptimizationPass {
             }
 
             insertPhiNodes(ir.getCfg());
+
             rename(ir.getCfg());
+
             if (driver.CodeGenerator.emitSSA) {
                 try {
                     pw = new PrintWriter(inputFileName + ".ssa");
@@ -401,5 +411,16 @@ public abstract class SSAOptimization extends OptimizationPass {
 
         pw.println("");
     }
+
+    @Override
+    protected void optimizeCode() {
+
+        computeSSAForm();
+        performSSAOptimization();
+        computeNormalForm();
+
+    }
+
+    protected abstract void performSSAOptimization();
 
 }

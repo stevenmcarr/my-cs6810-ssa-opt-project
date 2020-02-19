@@ -26,12 +26,26 @@ import java.util.*;
  * @version 1.0
  */
 public abstract class IlocInstruction {
+
+  private static int numInst = 0;
+
   protected String label = null;
 
   protected BasicBlock block = null;
 
   protected VirtualRegisterOperand lValue = null; // a VirtualRegisterOperand
+  protected Vector<VirtualRegisterOperand> lValues = null;
   protected Vector<Operand> rValues = new Vector<Operand>(); // only VirtualRegisterOperands
+
+  protected int instId;
+
+  public IlocInstruction() {
+    instId = numInst++;
+  }
+
+  public int getInstId() {
+    return instId;
+  }
 
   public abstract String getOpcode();
 
@@ -156,6 +170,26 @@ public abstract class IlocInstruction {
       return null;
   }
 
+  public void setBranchTargetLabel(LabelOperand target) {
+    if (this instanceof JumpIInstruction)
+      ((JumpIInstruction) this).setTargetLabel(target);
+    else if (this instanceof JumpInstruction)
+      ((JumpInstruction) this).setTargetLabel(target);
+    else if (this instanceof CbrInstruction)
+      ((CbrInstruction) this).setTargetLabel(target);
+    else if (this instanceof CbrneInstruction)
+      ((CbrneInstruction) this).setTargetLabel(target);
+  }
+
+  public Vector<VirtualRegisterOperand> getAllLValues() {
+    if (lValues == null) {
+      lValues = new Vector<VirtualRegisterOperand>();
+      lValues.add(lValue);
+    }
+
+    return lValues;
+  }
+
   public abstract boolean isExpression();
 
   public abstract boolean operandIsLValue(Operand operand);
@@ -165,6 +199,12 @@ public abstract class IlocInstruction {
   public abstract void replaceOperandAtIndex(int index, Operand operand);
 
   public abstract void replaceLValue(Operand operand);
+
+  public void replaceLValue(Operand op, int index) {
+    if (lValues != null)
+      lValues.set(0, (VirtualRegisterOperand) op);
+    replaceLValue(op);
+  }
 
   public abstract boolean isNecessary();
 }

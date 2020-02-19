@@ -165,4 +165,12 @@ public class CfgNode {
         return whichPred;
     }
 
+    public CfgNode getImmediateDominator() {
+        return idom.getPred();
+    }
+
+    public CfgNode getImmediatePostDominator() {
+        return ipdom.getPred();
+    }
+
 }

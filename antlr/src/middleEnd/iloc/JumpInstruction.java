@@ -30,6 +30,10 @@ public class JumpInstruction extends OneAddressIlocInstruction {
     return ((LabelOperand) source).getLabel();
   }
 
+  public void setTargetLabel(LabelOperand target) {
+    source = target;
+  }
+
   /**
    * getOpcode
    *

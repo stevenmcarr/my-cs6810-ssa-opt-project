@@ -35,6 +35,10 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
     return ((LabelOperand) dest).getLabel();
   }
 
+  public void setTargetLabel(LabelOperand target) {
+    dest = target;
+  }
+
   public String getStringRep() {
     String rep = "";
     if (label != null)
@@ -70,6 +74,11 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
 
   @Override
   public boolean isExpression() {
+    return false;
+  }
+
+  @Override
+  public boolean isNecessary() {
     return false;
   }
 }

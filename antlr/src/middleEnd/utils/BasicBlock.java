@@ -87,15 +87,27 @@ public class BasicBlock extends CfgNode {
   }
 
   public void removeInst(IlocInstruction inst) {
-    routine.remove(inst);
-    instructions.remove(inst);
-    inst.setBlock(null);
+    if (inst.getLabel() != null) {
+      IlocInstruction newI = new NopInstruction();
+      newI.setLabel(inst.getLabel());
+      replaceInst(inst, newI);
+    } else {
+      routine.remove(inst);
+      instructions.remove(inst);
+      inst.setBlock(null);
+    }
   }
 
   public void removeWithIterator(ListIterator<IlocInstruction> iter, IlocInstruction inst) {
-    iter.remove();
-    routine.remove(inst);
-    inst.setBlock(null);
+    if (inst.getLabel() != null) {
+      IlocInstruction newI = new NopInstruction();
+      newI.setLabel(inst.getLabel());
+      replaceWithIterator(iter, inst, newI);
+    } else {
+      iter.remove();
+      routine.remove(inst);
+      inst.setBlock(null);
+    }
   }
 
   public IlocInstruction getFirstInst() {
@@ -158,6 +170,15 @@ public class BasicBlock extends CfgNode {
   private void emitCode(PrintWriter pw) {
     for (IlocInstruction inst : instructions)
       inst.emit(pw);
+  }
+
+  public void removeAllInstructions() {
+    ListIterator<IlocInstruction> iter = listIterator();
+    while (iter.hasNext()) {
+      IlocInstruction inst = iter.next();
+      inst.setLabel(null);
+      removeWithIterator(iter, inst);
+    }
   }
 
 }
