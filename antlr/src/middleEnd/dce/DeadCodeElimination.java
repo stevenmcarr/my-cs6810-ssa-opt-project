@@ -89,11 +89,15 @@ public class DeadCodeElimination extends SSAOptimization {
     private void buildMaps(IlocRoutine rtn) {
         HashMap<Integer, IlocInstruction> instMap = new HashMap<Integer, IlocInstruction>();
         HashMap<String, IlocInstruction> definitionMap = new HashMap<String, IlocInstruction>();
-        for (PhiNode p : ((BasicBlock) rtn.getCfg().getEntryNode()).getPhiNodes())
+        for (PhiNode p : ((BasicBlock) rtn.getCfg().getEntryNode()).getPhiNodes()) {
             instMap.put(p.getInstId(), p);
+            definitionMap.put(p.getLValue().toString(), p);
+        }
         for (BasicBlock b : rtn.getBasicBlocks()) {
-            for (PhiNode p : b.getPhiNodes())
+            for (PhiNode p : b.getPhiNodes()) {
                 instMap.put(p.getInstId(), p);
+                definitionMap.put(p.getLValue().toString(), p);
+            }
             Iterator<IlocInstruction> iter = b.iterator();
             while (iter.hasNext()) {
                 IlocInstruction inst = iter.next();
@@ -165,12 +169,7 @@ public class DeadCodeElimination extends SSAOptimization {
     protected void performSSAOptimization() {
         computePDT();
         computePDF();
-        buildInstructionMap();
         removeDeadCode();
-
-    }
-
-    private void buildInstructionMap() {
     }
 
 }

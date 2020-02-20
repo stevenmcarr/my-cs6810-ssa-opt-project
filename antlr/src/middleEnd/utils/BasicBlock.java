@@ -133,6 +133,7 @@ public class BasicBlock extends CfgNode {
 
   public BasicBlock addPhiNode(PhiNode n) {
     phiNodes.add(n);
+    n.setBlock(this);
     return this;
   }
 
