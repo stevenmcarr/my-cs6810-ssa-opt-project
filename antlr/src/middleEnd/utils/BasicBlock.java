@@ -181,4 +181,8 @@ public class BasicBlock extends CfgNode {
     }
   }
 
+  public int size() {
+    return instructions.size();
+  }
+
 }

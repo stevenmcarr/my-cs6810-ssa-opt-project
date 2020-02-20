@@ -31,8 +31,7 @@ public class LocalValueNumbering extends OptimizationPass {
   private IlocRoutine currentRoutine = null;
 
   public LocalValueNumbering(String prevPassA, String passA) {
-    prevPassAbbrev = prevPassA;
-    passAbbrev = passA;
+    super(prevPassA, passA);
   }
 
   @Override

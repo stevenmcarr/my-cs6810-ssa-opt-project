@@ -196,6 +196,14 @@ public class IlocRoutine {
     return instructions.get(index);
   }
 
+  public IlocInstruction getNextInstruction(IlocInstruction inst) {
+    int index = getInstructionIndex(inst);
+    if (index < 0 || index >= instructions.size() - 1)
+      return null;
+    else
+      return instructions.get(index + 1);
+  }
+
   public void emitCodeWithSSA(PrintWriter pw) {
     for (BasicBlock b : basicBlocks)
       b.emitCodeWithSSA(pw);

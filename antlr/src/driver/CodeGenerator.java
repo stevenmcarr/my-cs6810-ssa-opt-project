@@ -5,10 +5,10 @@ package driver;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedList;
 
-import middleEnd.dbre.DominatorBasedRedundancyElimination;
-import middleEnd.dce.DeadCodeElimination;
-import middleEnd.lvn.LocalValueNumbering;
 import middleEnd.utils.OptimizationPass;
 
 /**
@@ -16,6 +16,28 @@ import middleEnd.utils.OptimizationPass;
  *
  */
 public class CodeGenerator {
+	private static LinkedList<String> passFlags = new LinkedList<String>();
+	private static LinkedList<String> passClassName = new LinkedList<String>();
+
+	private static void registerOptimizationPass(String flag, String className) {
+		passFlags.add(flag);
+		passClassName.add(className);
+	}
+
+	private static void generateOptimizationPasses() {
+		CodeGenerator.registerOptimizationPass("-lvn", "middleEnd.lvn.LocalValueNumbering");
+		CodeGenerator.registerOptimizationPass("-dbre", "middleEnd.dbre.DominatorBasedRedundancyElimination");
+		CodeGenerator.registerOptimizationPass("-dce", "middleEnd.dce.DeadCodeElimination");
+		CodeGenerator.registerOptimizationPass("-ruc", "middleEnd.dce.RemoveUnreachableCode");
+	}
+
+	private static String getPassClassName(String flag) {
+		int index = passFlags.indexOf(flag);
+		if (index >= 0)
+			return passClassName.get(index);
+		else
+			return null;
+	}
 
 	public static boolean emitCfg = false;
 	public static boolean emitDT = false;
@@ -30,20 +52,51 @@ public class CodeGenerator {
 	 * @throws FileNotFoundException
 	 */
 	public static void main(String args[]) throws FileNotFoundException, IOException {
+		generateOptimizationPasses();
 		int numargs = args.length;
 		OptimizationPass pass = null;
 		String prevPass = "";
 
 		for (int i = 0; i < numargs - 1; i++) {
-			if (args[i].equals("-lvn")) {
-				pass = new LocalValueNumbering(prevPass, "lvn");
-				prevPass = "lvn";
-			} else if (args[i].equals("-dbre")) {
-				pass = new DominatorBasedRedundancyElimination(prevPass, "dbre");
-				prevPass = "dbre";
-			} else if (args[i].equals("-dce")) {
-				pass = new DeadCodeElimination(prevPass, "dce");
-				prevPass = "dce";
+			String passName = getPassClassName(args[i]);
+			if (passName != null) {
+				Class<OptimizationPass> cl = null;
+				String passString = null;
+				try {
+					cl = (Class<OptimizationPass>) Class.forName(passName);
+					Constructor<OptimizationPass> con = cl.getConstructor(String.class, String.class);
+					passString = args[i].substring(1, args[i].length());
+					pass = (OptimizationPass) con.newInstance(prevPass, passString);
+				} catch (ClassNotFoundException e) {
+					System.err.println("Option " + args[i] + " not supported.");
+					continue;
+				} catch (NoSuchMethodException | SecurityException e) {
+					System.err.println("Option " + args[i] + " not supported.");
+					continue;
+				} catch (InstantiationException e) {
+					System.err.println("Option " + args[i] + " not supported.");
+					continue;
+				} catch (IllegalAccessException e) {
+					System.err.println("Option " + args[i] + " not supported.");
+					continue;
+				} catch (IllegalArgumentException e) {
+					System.err.println("Option " + args[i] + " not supported.");
+					continue;
+				} catch (InvocationTargetException e) {
+					System.err.println("Option " + args[i] + " not supported.");
+					continue;
+				}
+				prevPass = passString;
+				// }
+				// if (args[i].equals("-lvn")) {
+				// pass = new LocalValueNumbering(prevPass, "lvn");
+				// prevPass = "lvn";
+				// } else if (args[i].equals("-dbre")) {
+				// pass = new DominatorBasedRedundancyElimination(prevPass, "dbre");
+				// prevPass = "dbre";
+				// } else if (args[i].equals("-dce")) {
+				// pass = new DeadCodeElimination(prevPass, "dce");
+				// prevPass = "dce";
 			} else if (args[i].equals("-cfg")) {
 				emitCfg = true;
 				continue;

@@ -47,6 +47,11 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
 
   protected Hashtable<String, Integer> typeHash = new Hashtable<String, Integer>();
 
+  public OptimizationPass(String prevPassA, String passA) {
+    prevPassAbbrev = prevPassA;
+    passAbbrev = passA;
+  }
+
   public void emitCode(PrintWriter pw) {
     for (IlocRoutine rtn : routines)
       rtn.emitCode(pw);

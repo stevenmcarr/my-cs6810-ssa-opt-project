@@ -1,7 +1,5 @@
 package middleEnd.utils;
 
-import middleEnd.utils.VirtualRegisterSet;
-
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -18,13 +16,6 @@ import middleEnd.iloc.Operand;
 import middleEnd.iloc.PhiNode;
 import middleEnd.iloc.SSAVROperand;
 import middleEnd.iloc.VirtualRegisterOperand;
-import middleEnd.utils.BasicBlock;
-import middleEnd.utils.Cfg;
-import middleEnd.utils.CfgEdge;
-import middleEnd.utils.CfgNode;
-import middleEnd.utils.CfgNodeSet;
-import middleEnd.utils.DominatorTreeEdge;
-import middleEnd.utils.IlocRoutine;
 
 public abstract class SSAOptimization extends OptimizationPass {
     private HashMap<String, CfgNodeSet> iteratedDFMap = null;
@@ -37,8 +28,7 @@ public abstract class SSAOptimization extends OptimizationPass {
     private VirtualRegisterSet variables;
 
     public SSAOptimization(String prevPassA, String passA) {
-        prevPassAbbrev = prevPassA;
-        passAbbrev = passA;
+        super(prevPassA, passA);
     }
 
     public void emitCode(PrintWriter pw) {
