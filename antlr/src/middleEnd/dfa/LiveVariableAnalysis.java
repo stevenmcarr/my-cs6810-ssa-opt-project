@@ -1,5 +1,6 @@
 package middleEnd.dfa;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -11,7 +12,6 @@ import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.BasicBlock;
 import middleEnd.utils.BasicBlockDFMap;
-import middleEnd.utils.BasicBlockInstructionsIterator;
 import middleEnd.utils.VirtualRegisterSet;
 
 public class LiveVariableAnalysis extends IterativeFramework {
@@ -36,7 +36,7 @@ public class LiveVariableAnalysis extends IterativeFramework {
             VirtualRegisterSet out = emptySet.clone();
             VirtualRegisterSet gen = emptySet.clone();
             VirtualRegisterSet prsv = universe.clone();
-            BasicBlockInstructionsIterator bIter = b.iterator();
+            Iterator<IlocInstruction> bIter = b.iterator();
             while (bIter.hasNext()) {
                 IlocInstruction inst = bIter.next();
                 Vector<Operand> rv = inst.getRValues();

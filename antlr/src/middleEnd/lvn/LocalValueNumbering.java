@@ -28,10 +28,10 @@ import middleEnd.utils.*;
 public class LocalValueNumbering extends OptimizationPass {
 
   private int nextValueNumber;
+  private IlocRoutine currentRoutine = null;
 
   public LocalValueNumbering(String prevPassA, String passA) {
-    prevPassAbbrev = prevPassA;
-    passAbbrev = passA;
+    super(prevPassA, passA);
   }
 
   @Override
@@ -40,10 +40,11 @@ public class LocalValueNumbering extends OptimizationPass {
     BitSet liveVariables = new BitSet();
 
     for (int i = 0; i < routines.size(); i++) {
-      IlocRoutine routine = (IlocRoutine) routines.elementAt(i);
+      currentRoutine = (IlocRoutine) routines.elementAt(i);
+      currentRoutine.buildBasicBlocks();
       liveVariables.clear();
-      buildLiveVariableRegisterSet(routine, liveVariables);
-      Vector<BasicBlock> blocks = routine.getBasicBlocks();
+      buildLiveVariableRegisterSet(currentRoutine, liveVariables);
+      Vector<BasicBlock> blocks = currentRoutine.getBasicBlocks();
       for (int j = 0; j < blocks.size(); j++) {
         BasicBlock block = (BasicBlock) blocks.elementAt(j);
         valueNumber(block);
@@ -56,17 +57,16 @@ public class LocalValueNumbering extends OptimizationPass {
     Vector<BasicBlock> blocks = routine.getBasicBlocks();
     for (int j = 0; j < blocks.size(); j++) {
       BasicBlock block = (BasicBlock) blocks.elementAt(j);
-      IlocInstruction inst = block.getFirstInst();
-      IlocInstruction endInst = block.getLastInst().getNextInst();
-
+      Iterator<IlocInstruction> iter = block.iterator();
       /**
        * Go through list of instructions. Assume target of all copy instructions will
        * be a variable register. This is conservative.
        */
-      while (inst != endInst) {
+      while (iter.hasNext()) {
+        IlocInstruction inst = iter.next();
+
         if (inst instanceof I2iInstruction || inst instanceof F2fInstruction)
           live.set(inst.getLValue().getRegisterId());
-        inst = inst.getNextInst();
       }
     }
 
@@ -78,14 +78,17 @@ public class LocalValueNumbering extends OptimizationPass {
     Hashtable<String, ValueTableEntry> loadTable = new Hashtable<String, ValueTableEntry>();
     nextValueNumber = 0;
 
-    IlocInstruction inst = block.getFirstInst();
-    IlocInstruction endInst = block.getLastInst().getNextInst();
+    ListIterator<IlocInstruction> iter = block.listIterator();
 
-    while (inst != endInst) {
-      IlocInstruction nextInst = inst.getNextInst();
+    while (iter.hasNext()) {
+      IlocInstruction inst = iter.next();
       Vector<Integer> opValueNums = getValueNumbers(valueTable, inst.getRValues());
-      inst = performConstantPropagation(valueTable, constantTable, inst, opValueNums);
-      inst = checkIdentity(valueTable, inst, opValueNums);
+      IlocInstruction newInst = performConstantPropagation(valueTable, constantTable, inst, opValueNums);
+      block.replaceWithIterator(iter, inst, newInst);
+      inst = newInst;
+      newInst = checkIdentity(valueTable, inst, opValueNums);
+      block.replaceWithIterator(iter, inst, newInst);
+      inst = newInst;
       inst.updateCommutative(opValueNums);
       String hashKey = inst.getHashKey(opValueNums);
       RegisterValueTableEntry valueEntry = (RegisterValueTableEntry) valueTable.get(hashKey);
@@ -93,17 +96,18 @@ public class LocalValueNumbering extends OptimizationPass {
       //
       // Do not optimize load, store and call instructions
       //
+
       if (valueEntry != null && !(inst instanceof InvocationInstruction) && !inst.isMemoryStoreInstruction()) {
         if (inst.getLValue().getRegisterId() == valueEntry.getVirtualRegister())
-          removeInst(inst);
+          block.removeWithIterator(iter, inst);
         else {
           VirtualRegisterOperand lValue = inst.getLValue();
-          IlocInstruction newInst;
           if (lValue.getType() == Operand.INTEGER_TYPE)
             newInst = new I2iInstruction(new VirtualRegisterOperand(valueEntry.getVirtualRegister()), lValue.copy());
           else
             newInst = new F2fInstruction(new VirtualRegisterOperand(valueEntry.getVirtualRegister()), lValue.copy());
-          replaceInst(inst, newInst);
+          block.replaceWithIterator(iter, inst, newInst);
+          inst = newInst;
           valueTable.put(inst.getLValue().toString(), valueEntry.copy());
         }
       } else {
@@ -133,7 +137,6 @@ public class LocalValueNumbering extends OptimizationPass {
         }
       }
 
-      inst = nextInst;
     }
   }
 
@@ -191,7 +194,6 @@ public class LocalValueNumbering extends OptimizationPass {
     if (allConstant) {
       IlocInstruction newInst = inst.constantFold(constVals);
       if (newInst != null) {
-        replaceInst(inst, newInst);
         returnInst = newInst;
         Vector<Integer> newValueNums = getValueNumbers(valueTable, newInst.getRValues());
         valueNumbers.removeAllElements();
@@ -202,7 +204,6 @@ public class LocalValueNumbering extends OptimizationPass {
       IlocInstruction newInst = inst.constantPropagate(constVals);
 
       if (newInst != null) {
-        replaceInst(inst, newInst);
         returnInst = newInst;
       }
     }
@@ -216,7 +217,6 @@ public class LocalValueNumbering extends OptimizationPass {
     if (identityInst == null)
       return inst;
     else {
-      replaceInst(inst, identityInst);
       Vector<Integer> newValueNums = getValueNumbers(valueTable, identityInst.getRValues());
       valueNumbers.removeAllElements();
       valueNumbers.addAll(newValueNums);
@@ -232,13 +232,10 @@ public class LocalValueNumbering extends OptimizationPass {
   }
 
   private void removeDeadCode(BasicBlock block, BitSet liveVariables) {
-    IlocInstruction inst = block.getLastInst();
-    IlocInstruction endInst = block.getFirstInst().getPrevInst();
-
+    ListIterator<IlocInstruction> iter = block.reverseIterator();
     BitSet live = (BitSet) liveVariables.clone();
-
-    while (inst != endInst) {
-      IlocInstruction prevInst = inst.getPrevInst();
+    while (iter.hasPrevious()) {
+      IlocInstruction inst = iter.previous();
       VirtualRegisterOperand lValue = inst.getLValue();
 
       if (lValue == null)
@@ -246,9 +243,8 @@ public class LocalValueNumbering extends OptimizationPass {
       else if (live.get(lValue.getRegisterId())) {
         live.clear(lValue.getRegisterId());
         updateLiveSet(live, inst.getRValues());
-      } else
-        removeInst(inst);
-      inst = prevInst;
+      } else if (!(inst instanceof PseudoOpInstruction))
+        block.removeWithIterator(iter, inst);
     }
   }
 

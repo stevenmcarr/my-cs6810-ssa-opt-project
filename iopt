@@ -1,2 +1,0 @@
-#!/bin/bash
-java -jar antlr/ssa.jar $1

@@ -44,4 +44,9 @@ public class FretInstruction extends OneAddressIlocInstruction {
   public boolean isExpression() {
     return false;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return true;
+  }
 }

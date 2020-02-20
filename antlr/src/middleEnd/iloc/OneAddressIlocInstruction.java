@@ -61,4 +61,9 @@ public abstract class OneAddressIlocInstruction extends IlocInstruction {
 
   public void replaceLValue(Operand operand) {
   }
+
+  @Override
+  public boolean isNecessary() {
+    return false;
+  }
 }

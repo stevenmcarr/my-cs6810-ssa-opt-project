@@ -15,6 +15,7 @@ public class Cfg {
     private List<CfgNode> postOrder;
     private int maxIndex = 0;
     private HashMap<Integer, CfgNode> nodeMap = new HashMap<Integer, CfgNode>();
+    private HashMap<Integer, CfgNode> nodeMapPost = new HashMap<Integer, CfgNode>();
 
     public Cfg() {
         nodes = new LinkedList<CfgNode>();
@@ -155,6 +156,61 @@ public class Cfg {
         }
     }
 
+    public void buildPDT() {
+
+        for (CfgNode n : postOrder)
+            nodeMapPost.put(n.getNodeId(), n);
+
+        List<CfgNode> work = new ArrayList<CfgNode>(postOrder);
+        work.remove(exitNode);
+
+        exitNode.getPostDominators().setNodeMap(nodeMapPost);
+        exitNode.getPostDominators().set(exitNode);
+
+        for (CfgNode n : work) {
+            CfgNodeSet pds = n.getPostDominators();
+            pds.setNodeMap(nodeMapPost);
+            pds.setAll();
+        }
+
+        boolean changed;
+        do {
+            changed = false;
+            for (CfgNode n : work) {
+                CfgNodeSet pds = n.getPostDominators();
+                CfgNodeSet temp = new CfgNodeSet(pds);
+                temp.setAll();
+                for (CfgEdge e : n.getSuccs()) {
+                    CfgNode s = e.getSucc();
+                    temp.and(s.getPostDominators());
+                }
+                temp.set(n);
+                if (!pds.equals(temp)) {
+                    changed = true;
+                    n.setPostDominators(temp);
+                }
+            }
+
+        } while (changed);
+
+        exitNode.setImmediatePostDominator(null);
+        for (CfgNode n : work) {
+            CfgNodeSet pds = new CfgNodeSet(n.getPostDominators());
+            pds.clear(n);
+            int minIndex = pds.nextSetBit(0);
+            CfgNode ipdom = pds.getCfgNode(minIndex);
+
+            for (int i = pds.previousSetBit(minIndex); i >= 0; i = pds.nextSetBit(i + 1)) {
+                CfgNode next = pds.getCfgNode(i);
+                if (next.getPostDominators().cardinality() > ipdom.getPostDominators().cardinality()) {
+                    ipdom = next;
+                }
+            }
+
+            n.setImmediatePostDominator(ipdom);
+        }
+    }
+
     private void buildDFForNode(CfgNode n) {
         n.getDominanceFrontier().setNodeMap(nodeMap);
         for (DominatorTreeEdge e : n.getDTChildren()) {
@@ -187,6 +243,38 @@ public class Cfg {
         walkPostOrderDTToBuildDF(entryNode);
     }
 
+    private void buildPDFForNode(CfgNode n) {
+        n.getPostDominanceFrontier().setNodeMap(nodeMapPost);
+        for (DominatorTreeEdge e : n.getPDTChildren()) {
+            CfgNode c = e.getSucc();
+            CfgNodeSet pdf = c.getPostDominanceFrontier();
+            for (int i = pdf.nextSetBit(0); i >= 0; i = pdf.nextSetBit(i + 1)) {
+                CfgNode m = pdf.getCfgNode(i);
+                if (!n.strictlyPostDominates(m))
+                    n.getPostDominanceFrontier().set(m);
+            }
+        }
+        for (CfgEdge e : n.getPreds()) {
+            CfgNode m = e.getPred();
+            if (!n.strictlyPostDominates(m))
+                n.getPostDominanceFrontier().set(m);
+        }
+    }
+
+    private void walkPostOrderPDTToBuildPDF(CfgNode n) {
+        for (DominatorTreeEdge e : n.getPDTChildren()) {
+            CfgNode c = e.getSucc();
+            walkPostOrderPDTToBuildPDF(c);
+        }
+        buildPDFForNode(n);
+    }
+
+    public void buildPDF() {
+        for (CfgNode n : nodes)
+            n.clearMarked();
+        walkPostOrderPDTToBuildPDF(exitNode);
+    }
+
     public void emitCfg(PrintWriter pw) {
 
         pw.println("digraph cfg {");
@@ -217,6 +305,21 @@ public class Cfg {
 
     }
 
+    public void emitPDT(PrintWriter pw) {
+
+        pw.println("digraph pdt {");
+
+        for (CfgNode n : nodes) {
+            pw.println(n.getNodeId() + " [shape = square]");
+            for (DominatorTreeEdge e : n.getPDTChildren()) {
+                pw.println(e.getPred().getNodeId() + "->" + e.getSucc().getNodeId());
+            }
+        }
+
+        pw.println("}");
+
+    }
+
     public void emitDF(PrintWriter pw) {
         pw.println("Dominance Frontiers");
         pw.println("-------------------");
@@ -226,6 +329,13 @@ public class Cfg {
         pw.println("");
     }
 
-    public void insertPhiNode() {
+    public void emitPDF(PrintWriter pw) {
+        pw.println("Post Dominance Frontiers");
+        pw.println("------------------------");
+        for (CfgNode n : nodes) {
+            pw.println("Node " + n.getNodeId() + ": " + n.getPostDominanceFrontier().toString());
+        }
+        pw.println("");
     }
+
 }

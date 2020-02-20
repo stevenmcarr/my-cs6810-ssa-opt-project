@@ -99,4 +99,8 @@ public class Comment extends IlocInstruction {
 		return false;
 	}
 
+	@Override
+	public boolean isNecessary() {
+		return false;
+	}
 }

@@ -57,4 +57,9 @@ public class StoreAIInstruction extends ThreeAddressIlocInstruction {
   public boolean isExpression() {
     return false;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return true;
+  }
 }

@@ -40,4 +40,9 @@ public class HaltInstruction extends NoAddressIlocInstruction {
 		return false;
 	}
 
+	@Override
+	public boolean isNecessary() {
+		return true;
+	}
+
 }

@@ -43,4 +43,8 @@ public abstract class InvocationInstruction extends VariableAddressIlocInstructi
   public boolean isExpression() {
     return false;
   }
+
+  public boolean isNecessary() {
+    return true;
+  }
 }

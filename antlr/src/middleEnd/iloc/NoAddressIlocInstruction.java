@@ -53,4 +53,9 @@ public abstract class NoAddressIlocInstruction extends IlocInstruction {
   public boolean isExpression() {
     return false;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return false;
+  }
 }

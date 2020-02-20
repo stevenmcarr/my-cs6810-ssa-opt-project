@@ -1,0 +1,5 @@
+#!/bin/bash
+./iopt -lvn $1.il
+./iopt -dbre $1.lvn.il
+./iopt -dce $1.lvn.dbre.il
+./iopt -ruc $1.lvn.dbre.dce.il

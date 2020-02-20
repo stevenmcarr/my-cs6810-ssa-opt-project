@@ -31,10 +31,13 @@ public class FramePseudoOp extends PseudoOpInstruction {
     this.name = name;
     this.localSize = localSize;
     this.parameters = parameters;
-    this.lValue = new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG);
-    this.rValues.addAll(parameters);
-    this.rValues.add(new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG));
-    this.rValues.add(new VirtualRegisterOperand(VirtualRegisterOperand.SP_REG));
+    this.lValues = new Vector<VirtualRegisterOperand>();
+    this.lValues.add(new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG));
+    this.lValues.add(new VirtualRegisterOperand(VirtualRegisterOperand.SP_REG));
+    for (Operand op : parameters) {
+      if (op instanceof VirtualRegisterOperand)
+        lValues.add((VirtualRegisterOperand) op);
+    }
   }
 
   /**
@@ -94,6 +97,10 @@ public class FramePseudoOp extends PseudoOpInstruction {
 
   @Override
   public void replaceLValue(Operand operand) {
+    replaceLValue(operand, 0);
+  }
 
+  public void replaceLValue(Operand op, int index) {
+    lValues.set(index, (VirtualRegisterOperand) op);
   }
 }

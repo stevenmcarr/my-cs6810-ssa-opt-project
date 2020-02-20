@@ -11,14 +11,19 @@ public class CfgNode {
     protected int nodeId;
     protected boolean marked = false;
     protected CfgNodeSet dominators = new CfgNodeSet();
+    protected CfgNodeSet postDominators = new CfgNodeSet();
     protected CfgNodeSet dominanceFrontier = new CfgNodeSet();
+    protected CfgNodeSet postDominanceFrontier = new CfgNodeSet();
     protected DominatorTreeEdge idom = null; /* immediate dominator in the dominator tree */
-    protected List<DominatorTreeEdge> children;
+    protected DominatorTreeEdge ipdom = null; /* immediate post dominator in the dominator tree */
+    protected List<DominatorTreeEdge> dtChildren;
+    protected List<DominatorTreeEdge> pdtChildren;
 
     public CfgNode() {
         preds = new ArrayList<CfgEdge>();
         succs = new ArrayList<CfgEdge>();
-        children = new ArrayList<DominatorTreeEdge>();
+        dtChildren = new ArrayList<DominatorTreeEdge>();
+        pdtChildren = new ArrayList<DominatorTreeEdge>();
         nodeId = cfgNodeId++;
 
     }
@@ -67,12 +72,24 @@ public class CfgNode {
         return dominators;
     }
 
+    public CfgNodeSet getPostDominators() {
+        return postDominators;
+    }
+
     public void setDominators(CfgNodeSet new_ds) {
         dominators = new_ds;
     }
 
+    public void setPostDominators(CfgNodeSet new_pds) {
+        postDominators = new_pds;
+    }
+
     public void addDominatorTreeEdge(DominatorTreeEdge e) {
-        children.add(e);
+        dtChildren.add(e);
+    }
+
+    public void addPostDominatorTreeEdge(DominatorTreeEdge e) {
+        pdtChildren.add(e);
     }
 
     public void setImmediateDominator(CfgNode n) {
@@ -84,24 +101,53 @@ public class CfgNode {
         }
     }
 
+    public void setImmediatePostDominator(CfgNode n) {
+        if (n != null) {
+            DominatorTreeEdge dte = new DominatorTreeEdge();
+            dte.addPred(n).addSucc(this);
+            n.addPostDominatorTreeEdge(dte);
+            ipdom = new DominatorTreeEdge(dte);
+        }
+    }
+
     public List<DominatorTreeEdge> getDTChildren() {
-        return children;
+        return dtChildren;
+    }
+
+    public List<DominatorTreeEdge> getPDTChildren() {
+        return pdtChildren;
     }
 
     public CfgNodeSet getDominanceFrontier() {
         return dominanceFrontier;
     }
 
+    public CfgNodeSet getPostDominanceFrontier() {
+        return postDominanceFrontier;
+    }
+
     public void setdominanceFrontier(CfgNodeSet new_ds) {
         dominanceFrontier = new_ds;
+    }
+
+    public void setPostDominanceFrontier(CfgNodeSet new_pds) {
+        postDominanceFrontier = new_pds;
     }
 
     public boolean dominates(CfgNode m) {
         return m.getDominators().get(this);
     }
 
+    public boolean postDominates(CfgNode m) {
+        return m.getPostDominators().get(this);
+    }
+
     public boolean strictlyDominates(CfgNode m) {
         return !equals(m) && dominates(m);
+    }
+
+    public boolean strictlyPostDominates(CfgNode m) {
+        return !equals(m) && postDominates(m);
     }
 
     public int whichPredecessor(CfgNode n) {
@@ -117,6 +163,14 @@ public class CfgNode {
         }
 
         return whichPred;
+    }
+
+    public CfgNode getImmediateDominator() {
+        return idom.getPred();
+    }
+
+    public CfgNode getImmediatePostDominator() {
+        return ipdom.getPred();
     }
 
 }

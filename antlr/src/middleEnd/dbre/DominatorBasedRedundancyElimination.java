@@ -8,11 +8,13 @@ public class DominatorBasedRedundancyElimination extends SSAOptimization {
         super(prevPassA, passA);
     }
 
+    /**
+     * For dominator-based redundancy elimination, there is no additional work to be
+     * done since this optimization is part of the renaming phase in computing SSA
+     * form.
+     */
     @Override
-    protected void optimizeCode() {
-
-        computeSSAForm();
-        computeNormalForm();
+    protected void performSSAOptimization() {
 
     }
 

@@ -6,10 +6,10 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Debug (Launch)-CodeGenerator",
+            "name": "Debug CodeGenerator",
             "request": "launch",
             "mainClass": "driver.CodeGenerator",
-            "args": "-dbre ../../input/bubble.il"
+            "args": "-dbre ../../input/gcd.il"
         }
     ]
 }

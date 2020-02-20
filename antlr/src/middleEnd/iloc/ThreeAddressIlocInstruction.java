@@ -78,4 +78,9 @@ public abstract class ThreeAddressIlocInstruction extends IlocInstruction {
   public boolean isExpression() {
     return true;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return false;
+  }
 }

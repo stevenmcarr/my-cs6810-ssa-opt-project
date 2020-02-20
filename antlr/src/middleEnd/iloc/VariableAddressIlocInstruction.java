@@ -68,4 +68,9 @@ public abstract class VariableAddressIlocInstruction extends IlocInstruction {
   public void replaceLValue(Operand operand) {
     lValue = (VirtualRegisterOperand) operand;
   }
+
+  @Override
+  public boolean isNecessary() {
+    return false;
+  }
 }
