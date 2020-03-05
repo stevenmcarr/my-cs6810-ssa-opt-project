@@ -1,7 +1,7 @@
 # my-cs6810-ssa-opt-project
 ## Stats
 
-Here are some stats for each file in `./input/`. 
+Here are my stats for each file in `./input/`. 
 
 | File | Original Number of Instructions | Optimized Number of Instructions | Percent Reduced (Orig - Opt/Orig)|
 | - | - | - | - | 
