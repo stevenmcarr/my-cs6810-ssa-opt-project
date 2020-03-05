@@ -4,7 +4,7 @@
 Here are some stats for each file in `./input/`. 
 
 | File | Original Number of Instructions | Optimized Number of Instructions | Percent Reduced (Orig - Opt/Orig)|
-| - | - | - | - | - |
+| - | - | - | - | 
 |`arrayparam.il`  |841    |443    |47.3% |
 |`bubble.il`      |4374   |2481   |43.3% |
 |`check.il`       |140    |3      |97.9% |
