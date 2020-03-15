@@ -51,6 +51,7 @@ public class CodeGenerator {
 	 * @param args
 	 * @throws FileNotFoundException
 	 */
+	@SuppressWarnings("unchecked")
 	public static void main(String args[]) throws FileNotFoundException, IOException {
 		generateOptimizationPasses();
 		int numargs = args.length;

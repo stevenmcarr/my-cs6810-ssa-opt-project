@@ -1,5 +1,7 @@
 package middleEnd.iloc;
 
+import java.util.LinkedList;
+
 /**
  * <p>
  * Title: Nolife Compiler
@@ -28,8 +30,12 @@ public class VirtualRegisterOperand extends Operand {
   public static final int FLOAT_RET_REG = 3;
   public static final int FREE_REG = 4;
   public static int maxVirtualRegister = 4;
+  
+  private LinkedList<IlocInstruction> defs = new LinkedList<IlocInstruction>();
+  private LinkedList<IlocInstruction> uses = new LinkedList<IlocInstruction>();
 
   protected int registerId;
+  private boolean visited = false;
 
   public VirtualRegisterOperand(int registerId) {
     this.registerId = registerId;
@@ -47,5 +53,33 @@ public class VirtualRegisterOperand extends Operand {
 
   public String toString() {
     return "%vr" + registerId;
+  }
+
+  public boolean hasBeenVisited() {
+    return visited;
+  }
+
+  public void setVisited() {
+    visited = true;
+  }
+
+  public void clearVisited() {
+    visited = false;
+  }
+
+  public void addUse(IlocInstruction i) {
+    uses.add(i);
+  }
+
+  public void addDef(IlocInstruction i) {
+    defs.add(i);
+  }
+
+  public LinkedList<IlocInstruction> getUses() {
+    return uses;
+  }
+
+  public LinkedList<IlocInstruction> getDefs() {
+    return defs;
   }
 }

@@ -2,7 +2,7 @@ package middleEnd.utils;
 
 import java.util.HashMap;
 
-public class BasicBlockDFMap extends HashMap<Integer, VirtualRegisterSet> {
+public class BasicBlockDFMap extends HashMap<Integer, DataFlowSet> {
 
     /**
      *
@@ -13,11 +13,11 @@ public class BasicBlockDFMap extends HashMap<Integer, VirtualRegisterSet> {
         super();
     }
 
-    public VirtualRegisterSet get(BasicBlock b) {
+    public DataFlowSet get(BasicBlock b) {
         return super.get(b.getNodeId());
     }
 
-    public void put(BasicBlock b, VirtualRegisterSet vrs) {
+    public void put(BasicBlock b, DataFlowSet vrs) {
         super.put(b.getNodeId(), vrs);
     }
 }

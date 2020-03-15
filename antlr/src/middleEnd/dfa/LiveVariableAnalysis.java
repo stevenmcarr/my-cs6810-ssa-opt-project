@@ -10,6 +10,7 @@ import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
+import middleEnd.utils.DataFlowSet;
 import middleEnd.utils.BasicBlock;
 import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.VirtualRegisterSet;
@@ -57,7 +58,7 @@ public class LiveVariableAnalysis extends IterativeFramework {
     }
 
     @Override
-    public VirtualRegisterSet meet(BasicBlock n) {
+    public DataFlowSet meet(BasicBlock n) {
         VirtualRegisterSet result = emptySet.clone();
         for (CfgEdge e : n.getSuccs()) {
             BasicBlock s = (BasicBlock) e.getSucc();
@@ -67,12 +68,12 @@ public class LiveVariableAnalysis extends IterativeFramework {
     }
 
     @Override
-    public VirtualRegisterSet getCurrentMeetResult(BasicBlock n) {
+    public DataFlowSet getCurrentMeetResult(BasicBlock n) {
         return outMap.get(n);
     }
 
     @Override
-    public void setMeetResult(BasicBlock n, VirtualRegisterSet vrs) {
+    public void setMeetResult(BasicBlock n, DataFlowSet vrs) {
         outMap.put(n, vrs);
     }
 
@@ -86,7 +87,7 @@ public class LiveVariableAnalysis extends IterativeFramework {
     }
 
     @Override
-    public void setTransferResult(BasicBlock n, VirtualRegisterSet vrs) {
+    public void setTransferResult(BasicBlock n, DataFlowSet vrs) {
         inMap.put(n, vrs);
     }
 
