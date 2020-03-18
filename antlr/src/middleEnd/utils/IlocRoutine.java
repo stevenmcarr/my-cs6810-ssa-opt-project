@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Vector;
 
+import middleEnd.iloc.FramePseudoOp;
 import middleEnd.iloc.IlocInstruction;
 
 /**
@@ -36,6 +37,8 @@ public class IlocRoutine {
   private HashMap<String, IlocInstruction> labelMap = null;
   private HashMap<String, IlocInstruction> definitionMap = null;
   private HashMap<Integer, IlocInstruction> instMap = null;
+  private int frameSize = 0;
+  private FramePseudoOp frameOp= null;
 
   public IlocRoutine() {
   }
@@ -57,6 +60,11 @@ public class IlocRoutine {
       BasicBlock block = (new BasicBlock()).addRoutine(this);
       basicBlocks.add(block);
       block.addInstruction(inst);
+
+      if (inst instanceof FramePseudoOp) {
+        frameOp = (FramePseudoOp)inst;
+        frameSize = frameOp.getLocalSize();
+      }
 
       IlocInstruction prevInst = inst;
       while (lIter.hasNext()) {
@@ -215,5 +223,11 @@ public class IlocRoutine {
 
   public HashMap<Integer, IlocInstruction> getInstructionMap() {
     return instMap;
+  }
+
+  public int getSpillLocation() {
+    frameSize += 4;
+    frameOp.updateFrameSize(frameSize);
+	  return frameSize-4;
   }
 }

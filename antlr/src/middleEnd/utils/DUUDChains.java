@@ -1,16 +1,17 @@
 package middleEnd.utils;
 
 import java.util.Iterator;
+import java.util.Vector;
 
 import middleEnd.dfa.ReachingDefinitions;
 import middleEnd.iloc.IlocInstruction;
+import middleEnd.iloc.LiveRangeOperand;
 import middleEnd.iloc.Operand;
 import middleEnd.iloc.VirtualRegisterOperand;
 
 public class DUUDChains {
     private Cfg cfg;
     ReachingDefinitions rd;
-    private DefinitionSet allDefinitions;
 
     public DUUDChains() {
     }
@@ -63,21 +64,75 @@ public class DUUDChains {
         }
     }
 
-    public DefinitionSet getAllDefintions() {
-        if (rd == null)
-            return null;
-        else if (allDefinitions == null) {
-            allDefinitions = new DefinitionSet();
-            for (String vr : rd.getDefMap().keySet()) {
-                IlocInstructionSet iis = rd.getDefMap().get(vr);
-                for (int index = iis.nextSetBit(0); index >= 0; index = iis.nextSetBit(index + 1)) {
-                    allDefinitions.set(vr, iis.getIlocInstruction(index));
+	public void rename() {
+        for (CfgNode n : cfg.getPostOrder()) {
+            BasicBlock b = (BasicBlock)n;
+            Iterator<IlocInstruction> bIter = b.iterator();
+            while (bIter.hasNext()) {
+                IlocInstruction inst = bIter.next();
+                for (Operand op : inst.getRValues()) {
+                    if (op instanceof VirtualRegisterOperand) {
+                        LiveRangeOperand lro = new LiveRangeOperand((VirtualRegisterOperand)op);
+                        renameLiveRange((VirtualRegisterOperand)op,lro);
+                    }
+                }
+                for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                    if (!(vr instanceof LiveRangeOperand)) {
+                        LiveRangeOperand lro = new LiveRangeOperand(vr);
+                        renameLiveRange(vr,lro);
+                    }
                 }
             }
-            return allDefinitions;
+        }
+	}
 
-        } else
-            return allDefinitions;
-
+    private void renameLiveRange(VirtualRegisterOperand op, LiveRangeOperand lro) {
+        for (IlocInstruction inst : op.getDefs())
+            replaceOperand(inst,op,lro);
+        for (IlocInstruction inst : op.getUses())
+            replaceOperand(inst,op,lro);
     }
+
+    private void replaceOperand(IlocInstruction inst, VirtualRegisterOperand vr, LiveRangeOperand lro) {
+        Vector<Operand> operands = inst.getRValues();
+        for (int i = 0; i < operands.size(); i++) {
+            Operand op = operands.elementAt(i);
+            if (!(op instanceof LiveRangeOperand) && vr.toString().equals(op.toString())) {
+                inst.replaceOperandAtIndex(i,lro);
+            }
+        }
+        int j = 0;
+        for (VirtualRegisterOperand vro : inst.getAllLValues())
+            if (!(vro instanceof LiveRangeOperand) && vr.toString().equals(vro.toString())) {
+                inst.replaceLValue(lro, j);
+            }
+            j++;
+    }
+
+
+	public void resetLiveRanges() {
+        for (CfgNode n : cfg.getPostOrder()) {
+            BasicBlock b = (BasicBlock)n;
+            Iterator<IlocInstruction> bIter = b.iterator();
+            while (bIter.hasNext()) {
+                IlocInstruction inst = bIter.next();
+                Vector<Operand> operands = inst.getRValues();
+                for (int index = 0; index < operands.size(); index++) {
+                    Operand op = operands.elementAt(index);
+                    if (op instanceof LiveRangeOperand) {
+                        VirtualRegisterOperand vr = new VirtualRegisterOperand(((VirtualRegisterOperand)op).getRegisterId());
+                        inst.replaceOperandAtIndex(index, vr);
+                    }
+                }
+                int j = 0;
+                for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                    if (vr instanceof LiveRangeOperand) {
+                        VirtualRegisterOperand vrn = new VirtualRegisterOperand(vr.getRegisterId());
+                        inst.replaceLValue(vrn, j);
+                    }
+                    j++;
+                }
+            }
+        }
+	}
 }

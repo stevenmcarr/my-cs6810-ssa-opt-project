@@ -26,9 +26,9 @@ import middleEnd.iloc.*;
  */
 public class BasicBlock extends CfgNode {
 
-  LinkedList<IlocInstruction> instructions = new LinkedList<IlocInstruction>();
-  List<PhiNode> phiNodes = new ArrayList<PhiNode>();
-  IlocRoutine routine = null;
+  private LinkedList<IlocInstruction> instructions = new LinkedList<IlocInstruction>();
+  private List<PhiNode> phiNodes = new ArrayList<PhiNode>();
+  private IlocRoutine routine = null;
 
   public BasicBlock() {
   }
@@ -186,4 +186,7 @@ public class BasicBlock extends CfgNode {
     return instructions.size();
   }
 
+  public IlocRoutine getIlocRoutine() {
+    return routine;
+  }
 }

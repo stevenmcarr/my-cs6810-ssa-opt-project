@@ -82,4 +82,17 @@ public class VirtualRegisterOperand extends Operand {
   public LinkedList<IlocInstruction> getDefs() {
     return defs;
   }
+
+  public void copyDefsUsesToVR(VirtualRegisterOperand vr) {
+    for (IlocInstruction inst : defs)
+      vr.addDef(inst);
+    for (IlocInstruction inst : uses)
+      vr.addUse(inst);
+  }
+
+  public VirtualRegisterOperand deepCopy() {
+    VirtualRegisterOperand vr = new VirtualRegisterOperand(registerId);
+    copyDefsUsesToVR(vr);
+    return vr;
+  }
 }

@@ -18,6 +18,7 @@ public class CfgNode {
     protected DominatorTreeEdge ipdom = null; /* immediate post dominator in the dominator tree */
     protected List<DominatorTreeEdge> dtChildren;
     protected List<DominatorTreeEdge> pdtChildren;
+    protected LoopNode ln = null;
 
     public CfgNode() {
         preds = new ArrayList<CfgEdge>();
@@ -172,5 +173,13 @@ public class CfgNode {
     public CfgNode getImmediatePostDominator() {
         return ipdom.getPred();
     }
+
+  public void setLoopNode(LoopNode ln2) {
+    ln = ln2;
+  }
+
+  public LoopNode getLoopNode() {
+    return ln;
+  }
 
 }

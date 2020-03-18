@@ -103,4 +103,8 @@ public class FramePseudoOp extends PseudoOpInstruction {
   public void replaceLValue(Operand op, int index) {
     lValues.set(index, (VirtualRegisterOperand) op);
   }
+
+  public void updateFrameSize(int frameSize) {
+    localSize = frameSize;
+  }
 }
