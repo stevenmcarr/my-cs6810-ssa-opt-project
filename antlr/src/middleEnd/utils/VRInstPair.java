@@ -5,10 +5,14 @@ import middleEnd.iloc.VirtualRegisterOperand;
 
 public class VRInstPair {
 
-    VirtualRegisterOperand vr;
-    IlocInstruction inst;
+    private static int numVRInstPairs = 0;
+    private VirtualRegisterOperand vr;
+    private IlocInstruction inst;
+    private int pairId;
 
-    public VRInstPair() {}
+    public VRInstPair() {
+        pairId = numVRInstPairs++;
+    }
 
     public VRInstPair addVR(VirtualRegisterOperand vr) {
         this.vr = vr;
@@ -26,5 +30,13 @@ public class VRInstPair {
 
     public IlocInstruction getInst() {
         return inst;
+    }
+
+    public int getPairId() {
+        return pairId;
+    }
+
+    public boolean isPairEqual(VirtualRegisterOperand vr,IlocInstruction i) {
+        return (this.vr.equals(vr) && this.inst.equals(i));
     }
 }

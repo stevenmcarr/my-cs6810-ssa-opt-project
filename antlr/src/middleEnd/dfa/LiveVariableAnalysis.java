@@ -93,7 +93,7 @@ public class LiveVariableAnalysis extends IterativeFramework {
 
     @Override
     public List<CfgNode> getNodeOrder(Cfg g) {
-        return g.getPreOrder();
+        return g.getPostOrder();
     }
 
     public BasicBlockDFMap getInMap() {
