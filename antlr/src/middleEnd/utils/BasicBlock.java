@@ -189,4 +189,10 @@ public class BasicBlock extends CfgNode {
   public IlocRoutine getIlocRoutine() {
     return routine;
   }
+
+  public void print() {
+    for (IlocInstruction inst : instructions) {
+      System.out.println(inst.getStringRep());
+    }
+  }
 }

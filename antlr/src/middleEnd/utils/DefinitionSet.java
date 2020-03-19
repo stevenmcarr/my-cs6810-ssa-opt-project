@@ -63,7 +63,7 @@ public class DefinitionSet extends DataFlowSet {
         set(defMap.get(key));
 
         if (!instMap.containsKey(vr)) {
-            instMap.put(vr, new IlocInstructionSet());
+            instMap.put(vr, new IlocInstructionSet(i.getBlock().getIlocRoutine().getInstructionMap()));
         }
         instMap.get(vr).set(i);
     }

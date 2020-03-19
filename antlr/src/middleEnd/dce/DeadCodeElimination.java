@@ -31,7 +31,8 @@ public class DeadCodeElimination extends SSAOptimization {
 
     private void removeDeadCode() {
         for (IlocRoutine rtn : routines) {
-            buildMaps(rtn);
+            rtn.buildInstructionMap();
+            buildDefMap(rtn);
             LinkedList<IlocInstruction> work = new LinkedList<IlocInstruction>();
             IlocInstructionSet necessary = new IlocInstructionSet(rtn.getInstructionMap());
 
@@ -86,22 +87,18 @@ public class DeadCodeElimination extends SSAOptimization {
         }
     }
 
-    private void buildMaps(IlocRoutine rtn) {
-        HashMap<Integer, IlocInstruction> instMap = new HashMap<Integer, IlocInstruction>();
+    private void buildDefMap(IlocRoutine rtn) {
         HashMap<String, IlocInstruction> definitionMap = new HashMap<String, IlocInstruction>();
         for (PhiNode p : ((BasicBlock) rtn.getCfg().getEntryNode()).getPhiNodes()) {
-            instMap.put(p.getInstId(), p);
             definitionMap.put(p.getLValue().toString(), p);
         }
         for (BasicBlock b : rtn.getBasicBlocks()) {
             for (PhiNode p : b.getPhiNodes()) {
-                instMap.put(p.getInstId(), p);
                 definitionMap.put(p.getLValue().toString(), p);
             }
             Iterator<IlocInstruction> iter = b.iterator();
             while (iter.hasNext()) {
                 IlocInstruction inst = iter.next();
-                instMap.put(inst.getInstId(), inst);
                 for (VirtualRegisterOperand op : inst.getAllLValues())
                     if (op instanceof SSAVROperand)
                         definitionMap.put(op.toString(), inst);
@@ -109,7 +106,6 @@ public class DeadCodeElimination extends SSAOptimization {
         }
 
         rtn.setDefintionMap(definitionMap);
-        rtn.setInstructionMap(instMap);
     }
 
     private IlocInstruction changeBranchToIPdom(IlocInstruction i) {

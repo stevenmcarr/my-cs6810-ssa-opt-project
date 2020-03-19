@@ -24,7 +24,7 @@ public class ReachingDefinitions extends IterativeFramework {
     private BasicBlockDFMap outMap = new BasicBlockDFMap();
     private BasicBlockDFMap genMap = new BasicBlockDFMap();
     private BasicBlockDFMap prsvMap = new BasicBlockDFMap();
-    private HashMap<String, IlocInstructionSet> defMap;
+    private HashMap<String, IlocInstructionSet> defMap = new HashMap<String,IlocInstructionSet>();
 
     public ReachingDefinitions(Cfg g) {
         universe = new DefinitionSet();
@@ -45,7 +45,7 @@ public class ReachingDefinitions extends IterativeFramework {
 
     private void addToDefMap(String vr, IlocInstruction i) {
         if (!defMap.containsKey(vr)) {
-            IlocInstructionSet iis = new IlocInstructionSet();
+            IlocInstructionSet iis = new IlocInstructionSet(i.getBlock().getIlocRoutine().getInstructionMap());
             iis.set(i);
             defMap.put(vr, iis);
         } else {
@@ -57,9 +57,9 @@ public class ReachingDefinitions extends IterativeFramework {
     public void initialize(Cfg g) {
         for (CfgNode n : getNodeOrder(g)) {
             BasicBlock b = (BasicBlock) n;
-            DefinitionSet in = emptySet.clone();
-            DefinitionSet gen = emptySet.clone();
-            DefinitionSet prsv = universe.clone();
+            DefinitionSet in = new DefinitionSet(emptySet);
+            DefinitionSet gen = new DefinitionSet(emptySet);
+            DefinitionSet prsv = new DefinitionSet(universe);
             ListIterator<IlocInstruction> bIter = b.reverseIterator();
             while (bIter.hasPrevious()) {
                 IlocInstruction i = bIter.previous();
@@ -83,7 +83,7 @@ public class ReachingDefinitions extends IterativeFramework {
 
     @Override
     public DataFlowSet meet(BasicBlock n) {
-        DefinitionSet result = emptySet.clone();
+        DefinitionSet result = new DefinitionSet(emptySet);
         for (CfgEdge e : n.getPreds()) {
             BasicBlock s = (BasicBlock) e.getPred();
             result.or(inMap.get(s));
@@ -103,7 +103,7 @@ public class ReachingDefinitions extends IterativeFramework {
 
     @Override
     public DataFlowSet applyTransferFunc(BasicBlock n) {
-        DefinitionSet result = emptySet.clone();
+        DefinitionSet result = new DefinitionSet(emptySet);
         result.or(inMap.get(n));
         result.and(prsvMap.get(n));
         result.or(genMap.get(n));

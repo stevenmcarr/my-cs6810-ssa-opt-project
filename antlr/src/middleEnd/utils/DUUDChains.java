@@ -24,8 +24,9 @@ public class DUUDChains {
     public void build() {
         rd = new ReachingDefinitions(cfg);
         rd.computeDFResult(cfg);
+        emitRD(rd);
         BasicBlockDFMap inMap = rd.getInMap();
-        for (CfgNode n : cfg.getNodes()) {
+        for (CfgNode n : cfg.getPostOrder()) {
             BasicBlock b = (BasicBlock) n;
             DefinitionSet ds = (DefinitionSet) inMap.get(b);
             Iterator<IlocInstruction> bIter = b.iterator();
@@ -45,11 +46,37 @@ public class DUUDChains {
         }
     }
 
+    private void emitRD(ReachingDefinitions rd) {
+        for (CfgNode n : cfg.getPostOrder()) {
+            BasicBlock b = (BasicBlock)n;
+            System.out.println("Basic Block :" + b.getNodeId());
+
+            if (rd.getInMap().get(b) != null)
+                System.out.println("\tin  =  " + rd.getInMap().get(b).toString());
+            else
+                System.out.println("\tin  =  EmptySet");
+            if (rd.getGenMap().get(b) != null)
+                System.out.println("\tgen = " + rd.getGenMap().get(b).toString());
+            else
+                System.out.println("\tgen = EmptySet");
+            if (rd.getPrsvMap().get(b) != null)
+                System.out.println("\tprsv = " + rd.getPrsvMap().get(b).toString());
+            else
+                System.out.println("\tprsv = EmptySet");
+            if (rd.getOutMap().get(b) != null)
+                System.out.println("\tout = " + rd.getOutMap().get(b).toString() + "\n\n");
+            else
+                System.out.println("\tout = EmptySet");
+        }
+    }
+
     private void clearCurrentDefs(DefinitionSet ds, VirtualRegisterOperand vr) {
         IlocInstructionSet iis = ds.getInstructionSet(vr.toString());
-        for (int index = iis.nextSetBit(0); index >= 0; index = iis.nextSetBit(index + 1)) {
-            IlocInstruction inst = iis.getIlocInstruction(index);
-            ds.clear(vr.toString(), inst);
+        if (iis != null) {
+            for (int index = iis.nextSetBit(0); index >= 0; index = iis.nextSetBit(index + 1)) {
+                IlocInstruction inst = iis.getIlocInstruction(index);
+                ds.clear(vr.toString(), inst);
+            }
         }
     }
 

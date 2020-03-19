@@ -2,6 +2,7 @@ package middleEnd.utils;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Vector;
@@ -229,5 +230,18 @@ public class IlocRoutine {
     frameSize += 4;
     frameOp.updateFrameSize(frameSize);
 	  return frameSize-4;
+  }
+
+  public void buildInstructionMap() {
+        HashMap<Integer, IlocInstruction> instMap = new HashMap<Integer, IlocInstruction>();
+        for (BasicBlock b : getBasicBlocks()) {
+            Iterator<IlocInstruction> iter = b.iterator();
+            while (iter.hasNext()) {
+                IlocInstruction inst = iter.next();
+                instMap.put(inst.getInstId(), inst);
+        }
+
+        setInstructionMap(instMap);
+    }
   }
 }

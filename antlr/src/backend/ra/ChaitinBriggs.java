@@ -11,6 +11,7 @@ import middleEnd.iloc.LiveRangeOperand;
 import middleEnd.iloc.Operand;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
+import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.DUUDChains;
@@ -33,7 +34,8 @@ public class ChaitinBriggs extends OptimizationPass {
             ir.buildCfg();
             ir.getCfg().buildPreOrder();
             ir.getCfg().buildPostOrder();
-            ir.getCfg().buildDT();
+            ir.getCfg().buildDT(); 
+            ir.buildInstructionMap();
             do {
                 DUUDChains chains = (new DUUDChains()).addCfg(ir.getCfg());
                 chains.resetLiveRanges();
@@ -73,29 +75,32 @@ public class ChaitinBriggs extends OptimizationPass {
     }
 
     private void buildInterferenceGraph(Cfg cfg, LiveVariableAnalysis lva) {
+        BasicBlockDFMap outMap = lva.getOutMap();
         for (CfgNode n : cfg.getNodes()) {
             BasicBlock b = (BasicBlock)n;
-            VirtualRegisterSet live = (VirtualRegisterSet)lva.getOutMap().get(b).clone();
-            ListIterator<IlocInstruction> rIter = b.reverseIterator();
-            while (rIter.hasPrevious()) {
-                IlocInstruction inst = rIter.previous();
-                for (Operand op : inst.getAllLValues()) {
-                    if (op instanceof LiveRangeOperand) {
-                        LiveRangeOperand lr = (LiveRangeOperand)op;
-                        InterferenceNode lrNode = ig.addNode(lr);
-                        lrNode.addInst(inst);
-                        for (int i = live.nextSetBit(0); i >= 0; i = live.nextSetBit(i)) {
-                            LiveRangeOperand lr2 = new LiveRangeOperand(i);
-                            InterferenceNode lr2Node = ig.addNode(lr2); 
-                            lrNode.addAdjacentNode(lr2Node);
-                            lr2Node.addAdjacentNode(lrNode);
+            if (outMap.get(b) != null) {
+                VirtualRegisterSet live = (VirtualRegisterSet)outMap.get(b).clone();
+                ListIterator<IlocInstruction> rIter = b.reverseIterator();
+                while (rIter.hasPrevious()) {
+                    IlocInstruction inst = rIter.previous();
+                    for (Operand op : inst.getAllLValues()) {
+                        if (op instanceof LiveRangeOperand) {
+                            LiveRangeOperand lr = (LiveRangeOperand)op;
+                            InterferenceNode lrNode = ig.addNode(lr);
+                            lrNode.addInst(inst);
+                            for (int i = live.nextSetBit(0); i >= 0; i = live.nextSetBit(i)) {
+                                LiveRangeOperand lr2 = new LiveRangeOperand(i);
+                                InterferenceNode lr2Node = ig.addNode(lr2); 
+                                lrNode.addAdjacentNode(lr2Node);
+                                lr2Node.addAdjacentNode(lrNode);
+                            }
+                            live.clear(lr);
                         }
-                        live.clear(lr);
                     }
-                }
-                for (Operand op : inst.getRValues()) {
-                    if (op instanceof LiveRangeOperand)
-                        live.set((LiveRangeOperand)op);
+                    for (Operand op : inst.getRValues()) {
+                        if (op instanceof LiveRangeOperand)
+                            live.set((LiveRangeOperand)op);
+                    }
                 }
             }
         }
