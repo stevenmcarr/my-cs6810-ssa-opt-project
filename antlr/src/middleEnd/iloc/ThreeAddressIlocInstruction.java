@@ -83,4 +83,18 @@ public abstract class ThreeAddressIlocInstruction extends IlocInstruction {
   public boolean isNecessary() {
     return false;
   }
+
+  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+      if (vr == source1)
+        source1 = lro;
+      else if (vr == source2)
+        source2 = lro;
+  }
+
+  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+    if (dest == vr) {
+        dest = lro;
+        lValue = lro;
+    }
+  }
 }

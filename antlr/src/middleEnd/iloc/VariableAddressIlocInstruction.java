@@ -73,4 +73,16 @@ public abstract class VariableAddressIlocInstruction extends IlocInstruction {
   public boolean isNecessary() {
     return false;
   }
+
+  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+    int index;
+    if ((index = operands.indexOf(vr)) >= 0)
+      operands.set(index,lro);
+  }
+
+  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+    if (lValue == vr) {
+        lValue = lro;
+    }
+  }
 }

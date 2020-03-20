@@ -6,6 +6,12 @@ public class LiveRangeOperand extends VirtualRegisterOperand {
 
     private int liveRangeId;
 
+    public LiveRangeOperand(LiveRangeOperand lro) {
+        super(lro.getRegisterId());
+        liveRangeId = lro.getLiveRangeId();
+        lro.copyDefsUsesToVR(this);
+    }
+
     public LiveRangeOperand(VirtualRegisterOperand vr) {
         super(vr.registerId);
         liveRangeId = numLiveRanges++;

@@ -23,7 +23,7 @@ package middleEnd.iloc;
 public class IreadInstruction extends OneAddressIlocInstruction {
   public IreadInstruction(VirtualRegisterOperand source) {
     this.source = source;
-    rValues.add(source);
+    lValue = source;
   }
 
   /**
@@ -55,5 +55,19 @@ public class IreadInstruction extends OneAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return true;
+  }
+
+  @Override
+  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+
+  }
+
+  @Override
+  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+    if (vr == source) {
+      source = lro;
+      lValue = lro;
+    }
+
   }
 }

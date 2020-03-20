@@ -95,4 +95,8 @@ public class VirtualRegisterOperand extends Operand {
     copyDefsUsesToVR(vr);
     return vr;
   }
+
+  public boolean sameVR(VirtualRegisterOperand vr) {
+    return registerId == vr.getRegisterId();
+  }
 }

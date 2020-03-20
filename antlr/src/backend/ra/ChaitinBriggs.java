@@ -22,7 +22,7 @@ import middleEnd.utils.VirtualRegisterSet;
 public class ChaitinBriggs extends OptimizationPass {
 
     private InterferenceGraph ig = new InterferenceGraph();
-    private HashMap<Integer,Integer> spillCost = new HashMap<Integer,Integer>();
+    private HashMap<Integer, Integer> spillCost = new HashMap<Integer, Integer>();
 
     public ChaitinBriggs(String prevPassA, String passA) {
         super(prevPassA, passA);
@@ -34,20 +34,21 @@ public class ChaitinBriggs extends OptimizationPass {
             ir.buildCfg();
             ir.getCfg().buildPreOrder();
             ir.getCfg().buildPostOrder();
-            ir.getCfg().buildDT(); 
+            ir.getCfg().buildDT();
             ir.buildInstructionMap();
-            do {
-                DUUDChains chains = (new DUUDChains()).addCfg(ir.getCfg());
-                chains.resetLiveRanges();
-                chains.build();
-                chains.rename();
-                LiveVariableAnalysis lva = new LiveVariableAnalysis(VirtualRegisterOperand.maxVirtualRegister);
-                lva.computeDFResult(ir.getCfg());
-                buildInterferenceGraph(ir.getCfg(), lva);
-                computeSpillCosts(ir.getCfg());
-            } while (!ig.colorChaitinBriggs(spillCost,16));
+            // do {
+            DUUDChains chains = (new DUUDChains()).addCfg(ir.getCfg());
+            chains.resetLiveRanges();
+            chains.build();
+            chains.rename();
+ 
+                // LiveVariableAnalysis lva = new LiveVariableAnalysis(VirtualRegisterOperand.maxVirtualRegister);
+                // lva.computeDFResult(ir.getCfg());
+                // buildInterferenceGraph(ir.getCfg(), lva);
+                // computeSpillCosts(ir.getCfg());
+            // } while (!ig.colorChaitinBriggs(spillCost,16));
 
-            assignColors();
+            // assignColors();
         }
     }
 

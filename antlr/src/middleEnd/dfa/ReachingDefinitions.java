@@ -27,6 +27,7 @@ public class ReachingDefinitions extends IterativeFramework {
     private BasicBlockDFMap genMap = new BasicBlockDFMap();
     private BasicBlockDFMap prsvMap = new BasicBlockDFMap();
     private HashMap<String, LinkedList<VRInstPair>> defMap = new HashMap<String,LinkedList<VRInstPair>>();
+    private HashMap<Integer, VRInstPair> pairMap = new HashMap<Integer, VRInstPair>();
 
     public ReachingDefinitions(Cfg g) {
         this.g = g;
@@ -40,6 +41,7 @@ public class ReachingDefinitions extends IterativeFramework {
                     VRInstPair vrp = (new VRInstPair()).addVR(vr).addInst(i);
                     universe.set(vrp);
                     addToDefMap(vr, vrp);
+                    pairMap.put(vrp.getPairId(),vrp);
                 }
             }
         }
@@ -154,6 +156,10 @@ public class ReachingDefinitions extends IterativeFramework {
 
     public HashMap<String, LinkedList<VRInstPair>> getDefMap() {
         return defMap;
+    }
+
+    public HashMap<Integer,VRInstPair> getPairMap() {
+        return pairMap;
     }
 
     public void emitRD() {
