@@ -39,13 +39,21 @@ public class ChaitinBriggs extends OptimizationPass {
             ir.getCfg().buildPreOrder();
             ir.getCfg().buildPostOrder();
             ir.getCfg().buildDT();
+            ir.getCfg().buildLoopTree();
             ir.buildInstructionMap();
             do {
                 DUUDChains chains = (new DUUDChains()).addCfg(ir.getCfg());
                 chains.resetLiveRanges();
                 chains.build();
                 chains.rename();
-
+                if (CodeGenerator.emitDUCode)
+                    try {
+                        PrintWriter pw = new PrintWriter(inputFileName + "." + ir.getRoutineName() + ".du");
+                        ir.emitCode(pw);
+                        pw.close();
+                    } catch (FileNotFoundException e) {
+                        System.err.println("Can't emit live variable analysis for routine " + ir.getRoutineName());
+                    }
                 LVALiveRangeOperand lva = new LVALiveRangeOperand(LiveRangeOperand.numLiveRanges);
                 lva.computeDFResult(ir.getCfg());
                 if (CodeGenerator.emitLVA)

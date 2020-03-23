@@ -48,6 +48,7 @@ public class CodeGenerator {
 	public static boolean emitLVA = false;
 	public static boolean emitSSA = false;
 	public static boolean emitIG = false;
+	public static boolean emitDUCode = false;
 
 	/**
 	 * @param args
@@ -113,6 +114,9 @@ public class CodeGenerator {
 				continue;
 			} else if (args[i].equals("-ig")) {
 				emitIG = true;
+				continue;
+			} else if (args[i].equals("-du")) {
+				emitDUCode = true;
 				continue;
 			} else {
 				System.err.println("Invalid command option: " + args[i]);

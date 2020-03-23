@@ -10,30 +10,30 @@
 	.string	.string_const_0, "SUCCESS"
 	.text
 	.frame	main, 0
-	loadI	1  => %lr2
-	i2i	%lr2  => %lr3
-	loadI	10  => %lr4
-	comp	%lr3, %lr4 => %lr5
-	testgt	%lr5  => %lr6
+	loadI	1  => %vr4
+	i2i	%vr6  => %vr6
+	loadI	10  => %vr4
+	comp	%vr4, %vr4 => %vr4
+	testgt	%vr4  => %vr4
 	cbr	%lr6  -> .L0
 .L1:	nop
-	loadI	0  => %lr7
-	comp	%lr3, %lr7 => %lr8
-	testlt	%lr8  => %lr9
+	loadI	0  => %vr4
+	comp	%vr4, %vr4 => %vr4
+	testlt	%vr4  => %vr4
 	cbrne	%lr9  -> .L2
-	loadI	10  => %lr10
-	loadI	0  => %lr11
-	mod	%lr10, %lr11 => %lr12
-	i2i	%lr12  => %lr13
+	loadI	10  => %vr5
+	loadI	0  => %vr4
+	mod	%vr4, %vr4 => %vr4
+	i2i	%vr4  => %vr4
 .L2:	nop
-	loadI	1  => %lr14
-	add	%lr3, %lr14 => %lr15
-	i2i	%lr15  => %lr3
-	loadI	10  => %lr16
-	comp	%lr3, %lr16 => %lr17
-	testle	%lr17  => %lr18
+	loadI	1  => %vr4
+	add	%vr4, %vr4 => %vr4
+	i2i	%vr6  => %vr6
+	loadI	10  => %vr4
+	comp	%vr4, %vr4 => %vr4
+	testle	%vr4  => %vr4
 	cbr	%lr18  -> .L1
 .L0:	nop
-	loadI	.string_const_0  => %lr19
+	loadI	.string_const_0  => %vr4
 	swrite	%lr19
 	ret

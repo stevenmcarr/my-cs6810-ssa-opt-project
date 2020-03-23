@@ -23,7 +23,8 @@ public class InterferenceGraph {
     private LinkedList<LiveRangeOperand> lrs = new LinkedList<LiveRangeOperand>();
     private LinkedList<InterferenceNode> uncoloredNodes = new LinkedList<InterferenceNode>();
 
-    public InterferenceGraph() {}
+    public InterferenceGraph() {
+    }
 
     public InterferenceNode addNode(LiveRangeOperand lr) {
         InterferenceNode n;
@@ -38,7 +39,7 @@ public class InterferenceGraph {
         return n;
     }
 
-	public boolean colorChaitinBriggs(HashMap<Integer,Integer> spillCost,int k) {
+    public boolean colorChaitinBriggs(HashMap<Integer, Integer> spillCost, int k) {
         preColor(nodes);
         LinkedList<InterferenceNode> s = new LinkedList<InterferenceNode>();
         while (!nodes.isEmpty()) {
@@ -53,50 +54,49 @@ public class InterferenceGraph {
         while (!s.isEmpty()) {
             InterferenceNode v = s.pop();
             incrementallyRebuildGraph(v);
-            colorNodeIfPossible(v,k);
+            colorNodeIfPossible(v, k);
         }
 
         spillUncoloredNodes();
 
         return uncoloredNodes.isEmpty();
-            
+
     }
 
-	private void spillUncoloredNodes() {
+    private void spillUncoloredNodes() {
         for (InterferenceNode n : uncoloredNodes) {
             int spillLocation = n.getReferenceInstructions().getFirst().getBlock().getIlocRoutine().getSpillLocation();
-            VirtualRegisterOperand svr = new VirtualRegisterOperand(VirtualRegisterOperand.maxVirtualRegister+1);
+            VirtualRegisterOperand svr = new VirtualRegisterOperand(VirtualRegisterOperand.maxVirtualRegister + 1);
             for (IlocInstruction inst : n.getReferenceInstructions()) {
                 BasicBlock b = inst.getBlock();
                 Vector<Operand> operands = inst.getRValues();
                 boolean spillInserted = false;
                 for (int index = 0; index < operands.size(); index++) {
                     Operand op = operands.elementAt(index);
-                    if (op instanceof LiveRangeOperand && 
-                        ((LiveRangeOperand)op).getLiveRangeId() == n.getLR().getLiveRangeId()) {
-                            inst.replaceOperandAtIndex(index,new VirtualRegisterOperand(svr.getRegisterId()));
-                            if (!spillInserted) {
-                                LoadAIInstruction spillInst = 
-                                    new LoadAIInstruction(new VirtualRegisterOperand(VirtualRegisterOperand.FLOAT_RET_REG),
-                                                      new ConstantOperand(spillLocation),
-                                                      new VirtualRegisterOperand(((VirtualRegisterOperand)op).getRegisterId()));
-                                b.insertBefore(inst, spillInst);
-                                spillInserted = true;
-                            }
+                    if (op instanceof LiveRangeOperand
+                            && ((LiveRangeOperand) op).getLiveRangeId() == n.getLR().getLiveRangeId()) {
+                        inst.replaceOperandAtIndex(index, new VirtualRegisterOperand(svr.getRegisterId()));
+                        if (!spillInserted) {
+                            LoadAIInstruction spillInst = new LoadAIInstruction(
+                                    new VirtualRegisterOperand(VirtualRegisterOperand.FLOAT_RET_REG),
+                                    new ConstantOperand(spillLocation),
+                                    new VirtualRegisterOperand(((VirtualRegisterOperand) op).getRegisterId()));
+                            b.insertBefore(inst, spillInst);
+                            spillInserted = true;
                         }
+                    }
                 }
                 int j = 0;
                 for (VirtualRegisterOperand vr : inst.getAllLValues()) {
-                    if (vr instanceof LiveRangeOperand && 
-                        ((LiveRangeOperand)vr).getLiveRangeId() == n.getLR().getLiveRangeId()) {
-                        StoreAIInstruction spillInst =
-                            new StoreAIInstruction(new VirtualRegisterOperand(svr.getRegisterId()), 
-                                                   new ConstantOperand(spillLocation), 
-                                                   new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG));
+                    if (vr instanceof LiveRangeOperand
+                            && ((LiveRangeOperand) vr).getLiveRangeId() == n.getLR().getLiveRangeId()) {
+                        StoreAIInstruction spillInst = new StoreAIInstruction(
+                                new VirtualRegisterOperand(svr.getRegisterId()), new ConstantOperand(spillLocation),
+                                new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG));
                         b.insertAfter(inst, spillInst);
                         inst.replaceLValue(svr, j);
                         break;
-                    } 
+                    }
                     j++;
                 }
             }
@@ -111,7 +111,7 @@ public class InterferenceGraph {
                 colors.set(n.getColor());
             }
         }
-        int color = colors.nextClearBit(0);
+        int color = colors.nextClearBit(4); // 0 - 3 are reserved registers
         v.setColor(color);
         if (color < 0)
             uncoloredNodes.add(v);
@@ -135,7 +135,7 @@ public class InterferenceGraph {
             while (iter.hasNext()) {
                 InterferenceNode in = iter.next();
                 Integer sc = spillCost.get(in.getLR().getLiveRangeId());
-                if (sc < lowSC) {
+                if (lowSC == null || (sc != null && sc < lowSC)) { // sc is null when there is a reg never used
                     lowSC = sc;
                     n = in;
                 }
@@ -149,7 +149,7 @@ public class InterferenceGraph {
         InterferenceNode n = null;
         while (iter.hasNext() && n == null) {
             InterferenceNode in = iter.next();
-            if (in.getDegree() < k) 
+            if (in.getDegree() < k)
                 n = in;
         }
         return null;
@@ -162,39 +162,36 @@ public class InterferenceGraph {
             if (n.getLR().getRegisterId() == VirtualRegisterOperand.FP_REG) {
                 n.setColor(VirtualRegisterOperand.FP_REG);
                 lIter.remove();
-            }
-            else if (n.getLR().getRegisterId() == VirtualRegisterOperand.SP_REG) {
+            } else if (n.getLR().getRegisterId() == VirtualRegisterOperand.SP_REG) {
                 n.setColor(VirtualRegisterOperand.SP_REG);
                 lIter.remove();
-            }
-            else if (n.getLR().getRegisterId() == VirtualRegisterOperand.INT_RET_REG) {
+            } else if (n.getLR().getRegisterId() == VirtualRegisterOperand.INT_RET_REG) {
                 n.setColor(VirtualRegisterOperand.INT_RET_REG);
                 lIter.remove();
-            }
-            else if (n.getLR().getRegisterId() == VirtualRegisterOperand.FLOAT_RET_REG) {
+            } else if (n.getLR().getRegisterId() == VirtualRegisterOperand.FLOAT_RET_REG) {
                 n.setColor(VirtualRegisterOperand.FLOAT_RET_REG);
                 lIter.remove();
             }
         }
-	}
+    }
 
     public LinkedList<InterferenceNode> getNodes() {
         return nodes;
     }
 
-	public void dump() {
+    public void dump() {
         System.out.println("Interference Graph");
         System.out.println("------------------");
         for (InterferenceNode n : nodes) {
-            System.out.print("Node "+n.getLR().toString()+": ");
+            System.out.print("Node " + n.getLR().toString() + ": ");
             for (InterferenceNode m : n.getAdjacentNodes()) {
-                System.out.print(m.getLR().toString()+", ");
+                System.out.print(m.getLR().toString() + ", ");
             }
             System.out.println("");
         }
-	}
+    }
 
-	public InterferenceNode getNode(LiveRangeOperand lr) {
+    public InterferenceNode getNode(LiveRangeOperand lr) {
         InterferenceNode node = null;
         for (InterferenceNode n : nodes) {
             if (n.getLR().toString().equals(lr.toString())) {
@@ -202,9 +199,9 @@ public class InterferenceGraph {
                 break;
             }
         }
-		return node;
+        return node;
     }
-    
+
     public void emit(PrintWriter pw) {
 
         pw.println("graph interference_graph {");

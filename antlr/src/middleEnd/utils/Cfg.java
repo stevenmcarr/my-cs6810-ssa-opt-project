@@ -16,6 +16,7 @@ public class Cfg {
     private int maxIndex = 0;
     private HashMap<Integer, CfgNode> nodeMap = new HashMap<Integer, CfgNode>();
     private HashMap<Integer, CfgNode> nodeMapPost = new HashMap<Integer, CfgNode>();
+    private LoopTree loopTree = null;
 
     public Cfg() {
         nodes = new LinkedList<CfgNode>();
@@ -336,6 +337,15 @@ public class Cfg {
             pw.println("Node " + n.getNodeId() + ": " + n.getPostDominanceFrontier().toString());
         }
         pw.println("");
+    }
+
+	public void buildLoopTree() {
+        loopTree = (new LoopTree()).addCfg(this);
+        loopTree.buildLoopTree();
+    }
+    
+    public LoopTree getLoopTree() {
+        return loopTree;
     }
 
 }
