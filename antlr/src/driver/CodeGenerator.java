@@ -47,6 +47,7 @@ public class CodeGenerator {
 	public static boolean emitPDF = false;
 	public static boolean emitLVA = false;
 	public static boolean emitSSA = false;
+	public static boolean emitIG = false;
 
 	/**
 	 * @param args
@@ -109,6 +110,9 @@ public class CodeGenerator {
 				continue;
 			} else if (args[i].equals("-ssa")) {
 				emitSSA = true;
+				continue;
+			} else if (args[i].equals("-ig")) {
+				emitIG = true;
 				continue;
 			} else {
 				System.err.println("Invalid command option: " + args[i]);

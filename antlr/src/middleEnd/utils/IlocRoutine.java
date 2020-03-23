@@ -244,4 +244,11 @@ public class IlocRoutine {
         setInstructionMap(instMap);
     }
   }
+
+  public String getRoutineName() {
+    if (frameOp != null) {
+      return frameOp.getName();
+    } else
+      return "";
+  }
 }

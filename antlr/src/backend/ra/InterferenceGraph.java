@@ -1,5 +1,6 @@
 package backend.ra;
 
+import java.io.PrintWriter;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -180,4 +181,44 @@ public class InterferenceGraph {
     public LinkedList<InterferenceNode> getNodes() {
         return nodes;
     }
+
+	public void dump() {
+        System.out.println("Interference Graph");
+        System.out.println("------------------");
+        for (InterferenceNode n : nodes) {
+            System.out.print("Node "+n.getLR().toString()+": ");
+            for (InterferenceNode m : n.getAdjacentNodes()) {
+                System.out.print(m.getLR().toString()+", ");
+            }
+            System.out.println("");
+        }
+	}
+
+	public InterferenceNode getNode(LiveRangeOperand lr) {
+        InterferenceNode node = null;
+        for (InterferenceNode n : nodes) {
+            if (n.getLR().toString().equals(lr.toString())) {
+                node = n;
+                break;
+            }
+        }
+		return node;
+    }
+    
+    public void emit(PrintWriter pw) {
+
+        pw.println("graph interference_graph {");
+
+        for (InterferenceNode n : nodes) {
+            pw.println(n.getNodeId() + " [ label = \"" + n.getLR() + "\", shape = circle]");
+            for (InterferenceNode an : n.getAdjacentNodes()) {
+                if (nodes.indexOf(n) <= nodes.indexOf(an))
+                    pw.println(n.getNodeId() + "--" + an.getNodeId());
+            }
+        }
+
+        pw.println("}");
+
+    }
+
 }

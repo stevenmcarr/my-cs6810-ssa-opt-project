@@ -7,12 +7,16 @@ import middleEnd.iloc.LiveRangeOperand;
 
 public class InterferenceNode {
 
+    private static int numIntNodes = 0;
+    private int nodeId;
     private LinkedList<InterferenceNode> adjacentNodes = new LinkedList<InterferenceNode>();
     private LiveRangeOperand lr;
     private LinkedList<IlocInstruction> referenceInsts = new LinkedList<IlocInstruction>();
     private int color = -1;
 
-    public InterferenceNode() {}
+    public InterferenceNode() {
+        nodeId = numIntNodes++;
+    }
 
     public InterferenceNode addLR(LiveRangeOperand lr) {
         this.lr = lr;
@@ -32,6 +36,10 @@ public class InterferenceNode {
 
     public LiveRangeOperand getLR() {
         return lr;
+    }
+
+    public int getNodeId() {
+        return nodeId;
     }
 
     public boolean equals(InterferenceNode n) {

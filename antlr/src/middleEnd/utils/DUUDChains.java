@@ -16,6 +16,7 @@ public class DUUDChains {
     private ReachingDefinitions rd;
     private HashMap<String, LinkedList<VRInstPair>> defMap;
     private LinkedList<LinkedList<VRInstPair>> liveRanges = new LinkedList<LinkedList<VRInstPair>>();
+    private LinkedList<LiveRangeOperand> liveRangeOperands = new LinkedList<LiveRangeOperand>();
 
     public DUUDChains() {
     }
@@ -110,6 +111,7 @@ public class DUUDChains {
         if (plIter.hasNext()) {
             VRInstPair pair = plIter.next();
             lro = new LiveRangeOperand(pair.getVR());
+            liveRangeOperands.add(lro); 
             replaceOperand(pair.getInst(), pair.getVR(), lro);
             while (plIter.hasNext()) {
                 pair = plIter.next();
@@ -225,5 +227,9 @@ public class DUUDChains {
                 }
             }
         }
+    }
+
+    public LinkedList<LiveRangeOperand> getLiveRangeOperands() {
+        return liveRangeOperands;
     }
 }

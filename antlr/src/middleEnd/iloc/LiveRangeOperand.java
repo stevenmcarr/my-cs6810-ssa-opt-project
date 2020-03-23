@@ -2,7 +2,7 @@ package middleEnd.iloc;
 
 public class LiveRangeOperand extends VirtualRegisterOperand {
 
-    private static int numLiveRanges = 0;
+    public static int numLiveRanges = 0;
 
     private int liveRangeId;
 
