@@ -2,7 +2,6 @@ package backend.ra;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -25,8 +24,9 @@ import middleEnd.utils.OptimizationPass;
 
 public class ChaitinBriggs extends OptimizationPass {
 
-    private InterferenceGraph ig = new InterferenceGraph();
-    private HashMap<Integer, Integer> spillCost = new HashMap<Integer, Integer>();
+    private static final double INFINITY = 100000000.0;
+    private InterferenceGraph ig = null;
+    private double[] spillCost;
 
     public ChaitinBriggs(String prevPassA, String passA) {
         super(prevPassA, passA);
@@ -41,9 +41,19 @@ public class ChaitinBriggs extends OptimizationPass {
             ir.getCfg().buildDT();
             ir.getCfg().buildLoopTree();
             ir.buildInstructionMap();
+            int j= 0;
             do {
                 DUUDChains chains = (new DUUDChains()).addCfg(ir.getCfg());
                 chains.resetLiveRanges();
+                if (j > 0) {
+                    try {
+                        PrintWriter pw = new PrintWriter(inputFileName + "." + ir.getRoutineName() + ".ra"+j);
+                        ir.emitCode(pw);
+                        pw.close();
+                    } catch (FileNotFoundException e) {
+                        System.err.println("Can't emit code after RA iteration");
+                    }
+                }
                 chains.build();
                 chains.rename();
                 if (CodeGenerator.emitDUCode)
@@ -73,28 +83,41 @@ public class ChaitinBriggs extends OptimizationPass {
                     } catch (FileNotFoundException e) {
                         System.err.println("Can't emit interference graph for routine " + ir.getRoutineName());
                     }
-                computeSpillCosts(ir.getCfg());
-            } while (!ig.colorChaitinBriggs(spillCost, 16));
+                initSpillCost();
+                computeSpillCosts(ir.getCfg(), lva);
+                j++;
+            } while (!ig.colorChaitinBriggs(ir.getCfg(), spillCost, 16));
 
-            assignColors();
+            assignColors(ir.getCfg());
         }
     }
 
-    private void assignColors() {
-        for (InterferenceNode n : ig.getNodes()) {
-            for (IlocInstruction inst : n.getReferenceInstructions()) {
+    private void initSpillCost() {
+        spillCost = new double[LiveRangeOperand.numLiveRanges];
+        for (int i = 0; i < spillCost.length; i++)
+            spillCost[i] = 0.0;
+    }
+
+    private void assignColors(Cfg cfg) {
+        for (CfgNode n : cfg.getNodes()) {
+            BasicBlock b = (BasicBlock) n;
+            Iterator<IlocInstruction> bIter = b.iterator();
+            while (bIter.hasNext()) {
+                IlocInstruction inst = bIter.next();
                 Vector<Operand> operands = inst.getRValues();
                 for (int index = 0; index < operands.size(); index++) {
                     Operand op = operands.elementAt(index);
                     if (op instanceof LiveRangeOperand) {
-                        VirtualRegisterOperand vr = new VirtualRegisterOperand(n.getColor());
+                        int color = ig.getInterferenceNodeColor((LiveRangeOperand) op);
+                        VirtualRegisterOperand vr = new VirtualRegisterOperand(color);
                         inst.replaceOperandAtIndex(index, vr);
                     }
                 }
                 int j = 0;
                 for (VirtualRegisterOperand vr : inst.getAllLValues()) {
                     if (vr instanceof LiveRangeOperand) {
-                        VirtualRegisterOperand vrn = new VirtualRegisterOperand(n.getColor());
+                        int color = ig.getInterferenceNodeColor((LiveRangeOperand) vr);
+                        VirtualRegisterOperand vrn = new VirtualRegisterOperand(color);
                         inst.replaceLValue(vrn, j);
                     }
                     j++;
@@ -104,6 +127,7 @@ public class ChaitinBriggs extends OptimizationPass {
     }
 
     private void buildInterferenceGraph(Cfg cfg, LinkedList<LiveRangeOperand> liveRangeNames, LVALiveRangeOperand lva) {
+        ig = new InterferenceGraph();
         for (LiveRangeOperand lrn : liveRangeNames) {
             ig.addNode(lrn);
         }
@@ -149,7 +173,7 @@ public class ChaitinBriggs extends OptimizationPass {
         return op;
     }
 
-    private void computeSpillCosts(Cfg g) {
+    private void computeSpillCosts(Cfg g, LVALiveRangeOperand lva) {
         for (CfgNode n : g.getNodes()) {
             BasicBlock b = (BasicBlock) n;
             Iterator<IlocInstruction> bIter = b.iterator();
@@ -163,15 +187,53 @@ public class ChaitinBriggs extends OptimizationPass {
                 }
             }
         }
+        analyzeInfiniteSpillCost(g, lva);
     }
 
-    private void addSpillCost(LiveRangeOperand lr, Integer nsc) {
-        Integer sc = spillCost.get(lr.getLiveRangeId());
-        if (sc == null) {
-            spillCost.put(lr.getLiveRangeId(), nsc);
-        } else {
-            sc = sc + nsc;
+    private void analyzeInfiniteSpillCost(Cfg g, LVALiveRangeOperand lva) {
+        for (CfgNode n : g.getNodes()) {
+            BasicBlock b = (BasicBlock) n;
+            LiveRangeSet blockLrs = (LiveRangeSet) lva.getOutMap().get(b);
+            if (blockLrs != null) {
+                LiveRangeSet lrs = blockLrs.clone();
+                ListIterator<IlocInstruction> revIter = b.reverseIterator();
+                if (revIter.hasPrevious()) {
+                    IlocInstruction inst = revIter.previous();
+                    LiveRangeSet nextLrs = lrs.clone();
+                    for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                        if (vr instanceof LiveRangeOperand)
+                            lrs.clear((LiveRangeOperand) vr);
+                    }
+                    for (Operand op : inst.getRValues()) {
+                        if (op instanceof LiveRangeOperand)
+                            lrs.set((LiveRangeOperand) op);
+                    }
+                    while (revIter.hasPrevious()) {
+                        inst = revIter.previous();
+                        LiveRangeSet saveLrs = lrs.clone();
+                        for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                            if (vr instanceof LiveRangeOperand) {
+                                LiveRangeOperand lro = (LiveRangeOperand) vr;
+                                if (!nextLrs.get(lro)) {
+                                    //System.out.println("Live range "+lro.toString()+" has infinite spill cost");
+                                    spillCost[lro.getLiveRangeId()] = INFINITY;
+                                }
+                                lrs.clear(lro);
+                            }
+                        }
+                        for (Operand op : inst.getRValues()) {
+                            if (op instanceof LiveRangeOperand)
+                                lrs.set((LiveRangeOperand) op);
+                        }
+                        nextLrs = saveLrs;
+                    }
+                }
+            }
         }
+    }
+
+    private void addSpillCost(LiveRangeOperand lr, double nsc) {
+        spillCost[lr.getLiveRangeId()] += nsc;
     }
 
     private Integer getSpillCost(BasicBlock b, LiveRangeOperand lr) {

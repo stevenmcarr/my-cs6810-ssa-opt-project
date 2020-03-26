@@ -26,8 +26,7 @@
 	mod	%vr7, %vr10 => %vr13
 	i2i	%vr13  => %vr5
 .L2:	nop
-	loadI	1  => %vr6
-	add	%vr4, %vr6 => %vr14
+	addI	%vr4, 1 => %vr14
 	i2i	%vr14  => %vr4
 	loadI	10  => %vr7
 	comp	%vr4, %vr7 => %vr8

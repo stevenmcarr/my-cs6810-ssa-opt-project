@@ -47,7 +47,10 @@ public class LVALiveRangeOperand extends IterativeFramework {
                     }
                 }
                 if (inst.getLValue() != null)
-                    prsv.clear((LiveRangeOperand)inst.getLValue());
+                    if (inst.getLValue() instanceof LiveRangeOperand)
+                        prsv.clear((LiveRangeOperand)inst.getLValue());
+                    else
+                        System.err.println("Virtual Register "+inst.getLValue().toString()+" not a live range operand");
 
             }
             outMap.put(b, out);

@@ -2,7 +2,6 @@ package backend.ra;
 
 import java.io.PrintWriter;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -16,12 +15,15 @@ import middleEnd.iloc.Operand;
 import middleEnd.iloc.StoreAIInstruction;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
+import middleEnd.utils.Cfg;
+import middleEnd.utils.CfgNode;
 
 public class InterferenceGraph {
 
     private LinkedList<InterferenceNode> nodes = new LinkedList<InterferenceNode>();
     private LinkedList<LiveRangeOperand> lrs = new LinkedList<LiveRangeOperand>();
-    private LinkedList<InterferenceNode> uncoloredNodes = new LinkedList<InterferenceNode>();
+    private LinkedList<InterferenceNode> uncoloredNodes = null;
+    private int[] spillLocation;
 
     public InterferenceGraph() {
     }
@@ -39,7 +41,8 @@ public class InterferenceGraph {
         return n;
     }
 
-    public boolean colorChaitinBriggs(HashMap<Integer, Integer> spillCost, int k) {
+    public boolean colorChaitinBriggs(Cfg g, double[] spillCost, int k) {
+        uncoloredNodes = new LinkedList<InterferenceNode>();
         preColor(nodes);
         LinkedList<InterferenceNode> s = new LinkedList<InterferenceNode>();
         while (!nodes.isEmpty()) {
@@ -57,51 +60,79 @@ public class InterferenceGraph {
             colorNodeIfPossible(v, k);
         }
 
-        spillUncoloredNodes();
+        spillUncoloredNodes(g);
 
         return uncoloredNodes.isEmpty();
 
     }
 
-    private void spillUncoloredNodes() {
-        for (InterferenceNode n : uncoloredNodes) {
-            int spillLocation = n.getReferenceInstructions().getFirst().getBlock().getIlocRoutine().getSpillLocation();
-            VirtualRegisterOperand svr = new VirtualRegisterOperand(VirtualRegisterOperand.maxVirtualRegister + 1);
-            for (IlocInstruction inst : n.getReferenceInstructions()) {
-                BasicBlock b = inst.getBlock();
+    private void spillUncoloredNodes(Cfg g) {
+        spillLocation = new int[LiveRangeOperand.numLiveRanges];
+        for (int i = 0; i < spillLocation.length; i++)
+            spillLocation[i] = -1;
+        for (CfgNode n : g.getNodes()) {
+            BasicBlock b = (BasicBlock) n;
+            ListIterator<IlocInstruction> bIter = b.listIterator();
+            while (bIter.hasNext()) {
+                IlocInstruction inst = bIter.next();
                 Vector<Operand> operands = inst.getRValues();
-                boolean spillInserted = false;
+                BitSet spillInserted = new BitSet();
                 for (int index = 0; index < operands.size(); index++) {
                     Operand op = operands.elementAt(index);
-                    if (op instanceof LiveRangeOperand
-                            && ((LiveRangeOperand) op).getLiveRangeId() == n.getLR().getLiveRangeId()) {
-                        inst.replaceOperandAtIndex(index, new VirtualRegisterOperand(svr.getRegisterId()));
-                        if (!spillInserted) {
-                            LoadAIInstruction spillInst = new LoadAIInstruction(
-                                    new VirtualRegisterOperand(VirtualRegisterOperand.FLOAT_RET_REG),
-                                    new ConstantOperand(spillLocation),
-                                    new VirtualRegisterOperand(((VirtualRegisterOperand) op).getRegisterId()));
-                            b.insertBefore(inst, spillInst);
-                            spillInserted = true;
+                    if (op instanceof LiveRangeOperand) {
+                        LiveRangeOperand lro = (LiveRangeOperand) op;
+                        if (isUncolored(lro)) {
+                            inst.replaceOperandAtIndex(index, new LiveRangeOperand(lro));
+                            if (!spillInserted.get(lro.getLiveRangeId())) {
+                                int stackLocation = getSpillLocation(inst, lro);
+                                LoadAIInstruction spillInst = new LoadAIInstruction(
+                                        new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG),
+                                        new ConstantOperand(-stackLocation),
+                                        new LiveRangeOperand(lro));
+                                b.insertBeforeWithIterator(bIter,inst, spillInst);
+                                spillInserted.set(lro.getLiveRangeId());
+                            }
                         }
                     }
                 }
                 int j = 0;
                 for (VirtualRegisterOperand vr : inst.getAllLValues()) {
-                    if (vr instanceof LiveRangeOperand
-                            && ((LiveRangeOperand) vr).getLiveRangeId() == n.getLR().getLiveRangeId()) {
-                        StoreAIInstruction spillInst = new StoreAIInstruction(
-                                new VirtualRegisterOperand(svr.getRegisterId()), new ConstantOperand(spillLocation),
-                                new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG));
-                        b.insertAfter(inst, spillInst);
-                        inst.replaceLValue(svr, j);
-                        break;
+                    if (vr instanceof LiveRangeOperand) {
+                        LiveRangeOperand lro = (LiveRangeOperand) vr;
+                        if (isUncolored(lro)) {
+                            StoreAIInstruction spillInst = new StoreAIInstruction(
+                                    new LiveRangeOperand(lro),
+                                    new ConstantOperand(-getSpillLocation(inst, lro)),
+                                    new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG));
+                            b.insertAfterWithIterator(bIter,inst, spillInst);
+                            inst.replaceLValue(new LiveRangeOperand(lro), j);
+                        }
                     }
                     j++;
                 }
             }
 
         }
+    }
+
+    private int getSpillLocation(IlocInstruction inst, LiveRangeOperand lro) {
+        int loc = spillLocation[lro.getLiveRangeId()];
+        if (loc < 0) {
+            loc = inst.getBlock().getIlocRoutine().getSpillLocation();
+            spillLocation[lro.getLiveRangeId()] = loc;
+        }
+        return loc;
+    }
+
+    private boolean isUncolored(LiveRangeOperand lro) {
+        InterferenceNode in = null;
+        for (InterferenceNode n : uncoloredNodes) {
+            if (n.getLR().getLiveRangeId() == lro.getLiveRangeId()) {
+                in = n;
+                break;
+            }
+        }
+        return in != null;
     }
 
     private void colorNodeIfPossible(InterferenceNode v, int k) {
@@ -112,9 +143,10 @@ public class InterferenceGraph {
             }
         }
         int color = colors.nextClearBit(4); // 0 - 3 are reserved registers
-        v.setColor(color);
-        if (color < 0)
+        if (color >= k)
             uncoloredNodes.add(v);
+        else
+            v.setColor(color);
     }
 
     private void incrementallyRebuildGraph(InterferenceNode v) {
@@ -126,16 +158,16 @@ public class InterferenceGraph {
         }
     }
 
-    private InterferenceNode nodeWithLowestSpillCost(HashMap<Integer, Integer> spillCost) {
+    private InterferenceNode nodeWithLowestSpillCost(double[] spillCost) {
         Iterator<InterferenceNode> iter = nodes.iterator();
         InterferenceNode n = null;
         if (iter.hasNext()) {
             n = iter.next();
-            Integer lowSC = spillCost.get(n.getLR().getLiveRangeId());
+            double lowSC = spillCost[n.getLR().getLiveRangeId()]/(double)n.getDegree();
             while (iter.hasNext()) {
                 InterferenceNode in = iter.next();
-                Integer sc = spillCost.get(in.getLR().getLiveRangeId());
-                if (lowSC == null || (sc != null && sc < lowSC)) { // sc is null when there is a reg never used
+                double sc = spillCost[in.getLR().getLiveRangeId()]/(double)in.getDegree();
+                if (sc < lowSC) {
                     lowSC = sc;
                     n = in;
                 }
@@ -216,6 +248,20 @@ public class InterferenceGraph {
 
         pw.println("}");
 
+    }
+
+    public int getInterferenceNodeColor(LiveRangeOperand op) {
+        InterferenceNode in = null;
+        for (InterferenceNode n : nodes) {
+            if (n.getLR().getLiveRangeId() == op.getLiveRangeId()) {
+                in = n;
+                break;
+            }
+        }
+        if (in == null) // This is for pre-color regs who get the same color as the vr number
+            return op.getRegisterId();
+        else
+            return in.getColor();
     }
 
 }

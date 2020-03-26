@@ -62,4 +62,15 @@ public class StoreAIInstruction extends ThreeAddressIlocInstruction {
   public boolean isNecessary() {
     return true;
   }
+
+  public void replaceOperandAtIndex(int index, Operand operand) {
+    if (index == 0)
+      dest = operand;
+    else if (index == 1)
+      source1 = operand;
+    else 
+      source2 = operand;
+    rValues.set(index, operand);
+  }
+
 }

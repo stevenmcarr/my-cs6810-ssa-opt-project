@@ -26,6 +26,10 @@ public class DUUDChains {
         return this;
     }
 
+    public int getNumLiveRanges() {
+        return liveRangeOperands.size();
+    }
+
     public void build() {
         rd = new ReachingDefinitions(cfg);
         rd.computeDFResult(cfg);
@@ -142,14 +146,14 @@ public class DUUDChains {
         liveRanges.add(pairL);
     }
 
-    private void printLiveRange(LinkedList<VRInstPair> pairL) {
-        System.out.println("Live range");
-        System.out.println("----------");
-        for (VRInstPair pair : pairL) {
-            System.out.println("\t" + pair.getVR().toString() + ", " + pair.getInst().getStringRep());
-        }
-        System.out.println("");
-    }
+    // private void printLiveRange(LinkedList<VRInstPair> pairL) {
+    //     System.out.println("Live range");
+    //     System.out.println("----------");
+    //     for (VRInstPair pair : pairL) {
+    //         System.out.println("\t" + pair.getVR().toString() + ", " + pair.getInst().getStringRep());
+    //     }
+    //     System.out.println("");
+    // }
 
     private void buildLiveRange(VirtualRegisterOperand vr, LinkedList<VRInstPair> pairL) {
         vr.setVisited();
