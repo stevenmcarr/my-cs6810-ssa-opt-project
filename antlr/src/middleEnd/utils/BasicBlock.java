@@ -26,9 +26,9 @@ import middleEnd.iloc.*;
  */
 public class BasicBlock extends CfgNode {
 
-  LinkedList<IlocInstruction> instructions = new LinkedList<IlocInstruction>();
-  List<PhiNode> phiNodes = new ArrayList<PhiNode>();
-  IlocRoutine routine = null;
+  private LinkedList<IlocInstruction> instructions = new LinkedList<IlocInstruction>();
+  private List<PhiNode> phiNodes = new ArrayList<PhiNode>();
+  private IlocRoutine routine = null;
 
   public BasicBlock() {
   }
@@ -62,11 +62,27 @@ public class BasicBlock extends CfgNode {
     newInst.setBlock(this);
   }
 
+  public void insertBeforeWithIterator(ListIterator<IlocInstruction> iter,
+      IlocInstruction inst, IlocInstruction newInst) {
+    routine.insertBefore(inst, newInst);
+    newInst.setBlock(this);
+    iter.previous();
+    iter.add(newInst);
+    iter.next();
+  }
+
   public void insertAfter(IlocInstruction inst, IlocInstruction newInst) {
     routine.insertAfter(inst, newInst);
     int index = instructions.indexOf(inst);
     instructions.add(index + 1, newInst);
     newInst.setBlock(this);
+  }
+
+  public void insertAfterWithIterator(ListIterator<IlocInstruction> iter, 
+      IlocInstruction inst, IlocInstruction newInst) {
+    routine.insertAfter(inst, newInst);
+    newInst.setBlock(this);
+    iter.add(newInst);
   }
 
   public void replaceInst(IlocInstruction inst, IlocInstruction newInst) {
@@ -186,4 +202,13 @@ public class BasicBlock extends CfgNode {
     return instructions.size();
   }
 
+  public IlocRoutine getIlocRoutine() {
+    return routine;
+  }
+
+  public void print() {
+    for (IlocInstruction inst : instructions) {
+      System.out.println(inst.getStringRep());
+    }
+  }
 }

@@ -66,4 +66,12 @@ public abstract class OneAddressIlocInstruction extends IlocInstruction {
   public boolean isNecessary() {
     return false;
   }
+
+  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+      if (vr == source)
+        source = lro;
+  }
+
+  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+  }
 }

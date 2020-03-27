@@ -1,10 +1,9 @@
 package middleEnd.utils;
 
-import java.util.BitSet;
 
 import middleEnd.iloc.VirtualRegisterOperand;
 
-public class VirtualRegisterSet extends BitSet {
+public class VirtualRegisterSet extends DataFlowSet {
 
     public VirtualRegisterSet() {
         super();

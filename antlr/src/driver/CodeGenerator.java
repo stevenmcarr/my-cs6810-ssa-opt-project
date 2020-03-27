@@ -29,6 +29,7 @@ public class CodeGenerator {
 		CodeGenerator.registerOptimizationPass("-dbre", "middleEnd.dbre.DominatorBasedRedundancyElimination");
 		CodeGenerator.registerOptimizationPass("-dce", "middleEnd.dce.DeadCodeElimination");
 		CodeGenerator.registerOptimizationPass("-ruc", "middleEnd.dce.RemoveUnreachableCode");
+		CodeGenerator.registerOptimizationPass("-ra", "backend.ra.ChaitinBriggs");
 	}
 
 	private static String getPassClassName(String flag) {
@@ -46,11 +47,14 @@ public class CodeGenerator {
 	public static boolean emitPDF = false;
 	public static boolean emitLVA = false;
 	public static boolean emitSSA = false;
+	public static boolean emitIG = false;
+	public static boolean emitDUCode = false;
 
 	/**
 	 * @param args
 	 * @throws FileNotFoundException
 	 */
+	@SuppressWarnings("unchecked")
 	public static void main(String args[]) throws FileNotFoundException, IOException {
 		generateOptimizationPasses();
 		int numargs = args.length;
@@ -87,16 +91,6 @@ public class CodeGenerator {
 					continue;
 				}
 				prevPass = passString;
-				// }
-				// if (args[i].equals("-lvn")) {
-				// pass = new LocalValueNumbering(prevPass, "lvn");
-				// prevPass = "lvn";
-				// } else if (args[i].equals("-dbre")) {
-				// pass = new DominatorBasedRedundancyElimination(prevPass, "dbre");
-				// prevPass = "dbre";
-				// } else if (args[i].equals("-dce")) {
-				// pass = new DeadCodeElimination(prevPass, "dce");
-				// prevPass = "dce";
 			} else if (args[i].equals("-cfg")) {
 				emitCfg = true;
 				continue;
@@ -117,6 +111,12 @@ public class CodeGenerator {
 				continue;
 			} else if (args[i].equals("-ssa")) {
 				emitSSA = true;
+				continue;
+			} else if (args[i].equals("-ig")) {
+				emitIG = true;
+				continue;
+			} else if (args[i].equals("-du")) {
+				emitDUCode = true;
 				continue;
 			} else {
 				System.err.println("Invalid command option: " + args[i]);

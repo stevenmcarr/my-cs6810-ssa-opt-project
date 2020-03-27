@@ -34,7 +34,7 @@ public abstract class IlocInstruction {
   protected BasicBlock block = null;
 
   protected VirtualRegisterOperand lValue = null; // a VirtualRegisterOperand
-  protected Vector<VirtualRegisterOperand> lValues = null;
+  protected Vector<VirtualRegisterOperand> lValues = new Vector<VirtualRegisterOperand>();
   protected Vector<Operand> rValues = new Vector<Operand>(); // only VirtualRegisterOperands
 
   protected int instId;
@@ -182,8 +182,7 @@ public abstract class IlocInstruction {
   }
 
   public Vector<VirtualRegisterOperand> getAllLValues() {
-    if (lValues == null) {
-      lValues = new Vector<VirtualRegisterOperand>();
+    if (lValue != null && lValues.isEmpty()) {
       lValues.add(lValue);
     }
 
@@ -207,4 +206,23 @@ public abstract class IlocInstruction {
   }
 
   public abstract boolean isNecessary();
+
+  public void assignLR(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+    int index;
+    if (lValues != null)
+      if ((index = lValues.indexOf(vr)) >= 0) {
+        lValues.set(index,lro);
+      }
+    assignLRToLValue(vr,lro);
+
+    if (rValues != null)
+      if ((index = rValues.indexOf(vr)) >= 0)
+        rValues.set(index,lro);
+    
+    assignLRToRValue(vr,lro);
+  }
+
+  protected abstract void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro);
+
+  protected abstract void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro);
 }

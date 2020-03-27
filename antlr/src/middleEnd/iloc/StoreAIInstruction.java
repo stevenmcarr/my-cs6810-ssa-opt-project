@@ -46,7 +46,7 @@ public class StoreAIInstruction extends ThreeAddressIlocInstruction {
     if (label != null)
       pw.print(label + ":");
 
-    pw.println("\t" + getOpcode() + "\t" + source1.toString() + " => " + source2.toString() + ", " + dest.toString());
+    pw.println("\t" + getOpcode() + "\t" + source1.toString() + " => " + dest.toString() + ", " + source2.toString());
   }
 
   protected int getOperandType(Operand operand) {
@@ -62,4 +62,15 @@ public class StoreAIInstruction extends ThreeAddressIlocInstruction {
   public boolean isNecessary() {
     return true;
   }
+
+  public void replaceOperandAtIndex(int index, Operand operand) {
+    if (index == 0)
+      dest = operand;
+    else if (index == 1)
+      source1 = operand;
+    else 
+      source2 = operand;
+    rValues.set(index, operand);
+  }
+
 }

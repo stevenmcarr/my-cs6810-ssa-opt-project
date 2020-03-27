@@ -8,3 +8,6 @@ ssa.jar
 *.ssa
 *.lva
 *.json
+.DS*
+*.dbre*.il
+*.lvn.*.il

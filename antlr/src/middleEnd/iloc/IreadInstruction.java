@@ -56,4 +56,18 @@ public class IreadInstruction extends OneAddressIlocInstruction {
   public boolean isNecessary() {
     return true;
   }
+
+  @Override
+  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+
+  }
+
+  @Override
+  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+    if (vr == source) {
+      source = lro;
+      lValue = lro;
+    }
+
+  }
 }

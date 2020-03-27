@@ -58,4 +58,10 @@ public abstract class NoAddressIlocInstruction extends IlocInstruction {
   public boolean isNecessary() {
     return false;
   }
+
+  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+  }
+
+  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+  }
 }

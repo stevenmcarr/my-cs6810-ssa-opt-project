@@ -103,4 +103,14 @@ public class Comment extends IlocInstruction {
 	public boolean isNecessary() {
 		return false;
 	}
+
+	@Override
+	protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+
+	}
+
+	@Override
+	protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+
+	}
 }

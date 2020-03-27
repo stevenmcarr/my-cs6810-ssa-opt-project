@@ -1,11 +1,10 @@
 package middleEnd.utils;
 
-import java.util.BitSet;
 import java.util.HashMap;
 
 import middleEnd.iloc.IlocInstruction;
 
-public class IlocInstructionSet extends BitSet {
+public class IlocInstructionSet extends DataFlowSet {
 
     /**
      *
@@ -28,6 +27,10 @@ public class IlocInstructionSet extends BitSet {
 
     public IlocInstructionSet(HashMap<Integer, IlocInstruction> im) {
         instMap = im;
+    }
+
+    public IlocInstructionSet clone() {
+        return (IlocInstructionSet) super.clone();
     }
 
     public void setInstMap(HashMap<Integer, IlocInstruction> im) {

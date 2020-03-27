@@ -49,4 +49,11 @@ public abstract class PseudoOpInstruction extends IlocInstruction {
   public boolean isNecessary() {
     return true;
   }
+
+  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+  }
+
+  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+  }
+
 }

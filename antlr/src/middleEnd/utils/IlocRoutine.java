@@ -2,10 +2,12 @@ package middleEnd.utils;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Vector;
 
+import middleEnd.iloc.FramePseudoOp;
 import middleEnd.iloc.IlocInstruction;
 
 /**
@@ -36,6 +38,8 @@ public class IlocRoutine {
   private HashMap<String, IlocInstruction> labelMap = null;
   private HashMap<String, IlocInstruction> definitionMap = null;
   private HashMap<Integer, IlocInstruction> instMap = null;
+  private int frameSize = 0;
+  private FramePseudoOp frameOp= null;
 
   public IlocRoutine() {
   }
@@ -57,6 +61,11 @@ public class IlocRoutine {
       BasicBlock block = (new BasicBlock()).addRoutine(this);
       basicBlocks.add(block);
       block.addInstruction(inst);
+
+      if (inst instanceof FramePseudoOp) {
+        frameOp = (FramePseudoOp)inst;
+        frameSize = frameOp.getLocalSize();
+      }
 
       IlocInstruction prevInst = inst;
       while (lIter.hasNext()) {
@@ -215,5 +224,31 @@ public class IlocRoutine {
 
   public HashMap<Integer, IlocInstruction> getInstructionMap() {
     return instMap;
+  }
+
+  public int getSpillLocation() {
+    frameSize += 4;
+    frameOp.updateFrameSize(frameSize);
+	  return frameSize-4;
+  }
+
+  public void buildInstructionMap() {
+        HashMap<Integer, IlocInstruction> instMap = new HashMap<Integer, IlocInstruction>();
+        for (BasicBlock b : getBasicBlocks()) {
+            Iterator<IlocInstruction> iter = b.iterator();
+            while (iter.hasNext()) {
+                IlocInstruction inst = iter.next();
+                instMap.put(inst.getInstId(), inst);
+        }
+
+        setInstructionMap(instMap);
+    }
+  }
+
+  public String getRoutineName() {
+    if (frameOp != null) {
+      return frameOp.getName();
+    } else
+      return "";
   }
 }
