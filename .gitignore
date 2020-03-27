@@ -9,3 +9,5 @@ ssa.jar
 *.lva
 *.json
 .DS*
+*.dbre*.il
+*.lvn.*.il

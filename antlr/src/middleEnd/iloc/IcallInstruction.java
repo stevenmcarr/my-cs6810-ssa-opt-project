@@ -84,4 +84,9 @@ public class IcallInstruction extends InvocationInstruction {
   protected String getStringRepSpecific() {
     return "\t => " + returnRegister.toString();
   }
+  
+  public void replaceLValue(Operand operand) {
+    lValue = (VirtualRegisterOperand) operand;
+    returnRegister = lValue;
+  }
 }

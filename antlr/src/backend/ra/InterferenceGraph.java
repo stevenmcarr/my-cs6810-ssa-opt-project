@@ -89,6 +89,11 @@ public class InterferenceGraph {
                                         new VirtualRegisterOperand(VirtualRegisterOperand.FP_REG),
                                         new ConstantOperand(-stackLocation),
                                         new LiveRangeOperand(lro));
+                                if (inst.getLabel() != null) {
+                                    String label = inst.getLabel();
+                                    spillInst.setLabel(label);
+                                    inst.setLabel(null);
+                                }
                                 b.insertBeforeWithIterator(bIter,inst, spillInst);
                                 spillInserted.set(lro.getLiveRangeId());
                             }

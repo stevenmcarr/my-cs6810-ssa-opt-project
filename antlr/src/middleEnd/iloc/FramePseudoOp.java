@@ -102,6 +102,9 @@ public class FramePseudoOp extends PseudoOpInstruction {
 
   public void replaceLValue(Operand op, int index) {
     lValues.set(index, (VirtualRegisterOperand) op);
+    if (index > 1) { // the first 2 lvalues are vr0 and vr1, the rest are paramenters
+      parameters.set(index-2,op);
+    }
   }
 
   public void updateFrameSize(int frameSize) {

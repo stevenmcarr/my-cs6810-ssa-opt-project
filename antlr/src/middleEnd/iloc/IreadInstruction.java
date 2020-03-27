@@ -23,7 +23,7 @@ package middleEnd.iloc;
 public class IreadInstruction extends OneAddressIlocInstruction {
   public IreadInstruction(VirtualRegisterOperand source) {
     this.source = source;
-    lValue = source;
+    rValues.add(source);
   }
 
   /**

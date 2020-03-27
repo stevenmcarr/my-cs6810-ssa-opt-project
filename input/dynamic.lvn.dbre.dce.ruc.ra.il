@@ -120,8 +120,8 @@
 	comp	%vr4, %vr8 => %vr4
 	testeq	%vr4  => %vr4
 	cbr	%vr4  -> .L0
-	loadAI	%vr0, -1844 => %vr4
-.L1:	subI	%vr4, 1 => %vr7
+.L1:	loadAI	%vr0, -1844 => %vr4
+	subI	%vr4, 1 => %vr7
 	loadAI	%vr0, -1840 => %vr4
 	i2i	%vr4  => %vr5
 	loadAI	%vr0, -1844 => %vr4
@@ -175,13 +175,13 @@
 	comp	%vr4, %vr8 => %vr4
 	testne	%vr4  => %vr4
 	cbr	%vr4  -> .L3
-	loadAI	%vr0, -1824 => %vr4
-.L2:	i2i	%vr4  => %vr14
+.L2:	loadAI	%vr0, -1824 => %vr4
+	i2i	%vr4  => %vr14
 	comp	%vr14, %vr15 => %vr4
 	testgt	%vr4  => %vr4
 	cbr	%vr4  -> .L4
-	loadAI	%vr0, -1824 => %vr4
-.L5:	i2i	%vr4  => %vr9
+.L5:	loadAI	%vr0, -1824 => %vr4
+	i2i	%vr4  => %vr9
 	loadAI	%vr0, -1844 => %vr4
 	comp	%vr9, %vr4 => %vr4
 	testgt	%vr4  => %vr4
@@ -276,8 +276,8 @@
 	comp	%vr14, %vr15 => %vr4
 	testle	%vr4  => %vr4
 	cbr	%vr4  -> .L5
-	loadAI	%vr0, -1840 => %vr4
-.L4:	mult	%vr15, %vr4 => %vr5
+.L4:	loadAI	%vr0, -1840 => %vr4
+	mult	%vr15, %vr4 => %vr5
 	loadAI	%vr0, -1844 => %vr4
 	add	%vr5, %vr4 => %vr6
 	i2i	%vr0  => %vr4
