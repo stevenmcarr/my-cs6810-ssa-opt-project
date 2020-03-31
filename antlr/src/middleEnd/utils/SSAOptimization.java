@@ -268,7 +268,7 @@ public abstract class SSAOptimization extends OptimizationPass {
 
             if (driver.CodeGenerator.emitCfg) {
                 try {
-                    pw = new PrintWriter(inputFileName + ".cfg.dot");
+                    pw = new PrintWriter(inputFileName + "."+ir.getRoutineName()+".cfg.dot");
                     ir.getCfg().emitCfg(pw);
                     pw.close();
                 } catch (FileNotFoundException e) {
@@ -281,7 +281,7 @@ public abstract class SSAOptimization extends OptimizationPass {
             ir.getCfg().buildDT();
             if (driver.CodeGenerator.emitDT) {
                 try {
-                    pw = new PrintWriter(inputFileName + ".dt.dot");
+                    pw = new PrintWriter(inputFileName + "."+ir.getRoutineName()+".dt.dot");
                     ir.getCfg().emitDT(pw);
                     pw.close();
                 } catch (FileNotFoundException e) {
@@ -295,7 +295,7 @@ public abstract class SSAOptimization extends OptimizationPass {
             computeIDF(ir.getCfg());
             if (driver.CodeGenerator.emitDF) {
                 try {
-                    pw = new PrintWriter(inputFileName + ".df");
+                    pw = new PrintWriter(inputFileName + "."+ir.getRoutineName()+".df");
                     ir.getCfg().emitDF(pw);
                     emitIteratedDF(pw);
                     pw.close();
@@ -308,7 +308,7 @@ public abstract class SSAOptimization extends OptimizationPass {
             lva.computeDFResult(ir.getCfg());
             if (driver.CodeGenerator.emitLVA) {
                 try {
-                    pw = new PrintWriter(inputFileName + ".lva");
+                    pw = new PrintWriter(inputFileName + "."+ir.getRoutineName()+".lva");
                     emitLVA(pw, ir);
                     pw.close();
                 } catch (FileNotFoundException e) {
@@ -322,7 +322,7 @@ public abstract class SSAOptimization extends OptimizationPass {
 
             if (driver.CodeGenerator.emitSSA) {
                 try {
-                    pw = new PrintWriter(inputFileName + ".ssa");
+                    pw = new PrintWriter(inputFileName + "."+ir.getRoutineName()+".ssa");
                     emitCodeWithSSA(pw);
                     pw.close();
                 } catch (FileNotFoundException e) {
