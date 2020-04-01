@@ -11,6 +11,7 @@ public class SSAGraphNode extends SSAVRInstPair {
     private LinkedList<SSAGraphNode> adjacentNodes = new LinkedList<SSAGraphNode>();
     private LinkedList<SSAGraphNode> preds = new LinkedList<SSAGraphNode>();
     private boolean visited = false;
+    private int lowLink;
 
     public SSAGraphNode() {}
 
@@ -53,5 +54,13 @@ public class SSAGraphNode extends SSAVRInstPair {
 
     public String toString() {
         return inst.getStringRep();
+    }
+
+	public void setLowLink(int i) {
+        lowLink = i;
+    }
+    
+    public int getLowLink() {
+        return lowLink;
     }
 }
