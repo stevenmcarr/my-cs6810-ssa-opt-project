@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Vector;
 
 import middleEnd.iloc.IlocInstruction;
 import middleEnd.iloc.Operand;
+import middleEnd.iloc.PhiNode;
 import middleEnd.iloc.SSAVROperand;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
@@ -19,8 +21,8 @@ public class GlobalValueNumbering extends SSAOptimization {
 
     private SSAGraph ssaGraph;
     LinkedList<StronglyConnectedComponent> sccs;
-    Hashtable<String, Operand> valueTable = null;
-    Hashtable<String, Operand> scratchTable = null;
+    Hashtable<String, SSAVROperand> valueTable = null;
+    Hashtable<String, SSAVROperand> scratchTable = null;
     HashMap<String, SSAVROperand> valRep = null;
 
     public GlobalValueNumbering(String prevPassA, String passA) {
@@ -32,8 +34,8 @@ public class GlobalValueNumbering extends SSAOptimization {
         for (IlocRoutine ir : getRoutines()) {
             buildSSAGraph(ir.getCfg());
             buildSCCs(ssaGraph);
-            valueTable = new Hashtable<String, Operand>();
-            scratchTable = new Hashtable<String, Operand>();
+            valueTable = new Hashtable<String, SSAVROperand>();
+            scratchTable = new Hashtable<String, SSAVROperand>();
             valRep = new HashMap<String, SSAVROperand>();
             for (String t : ssaGraph.defMap.keySet()) {
                 valRep.put(t, null);
@@ -45,41 +47,138 @@ public class GlobalValueNumbering extends SSAOptimization {
                         SSAVROperand svr = n.getSSAVR();
                         IlocInstruction inst = ssaGraph.getSSAGraphNodeDef(svr.toString()).getInst();
                         SSAVROperand u = valRep.get(svr.toString());
+                        String key = getHashKey(inst);
+                        if (!valueTable.containsKey(key)) {
+                            valueTable.put(key, u);
+                        }
                     }
+                } else {
+                    IlocInstruction inst = ssaGraph.getNodes().getFirst().getInst();
+                    if (inst instanceof PhiNode)
+                        calcPhiValue((PhiNode) inst, valueTable);
+                    else {
+                        for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                            if (vr instanceof SSAVROperand) {
+                                SSAVROperand t = (SSAVROperand) vr;
+                                String key = getHashKey(inst);
+                                if (!valueTable.containsKey(key)) {
+                                    valRep.put(t.toString(), t);
+                                    valueTable.put(key, t);
+                                } else {
+                                    valRep.put(key, valueTable.get(key));
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    private SSAVROperand calcPhiValue(PhiNode p, Hashtable<String, SSAVROperand> valueTable) {
+        String key = getHashKey(p);
+        SSAVROperand newValRep = null;
+        if (!valueTable.containsKey(key)) {
+            newValRep = getPhiNodeValRep(p.getRValues());
+            if (newValRep == null)
+                newValRep = (SSAVROperand) p.getLValue();
+            valueTable.put(key, newValRep);
+        } else
+            newValRep = valueTable.get(key);
+
+        return newValRep;
+    }
+
+    private SSAVROperand getPhiNodeValRep(Vector<Operand> rValues) {
+        SSAVROperand val = null;
+        for (Operand op : rValues) {
+            if (op instanceof SSAVROperand) {
+                SSAVROperand svr = (SSAVROperand)op;
+                if (val == null) 
+                    val = svr;
+                else if (!svr.toString().equals(val.toString())) {
+                    val = null;
+                    break;
                 }
             }
         }
+        return val;
+    }
 
+    private String getHashKey(IlocInstruction inst) {
+        String key = inst.getOpcode();
+        for (Operand op : inst.getRValues()) {
+            if (op instanceof SSAVROperand) {
+                SSAVROperand svr = (SSAVROperand) op;
+                SSAVROperand val = valRep.get(svr.toString());
+                if (val == null)
+                    key += "null";
+                else
+                    key += val.toString();
+            } else
+                key += op.toString();
+        }
+        return key;
     }
 
     private void calcGlobalValueSCC(StronglyConnectedComponent scc) {
+        boolean change = false;
+        do {
+            SSAVROperand newValue = null;
+            for (SSAGraphNode n : scc) {
+               SSAVROperand t = n.getSSAVR();
+               IlocInstruction i = ssaGraph.getSSAGraphNodeDef(t.toString()).getInst();
+               if (i instanceof PhiNode) {
+                    newValue = calcPhiValue((PhiNode)i, scratchTable);
+               } else {
+                    String key = getHashKey(i);
+                    if (scratchTable.containsKey(key)) 
+                        newValue = scratchTable.get(key);
+                    else { 
+                        newValue = t;
+                        scratchTable.put(key,t);
+                    }
+               }
+               if (newValue.toString().equals(valRep.get(t.toString()).toString())) {
+                   change = true;
+                   valRep.put(t.toString(),newValue);
+               }
+            }
+        } while(change);
     }
 
     private void buildSSAGraph(Cfg cfg) {
         ssaGraph = new SSAGraph();
         for (CfgNode n : cfg.getPreOrder()) {
             BasicBlock b = (BasicBlock) n;
+            for (PhiNode p : b.getPhiNodes()) 
+                buildSSAGraph(p);
             Iterator<IlocInstruction> iter = b.iterator();
             while (iter.hasNext()) {
                 IlocInstruction inst = iter.next();
-                for (Operand op : inst.getRValues()) {
-                    if (op instanceof SSAVROperand) {
-                        SSAVROperand rval = (SSAVROperand) op;
-                        SSAGraphNode rnode = (new SSAGraphNode()).addInst(inst).addSSAVR(rval);
-                        ssaGraph.addNode(rnode);
-                        SSAGraphNode lnode = ssaGraph.getSSAGraphNodeDef(rval.toString());
-                        lnode.addAdjacentNode(rnode);
-                        for (VirtualRegisterOperand vr : inst.getAllLValues()) {
-                            if (vr instanceof SSAVROperand) {
-                                SSAVROperand lval = (SSAVROperand) vr;
-                                SSAGraphNode lnode2 = ssaGraph.getSSAGraphNodeDef(lval.toString());
-                                if (lnode2 == null) {
-                                    lnode2 = (new SSAGraphNode()).addInst(inst).addSSAVR(lval);
-                                    ssaGraph.addNode(lnode2);
-                                }
-                                rnode.addAdjacentNode(lnode2);
-                            }                  
+                buildSSAGraph(inst);
+            }
+        }
+    }
+
+    private void buildSSAGraph(IlocInstruction inst) {
+        for (Operand op : inst.getRValues()) {
+            if (op instanceof SSAVROperand) {
+                SSAVROperand rval = (SSAVROperand) op;
+                SSAGraphNode rnode = (new SSAGraphNode()).addInst(inst).addSSAVR(rval);
+                ssaGraph.addNode(rnode);
+                SSAGraphNode lnode = ssaGraph.getSSAGraphNodeDef(rval.toString());
+                lnode.addAdjacentNode(rnode);
+                for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                    if (vr instanceof SSAVROperand) {
+                        SSAVROperand lval = (SSAVROperand) vr;
+                        SSAGraphNode lnode2 = ssaGraph.getSSAGraphNodeDef(lval.toString());
+                        if (lnode2 == null) {
+                            lnode2 = (new SSAGraphNode()).addInst(inst).addSSAVR(lval);
+                            ssaGraph.addNode(lnode2);
                         }
+                        rnode.addAdjacentNode(lnode2);
                     }
                 }
             }
