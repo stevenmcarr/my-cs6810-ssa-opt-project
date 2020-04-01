@@ -1,5 +1,6 @@
 package middleEnd.gvn;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -58,4 +59,17 @@ public class SSAGraph {
     public LinkedList<SSAGraphNode> getNodes() {
         return nodes;
     }
+
+	public void emit(PrintWriter pw) {
+	pw.println("digraph ssa {");
+
+        for (SSAGraphNode n : nodes) {
+            pw.println(n.getPairId() + " [ label = \"" + n.getSSAVR().toString() + "\", shape = circle]");
+            for (SSAGraphNode m : n.getAdjacentNodes()) {
+                pw.println(n.getPairId() + "->" + m.getPairId());
+            }
+        }
+
+        pw.println("}");
+}
 }

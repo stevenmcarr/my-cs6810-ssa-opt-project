@@ -1,5 +1,8 @@
 package middleEnd.gvn;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -33,7 +36,27 @@ public class GlobalValueNumbering extends SSAOptimization {
     protected void performSSAOptimization() {
         for (IlocRoutine ir : getRoutines()) {
             buildSSAGraph(ir.getCfg());
+            try {
+                PrintWriter pw = new PrintWriter(inputFileName + "." + ir.getRoutineName() + ".ssag.dot");
+                ssaGraph.emit(pw);
+                pw.close();
+            } catch (FileNotFoundException e) {
+                System.err.println(e.getMessage());
+            }
             buildSCCs(ssaGraph);
+            try {
+                PrintWriter pw = new PrintWriter(inputFileName+"."+ir.getRoutineName()+".scc");
+                for (StronglyConnectedComponent scc : sccs) {
+                    pw.print(scc.getSCCId()+": ");
+                    for (SSAGraphNode n : scc) {
+                        pw.print(n.getSSAVR().toString()+", ");
+                    }
+                    pw.println("");
+                }
+                pw.close();
+            } catch (FileNotFoundException e) {
+                System.err.println(e.getMessage());
+            }
             valueTable = new Hashtable<String, SSAVROperand>();
             scratchTable = new Hashtable<String, SSAVROperand>();
             valRep = new HashMap<String, SSAVROperand>();
@@ -94,8 +117,8 @@ public class GlobalValueNumbering extends SSAOptimization {
         SSAVROperand val = null;
         for (Operand op : rValues) {
             if (op instanceof SSAVROperand) {
-                SSAVROperand svr = (SSAVROperand)op;
-                if (val == null) 
+                SSAVROperand svr = (SSAVROperand) op;
+                if (val == null)
                     val = svr;
                 else if (!svr.toString().equals(val.toString())) {
                     val = null;
@@ -127,37 +150,61 @@ public class GlobalValueNumbering extends SSAOptimization {
         do {
             SSAVROperand newValue = null;
             for (SSAGraphNode n : scc) {
-               SSAVROperand t = n.getSSAVR();
-               IlocInstruction i = ssaGraph.getSSAGraphNodeDef(t.toString()).getInst();
-               if (i instanceof PhiNode) {
-                    newValue = calcPhiValue((PhiNode)i, scratchTable);
-               } else {
+                SSAVROperand t = n.getSSAVR();
+                IlocInstruction i = ssaGraph.getSSAGraphNodeDef(t.toString()).getInst();
+                if (i instanceof PhiNode) {
+                    newValue = calcPhiValue((PhiNode) i, scratchTable);
+                } else {
                     String key = getHashKey(i);
-                    if (scratchTable.containsKey(key)) 
+                    if (scratchTable.containsKey(key))
                         newValue = scratchTable.get(key);
-                    else { 
+                    else {
                         newValue = t;
-                        scratchTable.put(key,t);
+                        scratchTable.put(key, t);
                     }
-               }
-               if (newValue.toString().equals(valRep.get(t.toString()).toString())) {
-                   change = true;
-                   valRep.put(t.toString(),newValue);
-               }
+                }
+                if (newValue.toString().equals(valRep.get(t.toString()).toString())) {
+                    change = true;
+                    valRep.put(t.toString(), newValue);
+                }
             }
-        } while(change);
+        } while (change);
     }
 
     private void buildSSAGraph(Cfg cfg) {
         ssaGraph = new SSAGraph();
         for (CfgNode n : cfg.getPreOrder()) {
             BasicBlock b = (BasicBlock) n;
-            for (PhiNode p : b.getPhiNodes()) 
+            for (PhiNode p : b.getPhiNodes())
+                buildSSAGraphNodes(p);
+            Iterator<IlocInstruction> iter = b.iterator();
+            while (iter.hasNext()) {
+                IlocInstruction inst = iter.next();
+                buildSSAGraphNodes(inst);
+            }
+        }
+        for (CfgNode n : cfg.getPreOrder()) {
+            BasicBlock b = (BasicBlock) n;
+            for (PhiNode p : b.getPhiNodes())
                 buildSSAGraph(p);
             Iterator<IlocInstruction> iter = b.iterator();
             while (iter.hasNext()) {
                 IlocInstruction inst = iter.next();
                 buildSSAGraph(inst);
+            }
+        }
+    }
+
+    private void buildSSAGraphNodes(IlocInstruction inst) {
+        for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+            if (vr instanceof SSAVROperand) {
+                SSAVROperand lval = (SSAVROperand) vr;
+                SSAGraphNode lnode = ssaGraph.getSSAGraphNodeDef(lval.toString());
+                if (lnode == null) {
+                    lnode = (new SSAGraphNode()).addInst(inst).addSSAVR(lval);
+                    ssaGraph.addNode(lnode);
+                    ssaGraph.addDef(lval.toString(), lnode);
+                }
             }
         }
     }
@@ -174,10 +221,6 @@ public class GlobalValueNumbering extends SSAOptimization {
                     if (vr instanceof SSAVROperand) {
                         SSAVROperand lval = (SSAVROperand) vr;
                         SSAGraphNode lnode2 = ssaGraph.getSSAGraphNodeDef(lval.toString());
-                        if (lnode2 == null) {
-                            lnode2 = (new SSAGraphNode()).addInst(inst).addSSAVR(lval);
-                            ssaGraph.addNode(lnode2);
-                        }
                         rnode.addAdjacentNode(lnode2);
                     }
                 }

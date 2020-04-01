@@ -9,7 +9,7 @@
             "name": "Debug CodeGenerator",
             "request": "launch",
             "mainClass": "driver.CodeGenerator",
-            "args": "-cse ../../input/while_array.lvn.il"
+            "args": "-gvn ../../input/while_array.lvn.il"
         }
     ]
 }

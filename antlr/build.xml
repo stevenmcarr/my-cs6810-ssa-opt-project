@@ -22,7 +22,7 @@
 
 	<target name = "build" description = "Compile source files">
 		<mkdir dir = "${build.dir}"/>
-		<javac destdir = "${build.dir}" source = "11" target = "11" debug = "true"
+		<javac destdir = "${build.dir}" debug = "true"
 			deprecation = "false" optimize = "false" failonerror = "true"
 			includeantruntime = "true">
 			<src path = "${src.dir}"/>

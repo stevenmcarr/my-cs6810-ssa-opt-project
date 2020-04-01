@@ -31,6 +31,7 @@ public class CodeGenerator {
 		CodeGenerator.registerOptimizationPass("-ruc", "middleEnd.dce.RemoveUnreachableCode");
 		CodeGenerator.registerOptimizationPass("-ra",  "backend.ra.ChaitinBriggs");
 		CodeGenerator.registerOptimizationPass("-cse", "middleEnd.gcse.GCSE");
+		CodeGenerator.registerOptimizationPass("-gvn", "middleEnd.gvn.GlobalValueNumbering");
 	}
 
 	private static String getPassClassName(String flag) {
