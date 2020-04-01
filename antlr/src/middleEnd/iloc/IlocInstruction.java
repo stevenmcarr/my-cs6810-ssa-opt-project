@@ -157,6 +157,10 @@ public abstract class IlocInstruction {
     return (this instanceof RetInstruction || this instanceof HaltInstruction);
   }
 
+  public boolean isCriticalInstruction() {
+    return (isEndInstruction() || isBranchInstruction() || isMemoryStoreInstruction() || (this instanceof PseudoOpInstruction));
+  }
+
   public String getBranchTargetLabel() {
     if (this instanceof JumpIInstruction)
       return ((JumpIInstruction) this).getTargetLabel();

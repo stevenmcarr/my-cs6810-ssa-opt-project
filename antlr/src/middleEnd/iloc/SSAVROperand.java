@@ -1,8 +1,15 @@
 package middleEnd.iloc;
 
+import java.util.LinkedList;
+
+import middleEnd.utils.SSAVRInstPair;
+
 public class SSAVROperand extends VirtualRegisterOperand {
 
     private int subscript;
+
+    private SSAVRInstPair ssaDef = null;
+    private LinkedList<SSAVRInstPair> ssaUses = new LinkedList<SSAVRInstPair>();
 
     public SSAVROperand(int registerId) {
         super(registerId);
@@ -28,5 +35,21 @@ public class SSAVROperand extends VirtualRegisterOperand {
 
     public SSAVROperand copy() {
         return new SSAVROperand(registerId, subscript);
+    }
+
+    public void setSSADef(SSAVRInstPair svr) {
+        ssaDef = svr;
+    }
+
+    public SSAVRInstPair getSSADef() {
+        return ssaDef;
+    }
+
+    public void addSSAUse(SSAVRInstPair svr) {
+        ssaUses.add(svr);
+    }
+
+    public LinkedList<SSAVRInstPair> getSSAUses() {
+        return ssaUses;
     }
 }
