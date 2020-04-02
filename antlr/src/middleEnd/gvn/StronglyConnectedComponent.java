@@ -5,11 +5,11 @@ import java.util.LinkedList;
 import middleEnd.iloc.SSAVROperand;
 import middleEnd.iloc.VirtualRegisterOperand;
 
-public class StronglyConnectedComponent extends LinkedList<SSAGraphNode>{
+public class StronglyConnectedComponent extends LinkedList<SSAGraphNode> {
 
     private int sccId;
     private static int numSCCs = 0;
-    private VirtualRegisterOperand newVR = new VirtualRegisterOperand(VirtualRegisterOperand.maxVirtualRegister++);
+    private VirtualRegisterOperand newVR;
 
     LinkedList<SSAGraphNode> reversePostorder = new LinkedList<SSAGraphNode>();
     /**
@@ -20,6 +20,7 @@ public class StronglyConnectedComponent extends LinkedList<SSAGraphNode>{
     public StronglyConnectedComponent() {
         super();
         sccId = numSCCs++;
+        newVR = new VirtualRegisterOperand(VirtualRegisterOperand.maxVirtualRegister++);
     }
 
     public int getSCCId() {

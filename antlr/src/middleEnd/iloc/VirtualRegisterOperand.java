@@ -29,7 +29,7 @@ public class VirtualRegisterOperand extends Operand {
   public static final int INT_RET_REG = 2;
   public static final int FLOAT_RET_REG = 3;
   public static final int FREE_REG = 4;
-  public static int maxVirtualRegister = 4;
+  public static int maxVirtualRegister = FREE_REG;
   
   private LinkedList<IlocInstruction> defs = new LinkedList<IlocInstruction>();
   private LinkedList<IlocInstruction> uses = new LinkedList<IlocInstruction>();
@@ -98,5 +98,9 @@ public class VirtualRegisterOperand extends Operand {
 
   public boolean sameVR(VirtualRegisterOperand vr) {
     return registerId == vr.getRegisterId();
+  }
+
+  public boolean isReservedRegister() {
+    return registerId < FREE_REG;
   }
 }

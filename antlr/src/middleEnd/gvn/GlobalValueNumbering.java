@@ -97,6 +97,35 @@ public class GlobalValueNumbering extends SSAOptimization {
     }
 
     private void renameSVRs(Cfg cfg) {
+        for (CfgNode n : cfg.getNodes()) {
+            BasicBlock b = (BasicBlock)n;
+            Iterator<IlocInstruction> iter = b.iterator();
+            while (iter.hasNext()) {
+                IlocInstruction inst = iter.next();
+                int index = 0;
+                for (Operand op : inst.getRValues()) {
+                    if (op instanceof SSAVROperand) {
+                        SSAVROperand svr = (SSAVROperand)op;
+                        if (!svr.isReservedRegister()) {
+                            VirtualRegisterOperand vr = ssaGraph.getSCCVR(svr);
+                            inst.replaceOperandAtIndex(index, vr.copy());
+                        }
+                    }
+                    index++;
+                }
+                index = 0;
+                for (VirtualRegisterOperand vr : inst.getAllLValues()) {
+                    if (vr instanceof SSAVROperand) {
+                        SSAVROperand svr = (SSAVROperand)vr;
+                        if (!svr.isReservedRegister()) {
+                            VirtualRegisterOperand nvr = ssaGraph.getSCCVR(svr);
+                            inst.replaceLValue(nvr, index);
+                        }
+                    }
+                    index++;
+                }
+            }
+        }
     }
 
     private SSAVROperand calcPhiValue(PhiNode p, HashMap<String, SSAVROperand> valueTable) {
