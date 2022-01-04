@@ -36,38 +36,4 @@ public class IreadInstruction extends OneAddressIlocInstruction {
     return "iread";
   }
 
-  /**
-   * getOperandType
-   *
-   * @param operand Operand
-   * @return int
-   * @todo Implement this middleEnd.iloc.IlocInstruction method
-   */
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
-
-  @Override
-  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-
-  }
-
-  @Override
-  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-    if (vr == source) {
-      source = lro;
-      lValue = lro;
-    }
-
-  }
 }

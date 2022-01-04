@@ -40,19 +40,4 @@ public class I2iInstruction extends CopyInstruction {
     return "i2i";
   }
 
-  public static String getHash(VirtualRegisterOperand src1) {
-    return "i2i" + src1.toString();
-  }
-
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  public IlocInstruction constantFold(Vector<Integer> constVals) {
-    Integer lOpVal = (Integer) constVals.elementAt(0);
-
-    ImmediateOperand source = new ConstantOperand(lOpVal.intValue());
-
-    return new LoadIInstruction(source, (VirtualRegisterOperand) dest);
-  }
 }

@@ -36,24 +36,4 @@ public class IwriteInstruction extends OneAddressIlocInstruction {
     return "iwrite";
   }
 
-  /**
-   * getOperandType
-   *
-   * @param operand Operand
-   * @return int
-   * @todo Implement this middleEnd.iloc.IlocInstruction method
-   */
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
 }

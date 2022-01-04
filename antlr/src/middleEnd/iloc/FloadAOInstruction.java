@@ -41,15 +41,4 @@ public class FloadAOInstruction extends ThreeAddressIlocInstruction {
     return "floadAO";
   }
 
-  protected int getOperandType(Operand operand) {
-    if (dest == operand)
-      return Operand.FLOAT_TYPE;
-    else
-      return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
 }

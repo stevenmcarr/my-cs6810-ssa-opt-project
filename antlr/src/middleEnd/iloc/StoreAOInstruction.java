@@ -50,28 +50,4 @@ public class StoreAOInstruction extends ThreeAddressIlocInstruction {
     pw.println("\t" + getOpcode() + "\t" + source1.toString() + " => " + source2.toString() + ", " + dest.toString());
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
-
-  public void replaceOperandAtIndex(int index, Operand operand) {
-    if (index == 0)
-      dest = operand;
-    else if (index == 1)
-      source1 = operand;
-    else 
-      source2 = operand;
-    rValues.set(index, operand);
-  }
-
 }

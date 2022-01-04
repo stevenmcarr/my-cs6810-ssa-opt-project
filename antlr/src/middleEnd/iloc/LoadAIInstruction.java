@@ -40,12 +40,4 @@ public class LoadAIInstruction extends ThreeAddressIlocInstruction {
     return "loadAI";
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
 }

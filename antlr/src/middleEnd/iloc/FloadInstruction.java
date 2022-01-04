@@ -38,19 +38,4 @@ public class FloadInstruction extends TwoAddressIlocInstruction {
     return "fload";
   }
 
-  protected int getOperandType(Operand operand) {
-    if (dest == operand)
-      return Operand.FLOAT_TYPE;
-    else
-      return Operand.INTEGER_TYPE;
-  }
-
-  public static String getHash(VirtualRegisterOperand source) {
-    return "fload" + source.toString();
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
 }

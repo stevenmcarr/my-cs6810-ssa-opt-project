@@ -43,7 +43,4 @@ public class DataSection extends PseudoOpInstruction {
     return rep;
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
 }

@@ -40,12 +40,4 @@ public class CompInstruction extends ThreeAddressIlocInstruction {
     return "comp";
   }
 
-  public static String getHash(VirtualRegisterOperand src1, VirtualRegisterOperand src2) {
-    return "comp" + src1.toString() + src2.toString();
-  }
-
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
 }

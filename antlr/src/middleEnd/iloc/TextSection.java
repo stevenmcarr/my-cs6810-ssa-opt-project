@@ -43,7 +43,4 @@ public class TextSection extends PseudoOpInstruction {
     return rep;
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
 }

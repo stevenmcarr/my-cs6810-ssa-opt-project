@@ -1,20 +1,27 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: CS4131 Nolife Compiler</p>
+ * <p>
+ * Title: CS4131 Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author not attributable
  * @version 1.0
  */
 public class TestleInstruction extends TestInstruction {
-  public TestleInstruction(VirtualRegisterOperand source,
-                           VirtualRegisterOperand dest) {
+  public TestleInstruction(VirtualRegisterOperand source, VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
     lValue = dest;
@@ -31,16 +38,4 @@ public class TestleInstruction extends TestInstruction {
     return "testle";
   }
 
-  public static String getHash(VirtualRegisterOperand src) {
-    return "testle"+src.toString();
-  }
-
-  public TestInstruction genComplementInst() {
-    return new TestgtInstruction(((VirtualRegisterOperand)source).copy(),
-                                 ((VirtualRegisterOperand)dest).copy());
-  }
-
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
 }

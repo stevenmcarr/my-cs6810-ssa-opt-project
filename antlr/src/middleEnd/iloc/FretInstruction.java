@@ -36,17 +36,4 @@ public class FretInstruction extends OneAddressIlocInstruction {
     return "fret";
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.FLOAT_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
 }

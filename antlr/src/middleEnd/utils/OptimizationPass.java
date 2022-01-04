@@ -1,19 +1,67 @@
 package middleEnd.utils;
 
-import java.util.Vector;
-
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ParseTree;
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.Vector;
 
-import middleEnd.iloc.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import middleEnd.iloc.AddIInstruction;
+import middleEnd.iloc.AddInstruction;
+import middleEnd.iloc.AndInstruction;
+import middleEnd.iloc.CallInstruction;
+import middleEnd.iloc.CbrInstruction;
+import middleEnd.iloc.CbrneInstruction;
+import middleEnd.iloc.CompInstruction;
+import middleEnd.iloc.ConstantOperand;
+import middleEnd.iloc.DataSection;
+import middleEnd.iloc.F2iInstruction;
+import middleEnd.iloc.FaddInstruction;
+import middleEnd.iloc.FloadInstruction;
+import middleEnd.iloc.FloatPseudoOp;
+import middleEnd.iloc.FmultInstruction;
+import middleEnd.iloc.FramePseudoOp;
+import middleEnd.iloc.GlobalPseudoOp;
+import middleEnd.iloc.I2fInstruction;
+import middleEnd.iloc.I2iInstruction;
+import middleEnd.iloc.IcallInstruction;
+import middleEnd.iloc.IlocInstruction;
+import middleEnd.iloc.ImmediateOperand;
+import middleEnd.iloc.IreadInstruction;
+import middleEnd.iloc.IretInstruction;
+import middleEnd.iloc.IwriteInstruction;
+import middleEnd.iloc.JumpIInstruction;
+import middleEnd.iloc.LabelOperand;
+import middleEnd.iloc.LoadIInstruction;
+import middleEnd.iloc.LoadInstruction;
+import middleEnd.iloc.ModInstruction;
+import middleEnd.iloc.MultIInstruction;
+import middleEnd.iloc.MultInstruction;
+import middleEnd.iloc.NopInstruction;
+import middleEnd.iloc.Operand;
+import middleEnd.iloc.OrInstruction;
+import middleEnd.iloc.RetInstruction;
+import middleEnd.iloc.StoreInstruction;
+import middleEnd.iloc.StringPseudoOp;
+import middleEnd.iloc.SubIInstruction;
+import middleEnd.iloc.SubInstruction;
+import middleEnd.iloc.SwriteInstruction;
+import middleEnd.iloc.TesteqInstruction;
+import middleEnd.iloc.TestgeInstruction;
+import middleEnd.iloc.TestgtInstruction;
+import middleEnd.iloc.TestleInstruction;
+import middleEnd.iloc.TestltInstruction;
+import middleEnd.iloc.TestneInstruction;
+import middleEnd.iloc.TextSection;
+import middleEnd.iloc.VirtualRegisterOperand;
+import parser.ilocBaseVisitor;
+import parser.ilocLexer;
+import parser.ilocParser;
 import parser.ilocParser.DataContext;
 import parser.ilocParser.FrameInstructionContext;
 import parser.ilocParser.IlocInstructionContext;
@@ -23,9 +71,6 @@ import parser.ilocParser.ProcedureContext;
 import parser.ilocParser.ProgramContext;
 import parser.ilocParser.PseudoOpContext;
 import parser.ilocParser.VirtualRegContext;
-import parser.ilocLexer;
-import parser.ilocParser;
-import parser.ilocBaseVisitor;
 
 public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
 
@@ -57,100 +102,12 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
       rtn.emitCode(pw);
   }
 
-  public VirtualRegisterOperand getTemporaryRegister(String inst) {
-    Integer tReg = (Integer) instHash.get(inst);
-
-    if (tReg == null) {
-      tReg = nextVirtualRegister++;
-      instHash.put(inst, tReg);
-    }
-
-    return new VirtualRegisterOperand(tReg.intValue());
-  }
-
-  public int getVirtualRegisterId(String variable) {
-    Integer id = (Integer) instHash.get(variable);
-
-    if (id == null) {
-      id = nextVirtualRegister++;
-      instHash.put(variable, id);
-    }
-
-    return id.intValue();
-
-  }
-
-  public void reset() {
-    instHash.clear();
-    if (nextVirtualRegister > maxVirtualRegister)
-      maxVirtualRegister = nextVirtualRegister;
-    nextVirtualRegister = VirtualRegisterOperand.FREE_REG;
-  }
-
   public void buildRoutines() {
-    IlocRoutine routine = new IlocRoutine();
-    routines.add(routine);
-    HashMap<String, IlocInstruction> labelMap = new HashMap<String, IlocInstruction>();
 
-    ListIterator<IlocInstruction> lIter = allInstructions.listIterator();
-    IlocInstruction inst = lIter.next();
-    routine.addInstruction(inst);
-    if (inst.getLabel() != null)
-      labelMap.put(inst.getLabel(), inst);
-    while (lIter.hasNext()) {
-      inst = lIter.next();
-      if (inst instanceof FramePseudoOp) {
-        routine.setLabelMap(labelMap);
-        routine = new IlocRoutine();
-        routines.add(routine);
-        labelMap = new HashMap<String, IlocInstruction>();
-      }
-      routine.addInstruction(inst);
-      if (inst.getLabel() != null)
-        labelMap.put(inst.getLabel(), inst);
-    }
-
-    routine.setLabelMap(labelMap);
-  }
-
-  private void initializeTypeHash(Hashtable<String, Integer> typeHash) {
-    typeHash.clear();
-    typeHash.put("%vr0", Operand.INTEGER_TYPE); // frame pointer
-    typeHash.put("%vr1", Operand.INTEGER_TYPE); // stack pointer
-    typeHash.put("%vr2", Operand.INTEGER_TYPE); // return register
-    typeHash.put("%vr3", Operand.FLOAT_TYPE); // return register
-  }
-
-  public void performTypeAssignment() {
-    for (int i = 0; i < routines.size(); i++) {
-      IlocRoutine routine = (IlocRoutine) routines.elementAt(i);
-      initializeTypeHash(typeHash);
-      Vector<BasicBlock> blocks = routine.getBasicBlocks();
-      for (int j = 0; j < blocks.size(); j++) {
-        BasicBlock block = (BasicBlock) blocks.elementAt(j);
-        Iterator<IlocInstruction> iter = block.iterator();
-        while (iter.hasNext()) {
-          IlocInstruction inst = iter.next();
-          inst.setOperandTypes(typeHash);
-        }
-      }
-    }
-  }
-
-  public void setNextVirtualRegister(int reg) {
-    nextVirtualRegister = reg;
   }
 
   public Vector<IlocRoutine> getRoutines() {
     return routines;
-  }
-
-  public int getNextVirtualRegister() {
-    return nextVirtualRegister;
-  }
-
-  public int getMaxVirtualRegister() {
-    return maxVirtualRegister;
   }
 
   @Override
@@ -654,7 +611,6 @@ public abstract class OptimizationPass extends ilocBaseVisitor<Void> {
 
     visit(t);
     buildRoutines();
-    performTypeAssignment();
   }
 
   protected abstract void optimizeCode();

@@ -38,16 +38,4 @@ public class LoadIInstruction extends CopyInstruction {
     return "loadI";
   }
 
-  public static String getHash(ImmediateOperand src1) {
-    return "loadI" + src1.toString();
-  }
-
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return true;
-  }
 }

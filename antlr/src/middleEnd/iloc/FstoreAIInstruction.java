@@ -49,20 +49,4 @@ public class FstoreAIInstruction extends ThreeAddressIlocInstruction {
     return rep;
   }
 
-  protected int getOperandType(Operand operand) {
-    if (source1 == operand)
-      return Operand.FLOAT_TYPE;
-    else
-      return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
 }

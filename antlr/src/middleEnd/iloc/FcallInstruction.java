@@ -52,33 +52,6 @@ public class FcallInstruction extends InvocationInstruction {
     return "fcall";
   }
 
-  public void setOperandTypes(Hashtable<String, Integer> typeMap) {
-    for (int i = 1; i < operands.size(); i++) {
-      VirtualRegisterOperand vr = (VirtualRegisterOperand) operands.elementAt(i);
-      Integer typeVal = (Integer) typeMap.get(vr.toString());
-      vr.setType(typeVal.intValue());
-    }
-    setType(typeMap, returnRegister);
-  }
-
-  public int getOperandType(Operand operand) {
-    int index = operands.indexOf(operand);
-
-    if (index != -1) {
-      VirtualRegisterOperand vr = (VirtualRegisterOperand) operands.elementAt(index);
-      return vr.getType();
-    } else
-      return Operand.FLOAT_TYPE;
-  }
-
-  public static String getHash(LabelOperand name, Vector<Operand> operands) {
-    String key = new String("fcall" + name.getLabel());
-    for (int i = 0; i < operands.size(); i++)
-      key += ((Operand) operands.elementAt(i)).toString();
-
-    return key;
-  }
-
   @Override
   protected String getStringRepSpecific() {
     return ("\t => " + returnRegister.toString());

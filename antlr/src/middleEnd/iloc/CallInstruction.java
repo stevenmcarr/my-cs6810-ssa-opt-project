@@ -46,20 +46,6 @@ public class CallInstruction extends InvocationInstruction {
     return "call";
   }
 
-  public void setOperandTypes(Hashtable<String, Integer> typeMap) {
-    for (int i = 1; i < operands.size(); i++) {
-      VirtualRegisterOperand vr = (VirtualRegisterOperand) operands.elementAt(i);
-      Integer typeVal = (Integer) typeMap.get(vr.toString());
-      vr.setType(typeVal.intValue());
-    }
-  }
-
-  public int getOperandType(Operand operand) {
-    int index = operands.indexOf(operand);
-    VirtualRegisterOperand vr = (VirtualRegisterOperand) operands.elementAt(index);
-    return vr.getType();
-  }
-
   @Override
   protected String getStringRepSpecific() {
     return "";

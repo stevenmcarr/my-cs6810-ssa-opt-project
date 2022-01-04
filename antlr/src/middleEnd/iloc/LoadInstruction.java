@@ -38,16 +38,4 @@ public class LoadInstruction extends TwoAddressIlocInstruction {
     return "load";
   }
 
-  public static String getHash(VirtualRegisterOperand source) {
-    return "load" + source.toString();
-  }
-
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
 }

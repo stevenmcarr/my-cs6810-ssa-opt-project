@@ -24,36 +24,4 @@ import java.util.Hashtable;
  */
 public abstract class PseudoOpInstruction extends IlocInstruction {
 
-  public void setOperandTypes(Hashtable<String, Integer> typeMap) {
-  }
-
-  public boolean operandIsLValue(Operand operand) {
-    return false;
-  }
-
-  public boolean operandIsRValue(Operand operand) {
-    return false;
-  }
-
-  public void replaceOperandAtIndex(int index, Operand operand) {
-  }
-
-  public void replaceLValue(Operand operand) {
-  }
-
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
-
-  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-  }
-
-  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-  }
-
 }

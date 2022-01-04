@@ -53,17 +53,4 @@ public class JumpIInstruction extends OneAddressIlocInstruction {
     pw.println("\t" + getOpcode() + "\t-> " + source.toString());
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
 }

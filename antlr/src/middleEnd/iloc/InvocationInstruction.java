@@ -26,25 +26,4 @@ public abstract class InvocationInstruction extends VariableAddressIlocInstructi
 
   private static int counter = 0;
 
-  /**
-   * Each call site gets a unique hash key.
-   *
-   * @param valueNums Vector
-   * @return String
-   */
-  public String getHashKey(Vector<Integer> valueNums) {
-    String hashKey = getOpcode() + counter++;
-    for (int i = 0; i < valueNums.size(); i++)
-      hashKey += ("&" + ((Integer) valueNums.elementAt(i)).toString());
-
-    return hashKey;
-  }
-
-  public boolean isExpression() {
-    return false;
-  }
-
-  public boolean isNecessary() {
-    return true;
-  }
 }

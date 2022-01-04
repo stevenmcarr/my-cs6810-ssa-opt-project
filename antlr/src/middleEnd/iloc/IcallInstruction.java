@@ -53,40 +53,9 @@ public class IcallInstruction extends InvocationInstruction {
     return "icall";
   }
 
-  public void setOperandTypes(Hashtable<String, Integer> typeMap) {
-    for (int i = 1; i < operands.size(); i++) {
-      VirtualRegisterOperand vr = (VirtualRegisterOperand) operands.elementAt(i);
-      Integer typeVal = (Integer) typeMap.get(vr.toString());
-      vr.setType(typeVal.intValue());
-    }
-    setType(typeMap, returnRegister);
-  }
-
-  public int getOperandType(Operand operand) {
-    int index = operands.indexOf(operand);
-
-    if (index != -1) {
-      VirtualRegisterOperand vr = (VirtualRegisterOperand) operands.elementAt(index);
-      return vr.getType();
-    } else
-      return Operand.INTEGER_TYPE;
-  }
-
-  public static String getHash(LabelOperand name, Vector<Operand> operands) {
-    String key = new String("icall" + name.getLabel()) + (counter++);
-    for (int i = 0; i < operands.size(); i++)
-      key += ((Operand) operands.elementAt(i)).toString();
-
-    return key;
-  }
-
   @Override
   protected String getStringRepSpecific() {
     return "\t => " + returnRegister.toString();
   }
-  
-  public void replaceLValue(Operand operand) {
-    lValue = (VirtualRegisterOperand) operand;
-    returnRegister = lValue;
-  }
+
 }

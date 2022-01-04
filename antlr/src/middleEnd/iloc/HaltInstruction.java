@@ -25,24 +25,4 @@ public class HaltInstruction extends NoAddressIlocInstruction {
 		return "halt";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see middleEnd.iloc.IlocInstruction#getOperandType(middleEnd.iloc.Operand)
-	 */
-	@Override
-	protected int getOperandType(Operand operand) {
-		return 0;
-	}
-
-	@Override
-	public boolean isExpression() {
-		return false;
-	}
-
-	@Override
-	public boolean isNecessary() {
-		return true;
-	}
-
 }

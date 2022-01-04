@@ -77,37 +77,4 @@ public class FramePseudoOp extends PseudoOpInstruction {
     return parameters;
   }
 
-  public void setOperandTypes(Hashtable<String, Integer> typeMap) {
-    for (int i = 0; i < parameters.size(); i++) {
-      VirtualRegisterOperand vr = (VirtualRegisterOperand) parameters.elementAt(i);
-      setType(typeMap, vr);
-    }
-  }
-
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  public void replaceOperandAtIndex(int index, Operand operand) {
-    rValues.set(index, operand);
-    int rValIndex = parameters.indexOf(operand);
-    if (rValIndex >= 0)
-      parameters.set(rValIndex, operand);
-  }
-
-  @Override
-  public void replaceLValue(Operand operand) {
-    replaceLValue(operand, 0);
-  }
-
-  public void replaceLValue(Operand op, int index) {
-    lValues.set(index, (VirtualRegisterOperand) op);
-    if (index > 1) { // the first 2 lvalues are vr0 and vr1, the rest are paramenters
-      parameters.set(index-2,op);
-    }
-  }
-
-  public void updateFrameSize(int frameSize) {
-    localSize = frameSize;
-  }
 }

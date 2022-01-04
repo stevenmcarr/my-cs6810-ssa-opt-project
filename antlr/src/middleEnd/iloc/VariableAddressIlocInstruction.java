@@ -50,39 +50,6 @@ public abstract class VariableAddressIlocInstruction extends IlocInstruction {
     return operands;
   }
 
-  public boolean operandIsRValue(Operand operand) {
-    return operands.contains(operand);
-  }
-
-  public boolean operandIsLValue(Operand operand) {
-    return false;
-  }
-
   protected abstract String getStringRepSpecific();
 
-  public void replaceOperandAtIndex(int index, Operand operand) {
-    operands.set(index, operand);
-    rValues.set(index, operand);
-  }
-
-  public void replaceLValue(Operand operand) {
-    lValue = (VirtualRegisterOperand) operand;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return false;
-  }
-
-  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-    int index;
-    if ((index = operands.indexOf(vr)) >= 0)
-      operands.set(index,lro);
-  }
-
-  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-    if (lValue == vr) {
-        lValue = lro;
-    }
-  }
 }

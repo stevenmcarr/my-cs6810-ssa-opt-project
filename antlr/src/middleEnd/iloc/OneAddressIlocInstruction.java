@@ -40,38 +40,4 @@ public abstract class OneAddressIlocInstruction extends IlocInstruction {
     return source;
   }
 
-  public void setOperandTypes(Hashtable<String, Integer> typeMap) {
-    setType(typeMap, source);
-  }
-
-  public boolean operandIsLValue(Operand operand) {
-    return false;
-  }
-
-  public boolean operandIsRValue(Operand operand) {
-    return operand == source;
-  }
-
-  public void replaceOperandAtIndex(int index, Operand operand) {
-    if (index == 0) {
-      source = operand;
-      rValues.set(index, operand);
-    }
-  }
-
-  public void replaceLValue(Operand operand) {
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return false;
-  }
-
-  protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-      if (vr == source)
-        source = lro;
-  }
-
-  protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-  }
 }

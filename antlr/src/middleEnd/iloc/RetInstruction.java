@@ -34,12 +34,4 @@ public class RetInstruction extends NoAddressIlocInstruction {
     return "ret";
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
 }

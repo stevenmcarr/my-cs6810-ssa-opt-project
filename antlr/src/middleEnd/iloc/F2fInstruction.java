@@ -1,26 +1,32 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
  */
 public class F2fInstruction extends CopyInstruction {
-  public F2fInstruction(VirtualRegisterOperand source,
-                        VirtualRegisterOperand dest) {
+  public F2fInstruction(VirtualRegisterOperand source, VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
     lValue = dest;
     rValues.add(source);
   }
-
 
   /**
    * getOpcode
@@ -32,11 +38,4 @@ public class F2fInstruction extends CopyInstruction {
     return "f2f";
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.FLOAT_TYPE;
-  }
-
-  public static String getHash(VirtualRegisterOperand source) {
-    return "f2f"+source.toString();
-  }
 }

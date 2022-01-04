@@ -38,14 +38,4 @@ public class F2iInstruction extends CopyInstruction {
     return "f2i";
   }
 
-  public static String getHash(VirtualRegisterOperand source) {
-    return "f2i" + source.toString();
-  }
-
-  protected int getOperandType(Operand operand) {
-    if (dest == operand)
-      return Operand.INTEGER_TYPE;
-    else
-      return Operand.FLOAT_TYPE;
-  }
 }

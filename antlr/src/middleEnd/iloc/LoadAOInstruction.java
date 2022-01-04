@@ -41,12 +41,4 @@ public class LoadAOInstruction extends ThreeAddressIlocInstruction {
     return "loadAO";
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
 }

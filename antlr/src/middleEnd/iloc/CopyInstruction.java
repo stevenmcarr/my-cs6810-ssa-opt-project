@@ -22,7 +22,4 @@ package middleEnd.iloc;
  */
 public abstract class CopyInstruction extends TwoAddressIlocInstruction {
 
-    public boolean isExpression() {
-        return false;
-    }
 }

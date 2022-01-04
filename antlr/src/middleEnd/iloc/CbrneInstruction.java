@@ -59,26 +59,4 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
     return "cbrne";
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
-
-  public IlocInstruction constantFold(Vector<Integer> constVals) {
-    Integer lOpVal = (Integer) constVals.elementAt(0);
-
-    if (lOpVal.intValue() == 0)
-      return new JumpIInstruction((LabelOperand) dest);
-    else
-      return new NopInstruction();
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return false;
-  }
 }

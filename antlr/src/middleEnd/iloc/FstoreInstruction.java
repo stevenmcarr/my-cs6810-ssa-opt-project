@@ -38,24 +38,4 @@ public class FstoreInstruction extends TwoAddressIlocInstruction {
     return "fstore";
   }
 
-  protected int getOperandType(Operand operand) {
-    if (source == operand)
-      return Operand.FLOAT_TYPE;
-    else
-      return Operand.INTEGER_TYPE;
-  }
-
-  public static String getHash(VirtualRegisterOperand source) {
-    return "fstore" + source.toString();
-  }
-
-  @Override
-  public boolean isExpression() {
-    return false;
-  }
-
-  @Override
-  public boolean isNecessary() {
-    return true;
-  }
 }

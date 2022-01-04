@@ -62,7 +62,4 @@ public class GlobalPseudoOp extends PseudoOpInstruction {
     return align;
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.INTEGER_TYPE;
-  }
 }

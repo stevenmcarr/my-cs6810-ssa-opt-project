@@ -56,7 +56,4 @@ public class FloatPseudoOp extends PseudoOpInstruction {
     return val;
   }
 
-  protected int getOperandType(Operand operand) {
-    return Operand.FLOAT_TYPE;
-  }
 }
