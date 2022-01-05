@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.codeGeneration.generateComments": true,
+		"java.project.referencedLibraries": [
+			"antlr/lib/**/*.jar"
+		]
+	}
+}
