@@ -26,10 +26,6 @@ public class CodeGenerator {
 
 	private static void generateOptimizationPasses() {
 		CodeGenerator.registerOptimizationPass("-lvn", "middleEnd.lvn.LocalValueNumbering");
-		CodeGenerator.registerOptimizationPass("-dbre", "middleEnd.dbre.DominatorBasedRedundancyElimination");
-		CodeGenerator.registerOptimizationPass("-dce", "middleEnd.dce.DeadCodeElimination");
-		CodeGenerator.registerOptimizationPass("-ruc", "middleEnd.dce.RemoveUnreachableCode");
-		CodeGenerator.registerOptimizationPass("-ra", "backend.ra.ChaitinBriggs");
 	}
 
 	private static String getPassClassName(String flag) {
@@ -68,7 +64,8 @@ public class CodeGenerator {
 				String passString = null;
 				try {
 					cl = (Class<OptimizationPass>) Class.forName(passName);
-					Constructor<OptimizationPass> con = cl.getConstructor(String.class, String.class);
+					Constructor<OptimizationPass> con = cl.getConstructor(String.class,
+							String.class);
 					passString = args[i].substring(1, args[i].length());
 					pass = (OptimizationPass) con.newInstance(prevPass, passString);
 				} catch (ClassNotFoundException e) {
