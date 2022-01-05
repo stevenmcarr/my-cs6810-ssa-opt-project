@@ -29,7 +29,6 @@ public class CodeGenerator {
 		CodeGenerator.registerOptimizationPass("-dbre", "middleEnd.dbre.DominatorBasedRedundancyElimination");
 		CodeGenerator.registerOptimizationPass("-dce", "middleEnd.dce.DeadCodeElimination");
 		CodeGenerator.registerOptimizationPass("-ruc", "middleEnd.dce.RemoveUnreachableCode");
-		CodeGenerator.registerOptimizationPass("-ra", "backend.ra.ChaitinBriggs");
 	}
 
 	private static String getPassClassName(String flag) {
