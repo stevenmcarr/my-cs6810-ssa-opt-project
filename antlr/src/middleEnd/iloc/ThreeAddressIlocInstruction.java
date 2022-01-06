@@ -2,6 +2,8 @@ package middleEnd.iloc;
 
 import java.util.Hashtable;
 
+import javax.lang.model.SourceVersion;
+
 /**
  * <p>
  * Title: Nolife Compiler
@@ -85,16 +87,23 @@ public abstract class ThreeAddressIlocInstruction extends IlocInstruction {
   }
 
   protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-      if (vr == source1)
-        source1 = lro;
-      else if (vr == source2)
-        source2 = lro;
+    if (vr == source1)
+      source1 = lro;
+    else if (vr == source2)
+      source2 = lro;
   }
 
   protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
     if (dest == vr) {
-        dest = lro;
-        lValue = lro;
+      dest = lro;
+      lValue = lro;
     }
+  }
+
+  protected void copyInstanceVars(ThreeAddressIlocInstruction inst) {
+    inst.dest = dest.deepCopy();
+    inst.source1 = source1.deepCopy();
+    inst.source2 = source2.deepCopy();
+    super.copyInstanceVars(inst);
   }
 }

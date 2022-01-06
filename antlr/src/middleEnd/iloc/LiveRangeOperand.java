@@ -12,6 +12,9 @@ public class LiveRangeOperand extends VirtualRegisterOperand {
         lro.copyInstanceVars(this);
     }
 
+    public LiveRangeOperand() {
+    }
+
     public LiveRangeOperand(VirtualRegisterOperand vr) {
         super(vr.registerId);
         liveRangeId = numLiveRanges++;
@@ -37,11 +40,12 @@ public class LiveRangeOperand extends VirtualRegisterOperand {
 
     public Operand deepCopy() {
         LiveRangeOperand lro = new LiveRangeOperand(this);
-        super.copyInstanceVars(lro);
+        copyInstanceVars(lro);
         return lro;
     }
 
     protected void copyInstanceVars(LiveRangeOperand copy) {
         copy.liveRangeId = liveRangeId;
+        super.copyInstanceVars(copy);
     }
 }

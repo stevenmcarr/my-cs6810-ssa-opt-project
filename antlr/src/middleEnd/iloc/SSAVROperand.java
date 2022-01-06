@@ -14,6 +14,9 @@ public class SSAVROperand extends VirtualRegisterOperand {
         this.subscript = subscript;
     }
 
+    public SSAVROperand() {
+    }
+
     public int getSubscript() {
         return subscript;
     }
@@ -32,12 +35,13 @@ public class SSAVROperand extends VirtualRegisterOperand {
 
     @Override
     public Operand deepCopy() {
-        SSAVROperand svo = this.copy();
-        super.copyInstanceVars(svo);
+        SSAVROperand svo = new SSAVROperand();
+        copyInstanceVars(svo);
         return svo;
     }
 
     public void copyInstanceVars(SSAVROperand copy) {
         copy.subscript = subscript;
+        super.copyInstanceVars(copy);
     }
 }

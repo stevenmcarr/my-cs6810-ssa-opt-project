@@ -43,6 +43,9 @@ public class VirtualRegisterOperand extends Operand {
       maxVirtualRegister = registerId;
   }
 
+  public VirtualRegisterOperand() {
+  }
+
   public VirtualRegisterOperand copy() {
     return new VirtualRegisterOperand(registerId);
   }
@@ -89,13 +92,13 @@ public class VirtualRegisterOperand extends Operand {
       vr.addDef(inst);
     for (IlocInstruction inst : uses)
       vr.addUse(inst);
+    super.copyInstanceVars(vr);
   }
 
   @Override
   public Operand deepCopy() {
     VirtualRegisterOperand vr = new VirtualRegisterOperand(registerId);
     copyInstanceVars(vr);
-    super.copyInstanceVars(vr);
     return vr;
   }
 

@@ -104,8 +104,8 @@ public class PartialRedundancyElimination extends OptimizationPass {
 		IlocInstruction f = b.getFirstInst();
 		int index = -1;
 		while ((index = insertInBlock.nextSetBit(index + 1)) != -1) {
-			IlocInstruction inst = vrInstMap.get(new VirtualRegisterOperand(index));
-			// clone the instruction
+			IlocInstruction inst = vrInstMap.get(new VirtualRegisterOperand(index)).deepCopy();
+			// clone the instruction - add deepCopy to all instructions and operands
 			// insert an instruction before f
 		}
 	}

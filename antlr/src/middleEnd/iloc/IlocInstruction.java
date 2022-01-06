@@ -232,10 +232,10 @@ public abstract class IlocInstruction {
     copy.instId = numInst++;
 
     if (lValue != null)
-      copy.lValue = lValue.deepCopy();
+      copy.lValue = (VirtualRegisterOperand) lValue.deepCopy();
 
     for (VirtualRegisterOperand vr : lValues)
-      copy.lValues.add(vr.deepCopy());
+      copy.lValues.add((VirtualRegisterOperand) vr.deepCopy());
 
     for (Operand op : rValues)
       copy.rValues.add(op.deepCopy());

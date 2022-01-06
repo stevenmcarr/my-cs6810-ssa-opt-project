@@ -28,6 +28,9 @@ public class ConstantOperand extends ImmediateOperand {
     this.value = value;
   }
 
+  public ConstantOperand() {
+  }
+
   public ConstantOperand copy() {
     return new ConstantOperand(value);
   }
@@ -42,12 +45,13 @@ public class ConstantOperand extends ImmediateOperand {
 
   @Override
   public Operand deepCopy() {
-    Operand op = new ConstantOperand(value);
-    super.copyInstanceVars(op);
+    Operand op = new ConstantOperand();
+    copyInstanceVars(op);
     return op;
   }
 
   protected void copyInstanceVars(ConstantOperand copy) {
     copy.value = value;
+    super.copyInstanceVars(copy);
   }
 }
