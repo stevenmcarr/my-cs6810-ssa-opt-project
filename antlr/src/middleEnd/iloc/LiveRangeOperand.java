@@ -9,21 +9,21 @@ public class LiveRangeOperand extends VirtualRegisterOperand {
     public LiveRangeOperand(LiveRangeOperand lro) {
         super(lro.getRegisterId());
         liveRangeId = lro.getLiveRangeId();
-        lro.copyDefsUsesToVR(this);
+        lro.copyInstanceVars(this);
     }
 
     public LiveRangeOperand(VirtualRegisterOperand vr) {
         super(vr.registerId);
         liveRangeId = numLiveRanges++;
-        vr.copyDefsUsesToVR(this);
+        vr.copyInstanceVars(this);
     }
 
     public LiveRangeOperand(int vrId) {
         super(vrId);
         liveRangeId = numLiveRanges++;
-	}
+    }
 
-	public int getLiveRangeId() {
+    public int getLiveRangeId() {
         return liveRangeId;
     }
 
@@ -33,5 +33,15 @@ public class LiveRangeOperand extends VirtualRegisterOperand {
 
     public boolean equals(LiveRangeOperand lr) {
         return liveRangeId == lr.getLiveRangeId();
+    }
+
+    public Operand deepCopy() {
+        LiveRangeOperand lro = new LiveRangeOperand(this);
+        super.copyInstanceVars(lro);
+        return lro;
+    }
+
+    protected void copyInstanceVars(LiveRangeOperand copy) {
+        copy.liveRangeId = liveRangeId;
     }
 }

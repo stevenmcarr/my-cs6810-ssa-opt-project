@@ -1,13 +1,21 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
@@ -30,5 +38,16 @@ public class ConstantOperand extends ImmediateOperand {
 
   public String toString() {
     return Integer.toString(value);
+  }
+
+  @Override
+  public Operand deepCopy() {
+    Operand op = new ConstantOperand(value);
+    super.copyInstanceVars(op);
+    return op;
+  }
+
+  protected void copyInstanceVars(ConstantOperand copy) {
+    copy.value = value;
   }
 }

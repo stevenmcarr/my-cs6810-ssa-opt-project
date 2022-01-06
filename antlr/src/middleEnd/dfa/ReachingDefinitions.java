@@ -3,17 +3,15 @@ package middleEnd.dfa;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 
 import middleEnd.iloc.IlocInstruction;
 import middleEnd.iloc.VirtualRegisterOperand;
+import middleEnd.utils.BasicBlock;
 import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.DataFlowSet;
-import middleEnd.utils.BasicBlock;
-import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.VRInstPair;
 import middleEnd.utils.VRInstPairSet;
 

@@ -211,18 +211,34 @@ public abstract class IlocInstruction {
     int index;
     if (lValues != null)
       if ((index = lValues.indexOf(vr)) >= 0) {
-        lValues.set(index,lro);
+        lValues.set(index, lro);
       }
-    assignLRToLValue(vr,lro);
+    assignLRToLValue(vr, lro);
 
     if (rValues != null)
       if ((index = rValues.indexOf(vr)) >= 0)
-        rValues.set(index,lro);
-    
-    assignLRToRValue(vr,lro);
+        rValues.set(index, lro);
+
+    assignLRToRValue(vr, lro);
   }
 
   protected abstract void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro);
 
   protected abstract void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro);
+
+  public abstract IlocInstruction deepCopy();
+
+  protected void copyInstanceVars(IlocInstruction copy) {
+    copy.instId = numInst++;
+
+    if (lValue != null)
+      copy.lValue = lValue.deepCopy();
+
+    for (VirtualRegisterOperand vr : lValues)
+      copy.lValues.add(vr.deepCopy());
+
+    for (Operand op : rValues)
+      copy.rValues.add(op.deepCopy());
+  }
+
 }
