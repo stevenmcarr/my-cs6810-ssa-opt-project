@@ -17,16 +17,12 @@ import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.VRInstPair;
 import middleEnd.utils.VRInstPairSet;
 
-public class ReachingDefinitions extends IterativeFramework {
+public class ReachingDefinitions extends ForwardDataflowProblem {
 
     private Cfg g;
     private VRInstPairSet emptySet;
     private VRInstPairSet universe;
-    private BasicBlockDFMap inMap = new BasicBlockDFMap();
-    private BasicBlockDFMap outMap = new BasicBlockDFMap();
-    private BasicBlockDFMap genMap = new BasicBlockDFMap();
-    private BasicBlockDFMap prsvMap = new BasicBlockDFMap();
-    private HashMap<String, LinkedList<VRInstPair>> defMap = new HashMap<String,LinkedList<VRInstPair>>();
+    private HashMap<String, LinkedList<VRInstPair>> defMap = new HashMap<String, LinkedList<VRInstPair>>();
     private HashMap<Integer, VRInstPair> pairMap = new HashMap<Integer, VRInstPair>();
 
     public ReachingDefinitions(Cfg g) {
@@ -41,7 +37,7 @@ public class ReachingDefinitions extends IterativeFramework {
                     VRInstPair vrp = (new VRInstPair()).addVR(vr).addInst(i);
                     universe.set(vrp);
                     addToDefMap(vr, vrp);
-                    pairMap.put(vrp.getPairId(),vrp);
+                    pairMap.put(vrp.getPairId(), vrp);
                 }
             }
         }
@@ -64,7 +60,7 @@ public class ReachingDefinitions extends IterativeFramework {
         LinkedList<VRInstPair> l = defMap.get(vr.toString());
         VRInstPair pair = null;
         for (VRInstPair vrp : l) {
-            if (vrp.isPairEqual(vr,i)) {
+            if (vrp.isPairEqual(vr, i)) {
                 pair = vrp;
                 break;
             }
@@ -83,7 +79,7 @@ public class ReachingDefinitions extends IterativeFramework {
             while (bIter.hasPrevious()) {
                 IlocInstruction i = bIter.previous();
                 for (VirtualRegisterOperand vr : i.getAllLValues()) {
-                    VRInstPair pair = findPair(vr,i);
+                    VRInstPair pair = findPair(vr, i);
                     if (prsv.get(pair))
                         gen.set(pair);
                     LinkedList<VRInstPair> l = defMap.get(vr.toString());
@@ -110,16 +106,6 @@ public class ReachingDefinitions extends IterativeFramework {
     }
 
     @Override
-    public DataFlowSet getCurrentMeetResult(BasicBlock n) {
-        return inMap.get(n);
-    }
-
-    @Override
-    public void setMeetResult(BasicBlock n, DataFlowSet vrs) {
-        inMap.put(n, vrs);
-    }
-
-    @Override
     public DataFlowSet applyTransferFunc(BasicBlock n) {
         VRInstPairSet result = emptySet.clone();
         result.or(inMap.get(n));
@@ -128,43 +114,17 @@ public class ReachingDefinitions extends IterativeFramework {
         return result;
     }
 
-    @Override
-    public void setTransferResult(BasicBlock n, DataFlowSet vrs) {
-        outMap.put(n, vrs);
-    }
-
-    @Override
-    public List<CfgNode> getNodeOrder(Cfg g) {
-        return g.getPreOrder();
-    }
-
-    public BasicBlockDFMap getInMap() {
-        return inMap;
-    }
-
-    public BasicBlockDFMap getOutMap() {
-        return outMap;
-    }
-
-    public BasicBlockDFMap getGenMap() {
-        return genMap;
-    }
-
-    public BasicBlockDFMap getPrsvMap() {
-        return prsvMap;
-    }
-
     public HashMap<String, LinkedList<VRInstPair>> getDefMap() {
         return defMap;
     }
 
-    public HashMap<Integer,VRInstPair> getPairMap() {
+    public HashMap<Integer, VRInstPair> getPairMap() {
         return pairMap;
     }
 
     public void emitRD() {
         for (CfgNode n : g.getPostOrder()) {
-            BasicBlock b = (BasicBlock)n;
+            BasicBlock b = (BasicBlock) n;
             System.out.println("Basic Block :" + b.getNodeId());
 
             if (inMap.get(b) != null)

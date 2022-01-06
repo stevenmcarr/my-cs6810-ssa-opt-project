@@ -12,21 +12,17 @@ import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
 import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.Cfg;
+import middleEnd.utils.CfgEdge;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.DataFlowSet;
 import middleEnd.utils.VRInstPair;
 import middleEnd.utils.VirtualRegisterSet;
 
-public class AnticipationAnalysis extends IterativeFramework {
+public class AnticipationAnalysis extends BackwardDataFlowProblem {
 
 	private VirtualRegisterSet emptySet;
 	private VirtualRegisterSet universe;
-	private BasicBlockDFMap inMap = new BasicBlockDFMap();
-	private BasicBlockDFMap outMap = new BasicBlockDFMap();
-	private BasicBlockDFMap antlocMap = new BasicBlockDFMap();
-	private BasicBlockDFMap killMap = new BasicBlockDFMap();
-	private HashMap<String, LinkedList<VRInstPair>> useMap = new HashMap<String, LinkedList<VRInstPair>>();
-	private HashMap<Integer, VRInstPair> pairMap = new HashMap<Integer, VRInstPair>();
+	private HashMap<String, LinkedList<IlocInstruction>> useMap = new HashMap<String, LinkedList<IlocInstruction>>();
 
 	public AnticipationAnalysis(Cfg g, int size) {
 		emptySet = new VirtualRegisterSet(size + 1);
@@ -37,99 +33,79 @@ public class AnticipationAnalysis extends IterativeFramework {
 			Iterator<IlocInstruction> bIter = b.iterator();
 			while (bIter.hasNext()) {
 				IlocInstruction i = bIter.next();
-				for (Operand op : i.getRValues()) {
-					if (op instanceof VirtualRegisterOperand) {
-						VirtualRegisterOperand vr = (VirtualRegisterOperand) op;
-						VRInstPair vrp = (new VRInstPair()).addVR(vr).addInst(i);
-						addToUseMap(vr, vrp);
-						pairMap.put(vrp.getPairId(), vrp);
+				if (i.isExpression()) {
+					for (Operand op : i.getRValues()) {
+						if (op instanceof VirtualRegisterOperand) {
+							VirtualRegisterOperand vr = (VirtualRegisterOperand) op;
+							addToUseMap(vr, i);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	private void addToUseMap(VirtualRegisterOperand vr, VRInstPair vrp) {
+	private void addToUseMap(VirtualRegisterOperand vr, IlocInstruction i) {
 		String key = vr.toString();
 		if (!useMap.containsKey(key)) {
-			LinkedList<VRInstPair> l = new LinkedList<VRInstPair>();
-			l.add(vrp);
+			LinkedList<IlocInstruction> l = new LinkedList<IlocInstruction>();
+			l.add(i);
 			useMap.put(key, l);
 		} else {
-			useMap.get(key).add(vrp);
+			useMap.get(key).add(i);
 		}
-	}
-
-	private VRInstPair findPair(VirtualRegisterOperand vr, IlocInstruction i) {
-		LinkedList<VRInstPair> l = useMap.get(vr.toString());
-		VRInstPair pair = null;
-		for (VRInstPair vrp : l) {
-			if (vrp.isPairEqual(vr, i)) {
-				pair = vrp;
-				break;
-			}
-		}
-		return pair;
 	}
 
 	@Override
 	public void initialize(Cfg g) {
 		for (CfgNode n : getNodeOrder(g)) {
 			BasicBlock b = (BasicBlock) n;
-			VirtualRegisterSet out = emptySet.clone();
+			VirtualRegisterSet out = universe.clone();
 			VirtualRegisterSet antloc = emptySet.clone();
-			VirtualRegisterSet kill = emptySet.clone();
+			VirtualRegisterSet transp = universe.clone();
 			Iterator<IlocInstruction> bIter = b.iterator();
 			while (bIter.hasNext()) {
 				IlocInstruction inst = bIter.next();
-				Vector<VirtualRegisterOperand> lv = inst.getAllLValues();
-				for (VirtualRegisterOperand op : lv) {
-					if (!antloc.get(op) && !kill.get(op))
+				for (VirtualRegisterOperand op : inst.getAllLValues()) {
+					if (!antloc.get(op) && transp.get(op))
 						antloc.set(op);
+					for (IlocInstruction i : useMap.get(op))
+						for (VirtualRegisterOperand vr : i.getAllLValues())
+							transp.clear(vr);
+
 				}
 
 			}
 			outMap.put(b, out);
-			antlocMap.put(b, antloc);
-			killMap.put(b, kill);
+			genMap.put(b, antloc);
+			prsvMap.put(b, transp);
 			setTransferResult(b, applyTransferFunc(b));
 		}
 	}
 
 	@Override
 	public DataFlowSet meet(BasicBlock n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		VirtualRegisterSet result;
+		if (n.getSuccs().size() == 0) {
+			result = universe.clone();
+			for (CfgEdge e : n.getSuccs()) {
+				BasicBlock s = (BasicBlock) e.getSucc();
+				result.and(inMap.get(s));
+			}
+		} else {
+			result = emptySet.clone();
+		}
 
-	@Override
-	public DataFlowSet getCurrentMeetResult(BasicBlock n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setMeetResult(BasicBlock n, DataFlowSet vrs) {
-		// TODO Auto-generated method stub
-
+		return result;
 	}
 
 	@Override
 	public DataFlowSet applyTransferFunc(BasicBlock n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setTransferResult(BasicBlock n, DataFlowSet vrs) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public List<CfgNode> getNodeOrder(Cfg g) {
-		// TODO Auto-generated method stub
-		return null;
+		VirtualRegisterSet result = emptySet.clone();
+		result.or(outMap.get(n));
+		result.and(prsvMap.get(n));
+		result.or(genMap.get(n));
+		return result;
 	}
 
 }
