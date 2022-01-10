@@ -78,7 +78,7 @@ public class BasicBlock extends CfgNode {
     newInst.setBlock(this);
   }
 
-  public void insertAfterWithIterator(ListIterator<IlocInstruction> iter, 
+  public void insertAfterWithIterator(ListIterator<IlocInstruction> iter,
       IlocInstruction inst, IlocInstruction newInst) {
     routine.insertAfter(inst, newInst);
     newInst.setBlock(this);
@@ -210,5 +210,9 @@ public class BasicBlock extends CfgNode {
     for (IlocInstruction inst : instructions) {
       System.out.println(inst.getStringRep());
     }
+  }
+
+  public String getBlockLabel() {
+    return getFirstInst().getLabel();
   }
 }

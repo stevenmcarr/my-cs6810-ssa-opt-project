@@ -26,6 +26,9 @@ public class CreadInstruction extends OneAddressIlocInstruction {
     lValue = source;
   }
 
+  public CreadInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -68,5 +71,16 @@ public class CreadInstruction extends OneAddressIlocInstruction {
       source = lro;
       lValue = lro;
     }
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    CreadInstruction inst = new CreadInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(CreadInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

@@ -26,6 +26,9 @@ public class IretInstruction extends OneAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public IretInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -48,5 +51,16 @@ public class IretInstruction extends OneAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return true;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    IretInstruction inst = new IretInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(IretInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

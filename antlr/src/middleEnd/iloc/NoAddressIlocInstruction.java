@@ -64,4 +64,8 @@ public abstract class NoAddressIlocInstruction extends IlocInstruction {
 
   protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
   }
+
+  protected void copyInstanceVars(IlocInstruction copy) {
+    super.copyInstanceVars(copy);
+  }
 }

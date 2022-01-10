@@ -30,7 +30,7 @@ public class VirtualRegisterOperand extends Operand {
   public static final int FLOAT_RET_REG = 3;
   public static final int FREE_REG = 4;
   public static int maxVirtualRegister = 4;
-  
+
   private LinkedList<IlocInstruction> defs = new LinkedList<IlocInstruction>();
   private LinkedList<IlocInstruction> uses = new LinkedList<IlocInstruction>();
 
@@ -41,6 +41,9 @@ public class VirtualRegisterOperand extends Operand {
     this.registerId = registerId;
     if (registerId > maxVirtualRegister)
       maxVirtualRegister = registerId;
+  }
+
+  public VirtualRegisterOperand() {
   }
 
   public VirtualRegisterOperand copy() {
@@ -83,16 +86,19 @@ public class VirtualRegisterOperand extends Operand {
     return defs;
   }
 
-  public void copyDefsUsesToVR(VirtualRegisterOperand vr) {
+  public void copyInstanceVars(VirtualRegisterOperand vr) {
+    vr.registerId = registerId;
     for (IlocInstruction inst : defs)
       vr.addDef(inst);
     for (IlocInstruction inst : uses)
       vr.addUse(inst);
+    super.copyInstanceVars(vr);
   }
 
-  public VirtualRegisterOperand deepCopy() {
+  @Override
+  public Operand deepCopy() {
     VirtualRegisterOperand vr = new VirtualRegisterOperand(registerId);
-    copyDefsUsesToVR(vr);
+    copyInstanceVars(vr);
     return vr;
   }
 

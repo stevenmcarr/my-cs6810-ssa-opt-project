@@ -28,6 +28,9 @@ public class FstoreInstruction extends TwoAddressIlocInstruction {
     rValues.add(dest);
   }
 
+  public FstoreInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -57,5 +60,16 @@ public class FstoreInstruction extends TwoAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return true;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FstoreInstruction inst = new FstoreInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FstoreInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

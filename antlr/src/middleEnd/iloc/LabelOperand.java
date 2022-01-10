@@ -28,6 +28,9 @@ public class LabelOperand extends ImmediateOperand {
     this.label = label;
   }
 
+  public LabelOperand() {
+  }
+
   public String getLabel() {
     return label;
   }
@@ -40,5 +43,17 @@ public class LabelOperand extends ImmediateOperand {
 
   public static LabelOperand makeLabelOperand() {
     return new LabelOperand("GL" + newLabelId++);
+  }
+
+  @Override
+  public Operand deepCopy() {
+    LabelOperand lo = new LabelOperand();
+    copyInstanceVars(lo);
+    return lo;
+  }
+
+  public void copyInstanceVars(LabelOperand copy) {
+    copy.label = new String(label);
+    super.copyInstanceVars(copy);
   }
 }

@@ -28,6 +28,9 @@ public class F2iInstruction extends CopyInstruction {
     rValues.add(source);
   }
 
+  public F2iInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -47,5 +50,16 @@ public class F2iInstruction extends CopyInstruction {
       return Operand.INTEGER_TYPE;
     else
       return Operand.FLOAT_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    F2iInstruction inst = new F2iInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(F2iInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

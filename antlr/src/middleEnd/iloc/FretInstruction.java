@@ -26,6 +26,9 @@ public class FretInstruction extends OneAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public FretInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -48,5 +51,16 @@ public class FretInstruction extends OneAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return true;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FretInstruction inst = new FretInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FretInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

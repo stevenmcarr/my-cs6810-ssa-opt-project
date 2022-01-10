@@ -23,6 +23,9 @@ public class Cmp_leInstruction extends ThreeAddressIlocInstruction {
 		rValues.add(source2);
 	}
 
+	public Cmp_leInstruction() {
+	}
+
 	/**
 	 * getOpcode
 	 *
@@ -35,11 +38,22 @@ public class Cmp_leInstruction extends ThreeAddressIlocInstruction {
 
 	public static String getHash(VirtualRegisterOperand src1,
 			VirtualRegisterOperand src2) {
-		return "cmp_LE"+src1.toString()+src2.toString();
+		return "cmp_LE" + src1.toString() + src2.toString();
 	}
 
 	protected int getOperandType(Operand operand) {
 		return Operand.INTEGER_TYPE;
+	}
+
+	@Override
+	public IlocInstruction deepCopy() {
+		Cmp_leInstruction inst = new Cmp_leInstruction();
+		copyInstanceVars(inst);
+		return inst;
+	}
+
+	protected void copyInstanceVars(Cmp_leInstruction inst) {
+		super.copyInstanceVars(inst);
 	}
 
 }

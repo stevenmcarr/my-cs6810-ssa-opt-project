@@ -1,13 +1,21 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
@@ -15,11 +23,14 @@ package middleEnd.iloc;
 public class TesteqInstruction extends TestInstruction {
 
   public TesteqInstruction(VirtualRegisterOperand source,
-                           VirtualRegisterOperand dest) {
+      VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
     lValue = dest;
     rValues.add(source);
+  }
+
+  public TesteqInstruction() {
   }
 
   /**
@@ -33,15 +44,26 @@ public class TesteqInstruction extends TestInstruction {
   }
 
   public static String getHash(VirtualRegisterOperand src) {
-    return "testeq"+src.toString();
+    return "testeq" + src.toString();
   }
 
   public TestInstruction genComplementInst() {
-    return new TestneInstruction(((VirtualRegisterOperand)source).copy(),
-                                 ((VirtualRegisterOperand)dest).copy());
+    return new TestneInstruction(((VirtualRegisterOperand) source).copy(),
+        ((VirtualRegisterOperand) dest).copy());
   }
 
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    TesteqInstruction inst = new TesteqInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(TesteqInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

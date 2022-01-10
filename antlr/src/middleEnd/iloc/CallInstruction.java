@@ -36,6 +36,9 @@ public class CallInstruction extends InvocationInstruction {
     }
   }
 
+  public CallInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -63,5 +66,16 @@ public class CallInstruction extends InvocationInstruction {
   @Override
   protected String getStringRepSpecific() {
     return "";
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    CallInstruction inst = new CallInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(CallInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

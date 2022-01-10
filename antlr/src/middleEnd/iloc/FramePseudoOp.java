@@ -40,6 +40,9 @@ public class FramePseudoOp extends PseudoOpInstruction {
     }
   }
 
+  public FramePseudoOp() {
+  }
+
   /**
    * getOpcode
    *
@@ -103,11 +106,30 @@ public class FramePseudoOp extends PseudoOpInstruction {
   public void replaceLValue(Operand op, int index) {
     lValues.set(index, (VirtualRegisterOperand) op);
     if (index > 1) { // the first 2 lvalues are vr0 and vr1, the rest are paramenters
-      parameters.set(index-2,op);
+      parameters.set(index - 2, op);
     }
   }
 
   public void updateFrameSize(int frameSize) {
     localSize = frameSize;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FramePseudoOp inst = new FramePseudoOp();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FramePseudoOp inst) {
+    inst.name = new String(name);
+    inst.localSize = localSize;
+    inst.parameters = new Vector<Operand>();
+    for (Operand op : parameters) {
+      Operand newOp = op.deepCopy();
+      inst.parameters.add(newOp);
+    }
+
+    super.copyInstanceVars(inst);
   }
 }

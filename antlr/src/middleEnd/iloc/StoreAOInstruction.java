@@ -33,6 +33,9 @@ public class StoreAOInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source2);
   }
 
+  public StoreAOInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -69,9 +72,20 @@ public class StoreAOInstruction extends ThreeAddressIlocInstruction {
       dest = operand;
     else if (index == 1)
       source1 = operand;
-    else 
+    else
       source2 = operand;
     rValues.set(index, operand);
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    StoreAOInstruction inst = new StoreAOInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(StoreAOInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 
 }

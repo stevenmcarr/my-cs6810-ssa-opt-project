@@ -26,6 +26,9 @@ public class FreadInstruction extends OneAddressIlocInstruction {
     lValue = source;
   }
 
+  public FreadInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -68,5 +71,16 @@ public class FreadInstruction extends OneAddressIlocInstruction {
       source = lro;
       lValue = lro;
     }
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FreadInstruction inst = new FreadInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FreadInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

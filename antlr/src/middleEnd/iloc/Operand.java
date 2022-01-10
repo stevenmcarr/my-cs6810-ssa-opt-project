@@ -36,4 +36,10 @@ public abstract class Operand {
     return operandType;
   }
 
+  public abstract Operand deepCopy();
+
+  protected void copyInstanceVars(Operand copy) {
+    copy.operandType = operandType;
+  }
+
 }

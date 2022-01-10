@@ -47,4 +47,8 @@ public abstract class InvocationInstruction extends VariableAddressIlocInstructi
   public boolean isNecessary() {
     return true;
   }
+
+  public void copyInstanceVars(IlocInstruction copy) {
+    super.copyInstanceVars(copy);
+  }
 }

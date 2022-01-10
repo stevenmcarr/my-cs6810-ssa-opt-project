@@ -30,6 +30,9 @@ public class CompInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source2);
   }
 
+  public CompInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -46,6 +49,17 @@ public class CompInstruction extends ThreeAddressIlocInstruction {
 
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    CompInstruction inst = new CompInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(CompInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 
 }

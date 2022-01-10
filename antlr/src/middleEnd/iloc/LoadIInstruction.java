@@ -28,6 +28,9 @@ public class LoadIInstruction extends CopyInstruction {
     rValues.add(source);
   }
 
+  public LoadIInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -49,5 +52,16 @@ public class LoadIInstruction extends CopyInstruction {
   @Override
   public boolean isExpression() {
     return true;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    LoadIInstruction inst = new LoadIInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(LoadIInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

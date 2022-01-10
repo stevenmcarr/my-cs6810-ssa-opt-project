@@ -30,6 +30,9 @@ public class FstoreAIInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source2);
   }
 
+  public FstoreAIInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -64,5 +67,16 @@ public class FstoreAIInstruction extends ThreeAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return true;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FstoreAIInstruction inst = new FstoreAIInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FstoreAIInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

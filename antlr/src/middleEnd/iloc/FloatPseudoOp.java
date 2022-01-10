@@ -30,6 +30,9 @@ public class FloatPseudoOp extends PseudoOpInstruction {
     this.val = val;
   }
 
+  public FloatPseudoOp() {
+  }
+
   /**
    * getOpcode
    *
@@ -58,5 +61,18 @@ public class FloatPseudoOp extends PseudoOpInstruction {
 
   protected int getOperandType(Operand operand) {
     return Operand.FLOAT_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FloatPseudoOp inst = new FloatPseudoOp();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FloatPseudoOp inst) {
+    inst.name = new String(name);
+    inst.val = val;
+    super.copyInstanceVars(inst);
   }
 }

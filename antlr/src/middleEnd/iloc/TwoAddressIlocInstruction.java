@@ -23,8 +23,9 @@ import java.util.Hashtable;
  * @version 1.0
  */
 public abstract class TwoAddressIlocInstruction extends IlocInstruction {
-  Operand source;
-  Operand dest;
+
+  protected Operand source;
+  protected Operand dest;
 
   public String getStringRep() {
     String rep = "";
@@ -79,14 +80,21 @@ public abstract class TwoAddressIlocInstruction extends IlocInstruction {
   }
 
   protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-      if (vr == source)
-        source = lro;
+    if (vr == source)
+      source = lro;
   }
 
   protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
     if (dest == vr) {
-        dest = lro;
-        lValue = lro;
+      dest = lro;
+      lValue = lro;
     }
   }
+
+  protected void copyInstanceVars(TwoAddressIlocInstruction copy) {
+    copy.source = source;
+    copy.dest = dest;
+    super.copyInstanceVars(copy);
+  }
+
 }

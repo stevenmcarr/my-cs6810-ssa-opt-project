@@ -2,12 +2,34 @@ package middleEnd.dfa;
 
 import java.util.List;
 
+import middleEnd.utils.BasicBlock;
+import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgNode;
-import middleEnd.utils.BasicBlock;
 import middleEnd.utils.DataFlowSet;
 
 public abstract class IterativeFramework {
+
+    protected BasicBlockDFMap inMap = new BasicBlockDFMap();
+    protected BasicBlockDFMap outMap = new BasicBlockDFMap();
+    protected BasicBlockDFMap genMap = new BasicBlockDFMap();
+    protected BasicBlockDFMap prsvMap = new BasicBlockDFMap();
+
+    public BasicBlockDFMap getInMap() {
+        return inMap;
+    }
+
+    public BasicBlockDFMap getOutMap() {
+        return outMap;
+    }
+
+    public BasicBlockDFMap getGenMap() {
+        return genMap;
+    }
+
+    public BasicBlockDFMap getPrsvMap() {
+        return prsvMap;
+    }
 
     public abstract void initialize(Cfg g);
 

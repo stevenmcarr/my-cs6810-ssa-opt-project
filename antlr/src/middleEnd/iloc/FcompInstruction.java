@@ -1,21 +1,29 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
  */
 public class FcompInstruction extends ThreeAddressIlocInstruction {
   public FcompInstruction(VirtualRegisterOperand source1,
-                          VirtualRegisterOperand source2,
-                          VirtualRegisterOperand dest) {
+      VirtualRegisterOperand source2,
+      VirtualRegisterOperand dest) {
     this.source1 = source1;
     this.source2 = source2;
     this.dest = dest;
@@ -24,6 +32,8 @@ public class FcompInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source2);
   }
 
+  public FcompInstruction() {
+  }
 
   /**
    * getOpcode
@@ -36,8 +46,8 @@ public class FcompInstruction extends ThreeAddressIlocInstruction {
   }
 
   public static String getHash(VirtualRegisterOperand src1,
-                               VirtualRegisterOperand src2) {
-    return "fcomp"+src1.toString()+src2.toString();
+      VirtualRegisterOperand src2) {
+    return "fcomp" + src1.toString() + src2.toString();
   }
 
   protected int getOperandType(Operand operand) {
@@ -45,5 +55,16 @@ public class FcompInstruction extends ThreeAddressIlocInstruction {
       return Operand.INTEGER_TYPE;
     else
       return Operand.FLOAT_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FcompInstruction inst = new FcompInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FcompInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

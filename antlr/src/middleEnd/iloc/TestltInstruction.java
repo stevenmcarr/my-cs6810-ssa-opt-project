@@ -1,24 +1,35 @@
 package middleEnd.iloc;
 
 /**
- * <p>Title: CS4131 Nolife Compiler</p>
+ * <p>
+ * Title: CS4131 Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author not attributable
  * @version 1.0
  */
 public class TestltInstruction extends TestInstruction {
   public TestltInstruction(VirtualRegisterOperand source,
-                           VirtualRegisterOperand dest) {
+      VirtualRegisterOperand dest) {
     this.source = source;
     this.dest = dest;
     lValue = dest;
     rValues.add(source);
+  }
+
+  public TestltInstruction() {
   }
 
   /**
@@ -32,15 +43,26 @@ public class TestltInstruction extends TestInstruction {
   }
 
   public static String getHash(VirtualRegisterOperand src) {
-    return "testlt"+src.toString();
+    return "testlt" + src.toString();
   }
 
   public TestInstruction genComplementInst() {
-    return new TestgeInstruction(((VirtualRegisterOperand)source).copy(),
-                                 ((VirtualRegisterOperand)dest).copy());
+    return new TestgeInstruction(((VirtualRegisterOperand) source).copy(),
+        ((VirtualRegisterOperand) dest).copy());
   }
 
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    TestltInstruction inst = new TestltInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(TestltInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

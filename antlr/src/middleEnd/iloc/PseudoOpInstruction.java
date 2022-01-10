@@ -56,4 +56,7 @@ public abstract class PseudoOpInstruction extends IlocInstruction {
   protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
   }
 
+  protected void copyInstanceVars(PseudoOpInstruction copy) {
+    super.copyInstanceVars(copy);
+  }
 }

@@ -28,6 +28,9 @@ public class FloadInstruction extends TwoAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public FloadInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -52,5 +55,16 @@ public class FloadInstruction extends TwoAddressIlocInstruction {
   @Override
   public boolean isExpression() {
     return false;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FloadInstruction inst = new FloadInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FloadInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

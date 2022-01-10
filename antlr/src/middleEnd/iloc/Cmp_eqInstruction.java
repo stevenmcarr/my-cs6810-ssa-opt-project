@@ -23,6 +23,9 @@ public class Cmp_eqInstruction extends ThreeAddressIlocInstruction {
 		rValues.add(source2);
 	}
 
+	public Cmp_eqInstruction() {
+	}
+
 	/**
 	 * getOpcode
 	 *
@@ -35,11 +38,21 @@ public class Cmp_eqInstruction extends ThreeAddressIlocInstruction {
 
 	public static String getHash(VirtualRegisterOperand src1,
 			VirtualRegisterOperand src2) {
-		return "cmp_EQ"+src1.toString()+src2.toString();
+		return "cmp_EQ" + src1.toString() + src2.toString();
 	}
 
 	protected int getOperandType(Operand operand) {
 		return Operand.INTEGER_TYPE;
 	}
 
+	@Override
+	public IlocInstruction deepCopy() {
+		Cmp_eqInstruction inst = new Cmp_eqInstruction();
+		copyInstanceVars(inst);
+		return inst;
+	}
+
+	protected void copyInstanceVars(Cmp_eqInstruction inst) {
+		super.copyInstanceVars(inst);
+	}
 }

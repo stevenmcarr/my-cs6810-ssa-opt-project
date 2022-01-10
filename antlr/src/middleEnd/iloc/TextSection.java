@@ -46,4 +46,15 @@ public class TextSection extends PseudoOpInstruction {
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
   }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    TextSection inst = new TextSection();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(TextSection inst) {
+    super.copyInstanceVars(inst);
+  }
 }

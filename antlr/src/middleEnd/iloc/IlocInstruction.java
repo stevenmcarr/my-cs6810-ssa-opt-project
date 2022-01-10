@@ -211,18 +211,55 @@ public abstract class IlocInstruction {
     int index;
     if (lValues != null)
       if ((index = lValues.indexOf(vr)) >= 0) {
-        lValues.set(index,lro);
+        lValues.set(index, lro);
       }
-    assignLRToLValue(vr,lro);
+    assignLRToLValue(vr, lro);
 
     if (rValues != null)
       if ((index = rValues.indexOf(vr)) >= 0)
-        rValues.set(index,lro);
-    
-    assignLRToRValue(vr,lro);
+        rValues.set(index, lro);
+
+    assignLRToRValue(vr, lro);
   }
 
   protected abstract void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro);
 
   protected abstract void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro);
+
+  public abstract IlocInstruction deepCopy();
+
+  protected void copyInstanceVars(IlocInstruction copy) {
+    copy.instId = numInst++;
+
+    if (lValue != null)
+      copy.lValue = (VirtualRegisterOperand) lValue.deepCopy();
+
+    for (VirtualRegisterOperand vr : lValues)
+      copy.lValues.add((VirtualRegisterOperand) vr.deepCopy());
+
+    for (Operand op : rValues)
+      copy.rValues.add(op.deepCopy());
+  }
+
+  public void updateBranchTarget(LabelOperand newLOp, String oldLabel) {
+    LabelOperand copy = (LabelOperand) newLOp.deepCopy();
+    if (this instanceof CbrInstruction) {
+      CbrInstruction cbr = (CbrInstruction) this;
+      if (cbr.getBranchTargetLabel() == oldLabel)
+        cbr.setBranchTargetLabel(copy);
+    } else if (this instanceof CbrneInstruction) {
+      CbrneInstruction cbrne = (CbrneInstruction) this;
+      if (cbrne.getBranchTargetLabel() == oldLabel)
+        cbrne.setBranchTargetLabel(copy);
+    } else if (this instanceof JumpIInstruction) {
+      JumpIInstruction jump = (JumpIInstruction) this;
+      if (jump.getBranchTargetLabel() == oldLabel)
+        jump.setBranchTargetLabel(copy);
+    } else if (this instanceof JumpInstruction) {
+      JumpInstruction jump = (JumpInstruction) this;
+      if (jump.getBranchTargetLabel() == oldLabel)
+        jump.setBranchTargetLabel(copy);
+    }
+  }
+
 }

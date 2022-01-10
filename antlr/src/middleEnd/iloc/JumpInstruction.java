@@ -26,6 +26,9 @@ public class JumpInstruction extends OneAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public JumpInstruction() {
+  }
+
   public String getTargetLabel() {
     return ((LabelOperand) source).getLabel();
   }
@@ -64,5 +67,16 @@ public class JumpInstruction extends OneAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return true;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    JumpInstruction inst = new JumpInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(JumpInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

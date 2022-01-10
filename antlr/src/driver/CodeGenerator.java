@@ -29,6 +29,7 @@ public class CodeGenerator {
 		CodeGenerator.registerOptimizationPass("-dbre", "middleEnd.dbre.DominatorBasedRedundancyElimination");
 		CodeGenerator.registerOptimizationPass("-dce", "middleEnd.dce.DeadCodeElimination");
 		CodeGenerator.registerOptimizationPass("-ruc", "middleEnd.dce.RemoveUnreachableCode");
+		CodeGenerator.registerOptimizationPass("-pre", "middleEnd.pre.PartialRedundancyElimination");
 		CodeGenerator.registerOptimizationPass("-ra", "backend.ra.ChaitinBriggs");
 	}
 
@@ -68,7 +69,8 @@ public class CodeGenerator {
 				String passString = null;
 				try {
 					cl = (Class<OptimizationPass>) Class.forName(passName);
-					Constructor<OptimizationPass> con = cl.getConstructor(String.class, String.class);
+					Constructor<OptimizationPass> con = cl.getConstructor(String.class,
+							String.class);
 					passString = args[i].substring(1, args[i].length());
 					pass = (OptimizationPass) con.newInstance(prevPass, passString);
 				} catch (ClassNotFoundException e) {
