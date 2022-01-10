@@ -45,4 +45,15 @@ public class HaltInstruction extends NoAddressIlocInstruction {
 		return true;
 	}
 
+	@Override
+	public IlocInstruction deepCopy() {
+		HaltInstruction inst = new HaltInstruction();
+		copyInstanceVars(inst);
+		return inst;
+	}
+
+	protected void copyInstanceVars(HaltInstruction inst) {
+		super.copyInstanceVars(inst);
+	}
+
 }

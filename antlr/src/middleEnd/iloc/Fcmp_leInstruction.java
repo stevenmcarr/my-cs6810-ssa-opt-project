@@ -20,6 +20,9 @@ public class Fcmp_leInstruction extends ThreeAddressIlocInstruction {
 		rValues.add(source2);
 	}
 
+	public Fcmp_leInstruction() {
+	}
+
 	/**
 	 * getOpcode
 	 *
@@ -32,7 +35,7 @@ public class Fcmp_leInstruction extends ThreeAddressIlocInstruction {
 
 	public static String getHash(VirtualRegisterOperand src1,
 			VirtualRegisterOperand src2) {
-		return "fcmp_LE"+src1.toString()+src2.toString();
+		return "fcmp_LE" + src1.toString() + src2.toString();
 	}
 
 	protected int getOperandType(Operand operand) {
@@ -41,5 +44,15 @@ public class Fcmp_leInstruction extends ThreeAddressIlocInstruction {
 		else
 			return Operand.FLOAT_TYPE;
 	}
-}
 
+	@Override
+	public IlocInstruction deepCopy() {
+		Fcmp_leInstruction inst = new Fcmp_leInstruction();
+		copyInstanceVars(inst);
+		return inst;
+	}
+
+	protected void copyInstanceVars(Fcmp_leInstruction inst) {
+		super.copyInstanceVars(inst);
+	}
+}

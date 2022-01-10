@@ -30,6 +30,9 @@ public class FloadAIInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source2);
   }
 
+  public FloadAIInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -50,5 +53,16 @@ public class FloadAIInstruction extends ThreeAddressIlocInstruction {
   @Override
   public boolean isExpression() {
     return false;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FloadAIInstruction inst = new FloadAIInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FloadAIInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

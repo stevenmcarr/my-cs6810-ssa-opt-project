@@ -92,7 +92,7 @@ public class AddInstruction extends ThreeAddressIlocInstruction {
     return inst;
   }
 
-  protected void copyInstanceVars(AddIInstruction inst) {
+  protected void copyInstanceVars(AddInstruction inst) {
     super.copyInstanceVars(inst);
   }
 }

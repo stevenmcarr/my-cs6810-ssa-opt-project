@@ -25,4 +25,8 @@ public abstract class CopyInstruction extends TwoAddressIlocInstruction {
     public boolean isExpression() {
         return false;
     }
+
+    protected void copyInstanceVars(CopyInstruction inst) {
+        super.copyInstanceVars(inst);
+    }
 }

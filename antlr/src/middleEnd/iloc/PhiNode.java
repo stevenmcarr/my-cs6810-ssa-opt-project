@@ -11,6 +11,9 @@ public class PhiNode extends VariableAddressIlocInstruction {
         operands = new Vector<Operand>(rValues);
     }
 
+    public PhiNode() {
+    }
+
     @Override
     public String getOpcode() {
         return "phi";
@@ -44,4 +47,14 @@ public class PhiNode extends VariableAddressIlocInstruction {
         return false;
     }
 
+    @Override
+    public IlocInstruction deepCopy() {
+        PhiNode inst = new PhiNode();
+        copyInstanceVars(inst);
+        return inst;
+    }
+
+    protected void copyInstanceVars(PhiNode inst) {
+        super.copyInstanceVars(inst);
+    }
 }

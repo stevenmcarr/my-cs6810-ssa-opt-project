@@ -46,4 +46,15 @@ public class DataSection extends PseudoOpInstruction {
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
   }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    DataSection inst = new DataSection();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(DataSection inst) {
+    super.copyInstanceVars(inst);
+  }
 }

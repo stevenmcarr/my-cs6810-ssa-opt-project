@@ -31,6 +31,9 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
     rValues.add(dest);
   }
 
+  public CbrneInstruction() {
+  }
+
   public String getTargetLabel() {
     return ((LabelOperand) dest).getLabel();
   }
@@ -80,5 +83,16 @@ public class CbrneInstruction extends TwoAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return false;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    CbrneInstruction inst = new CbrneInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(CbrneInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

@@ -39,6 +39,9 @@ public class IcallInstruction extends InvocationInstruction {
     lValue = returnRegister;
   }
 
+  public IcallInstruction() {
+  }
+
   public VirtualRegisterOperand getReturnRegister() {
     return returnRegister;
   }
@@ -84,9 +87,21 @@ public class IcallInstruction extends InvocationInstruction {
   protected String getStringRepSpecific() {
     return "\t => " + returnRegister.toString();
   }
-  
+
   public void replaceLValue(Operand operand) {
     lValue = (VirtualRegisterOperand) operand;
     returnRegister = lValue;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    IcallInstruction inst = new IcallInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(IcallInstruction inst) {
+    inst.returnRegister = returnRegister;
+    super.copyInstanceVars(inst);
   }
 }

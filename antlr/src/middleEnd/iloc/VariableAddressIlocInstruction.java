@@ -77,12 +77,22 @@ public abstract class VariableAddressIlocInstruction extends IlocInstruction {
   protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
     int index;
     if ((index = operands.indexOf(vr)) >= 0)
-      operands.set(index,lro);
+      operands.set(index, lro);
   }
 
   protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
     if (lValue == vr) {
-        lValue = lro;
+      lValue = lro;
     }
+  }
+
+  protected void copyInstanceVars(VariableAddressIlocInstruction copy) {
+    copy.operands = new Vector<Operand>();
+    for (Operand op : operands) {
+      Operand opc = op.deepCopy();
+      copy.operands.add(opc);
+    }
+
+    super.copyInstanceVars(copy);
   }
 }

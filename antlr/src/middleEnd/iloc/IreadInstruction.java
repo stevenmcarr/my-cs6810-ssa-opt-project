@@ -26,6 +26,9 @@ public class IreadInstruction extends OneAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public IreadInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -69,5 +72,16 @@ public class IreadInstruction extends OneAddressIlocInstruction {
       lValue = lro;
     }
 
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    IreadInstruction inst = new IreadInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(IreadInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

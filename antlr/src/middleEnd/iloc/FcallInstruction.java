@@ -38,6 +38,9 @@ public class FcallInstruction extends InvocationInstruction {
     lValue = returnRegister;
   }
 
+  public FcallInstruction() {
+  }
+
   public VirtualRegisterOperand getReturnRegister() {
     return returnRegister;
   }
@@ -82,5 +85,17 @@ public class FcallInstruction extends InvocationInstruction {
   @Override
   protected String getStringRepSpecific() {
     return ("\t => " + returnRegister.toString());
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FcallInstruction inst = new FcallInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FcallInstruction inst) {
+    inst.returnRegister = returnRegister;
+    super.copyInstanceVars(inst);
   }
 }

@@ -64,6 +64,21 @@ public class PartialRedundancyElimination extends OptimizationPass {
 	}
 
 	private void deleteInstructions(Cfg cfg) {
+		for (CfgNode n : cfg.getNodes()) {
+			BasicBlock b = (BasicBlock) n;
+			VirtualRegisterSet delete = (VirtualRegisterSet) deleteMap.get(b);
+			boolean done = false;
+			for (int index = -1; !done && (index = delete.nextSetBit(index)) != -1;) {
+				IlocInstruction lastNext = b.getNextInst(b.getLastInst());
+				for (IlocInstruction inst = b.getFirstInst(); !done
+						&& inst != lastNext; inst = b.getNextInst(inst)) {
+					if (inst.getLValue() != null && inst.getLValue().getRegisterId() == index) {
+						b.removeInst(inst);
+						done = true;
+					}
+				}
+			}
+		}
 	}
 
 	private void insertInstructions(Cfg cfg) {
@@ -87,17 +102,26 @@ public class PartialRedundancyElimination extends OptimizationPass {
 				} else if (e.getPred().getSuccs().size() == 1) {
 					insertAtStartBlock(b, insertEdge);
 				} else {
-					insertOnEdge(b, insertEdge);
+					insertOnEdge(e, insertEdge);
 				}
 			}
 
 		}
 	}
 
-	private void insertOnEdge(BasicBlock b, VirtualRegisterSet insertEdge) {
+	private void insertOnEdge(CfgEdge e, VirtualRegisterSet insertEdge) {
 	}
 
-	private void insertAtEndBlock(BasicBlock b, VirtualRegisterSet insertEdge) {
+	private void insertAtEndBlock(BasicBlock b, VirtualRegisterSet insertEndBlock) {
+		IlocInstruction l = b.getLastInst();
+		if (l.isBranchInstruction())
+			l = b.getPreviousInst(l);
+
+		int index = -1;
+		while ((index = insertEndBlock.nextSetBit(index + 1)) != -1) {
+			IlocInstruction inst = vrInstMap.get(new VirtualRegisterOperand(index)).deepCopy();
+			b.insertAfter(l, inst);
+		}
 	}
 
 	private void insertAtStartBlock(BasicBlock b, VirtualRegisterSet insertInBlock) {
@@ -105,8 +129,7 @@ public class PartialRedundancyElimination extends OptimizationPass {
 		int index = -1;
 		while ((index = insertInBlock.nextSetBit(index + 1)) != -1) {
 			IlocInstruction inst = vrInstMap.get(new VirtualRegisterOperand(index)).deepCopy();
-			// clone the instruction - add deepCopy to all instructions and operands
-			// insert an instruction before f
+			b.insertBefore(f, inst);
 		}
 	}
 

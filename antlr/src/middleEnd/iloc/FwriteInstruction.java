@@ -26,6 +26,9 @@ public class FwriteInstruction extends OneAddressIlocInstruction {
     rValues.add(source);
   }
 
+  public FwriteInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -55,5 +58,16 @@ public class FwriteInstruction extends OneAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return true;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    FwriteInstruction inst = new FwriteInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(FwriteInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

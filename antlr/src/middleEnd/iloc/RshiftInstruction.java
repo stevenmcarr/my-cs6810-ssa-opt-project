@@ -3,21 +3,29 @@ package middleEnd.iloc;
 import java.util.Vector;
 
 /**
- * <p>Title: Nolife Compiler</p>
+ * <p>
+ * Title: Nolife Compiler
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author Steve Carr
  * @version 1.0
  */
 public class RshiftInstruction extends ThreeAddressIlocInstruction {
   public RshiftInstruction(VirtualRegisterOperand source1,
-                           VirtualRegisterOperand source2,
-                           VirtualRegisterOperand dest) {
+      VirtualRegisterOperand source2,
+      VirtualRegisterOperand dest) {
     this.source1 = source1;
     this.source2 = source2;
     this.dest = dest;
@@ -26,6 +34,8 @@ public class RshiftInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source2);
   }
 
+  public RshiftInstruction() {
+  }
 
   /**
    * getOpcode
@@ -42,23 +52,33 @@ public class RshiftInstruction extends ThreeAddressIlocInstruction {
   }
 
   public IlocInstruction constantFold(Vector<Integer> constVals) {
-   Integer lOpVal = (Integer)constVals.elementAt(0);
-   Integer rOpVal = (Integer)constVals.elementAt(1);
+    Integer lOpVal = (Integer) constVals.elementAt(0);
+    Integer rOpVal = (Integer) constVals.elementAt(1);
 
-   ImmediateOperand source = new ConstantOperand(lOpVal.intValue() >> rOpVal.intValue());
+    ImmediateOperand source = new ConstantOperand(lOpVal.intValue() >> rOpVal.intValue());
 
-   return new LoadIInstruction(source,(VirtualRegisterOperand)dest);
+    return new LoadIInstruction(source, (VirtualRegisterOperand) dest);
   }
 
   public IlocInstruction constantPropagate(Vector<Integer> constVals) {
-    Integer lOpVal = (Integer)constVals.elementAt(0);
-    Integer rOpVal = (Integer)constVals.elementAt(1);
+    Integer lOpVal = (Integer) constVals.elementAt(0);
+    Integer rOpVal = (Integer) constVals.elementAt(1);
 
     if (lOpVal == null) {
       ConstantOperand source2 = new ConstantOperand(rOpVal.intValue());
-      return new RshiftIInstruction((VirtualRegisterOperand)source1,source2,(VirtualRegisterOperand)dest);
-    }
-    else
+      return new RshiftIInstruction((VirtualRegisterOperand) source1, source2, (VirtualRegisterOperand) dest);
+    } else
       return this;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    RshiftInstruction inst = new RshiftInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(RshiftInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

@@ -30,6 +30,9 @@ public class I2iInstruction extends CopyInstruction {
     rValues.add(source);
   }
 
+  public I2iInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -54,5 +57,16 @@ public class I2iInstruction extends CopyInstruction {
     ImmediateOperand source = new ConstantOperand(lOpVal.intValue());
 
     return new LoadIInstruction(source, (VirtualRegisterOperand) dest);
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    I2iInstruction inst = new I2iInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(I2iInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

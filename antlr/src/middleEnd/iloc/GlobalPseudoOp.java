@@ -31,6 +31,9 @@ public class GlobalPseudoOp extends PseudoOpInstruction {
     this.align = align;
   }
 
+  public GlobalPseudoOp() {
+  }
+
   /**
    * getOpcode
    *
@@ -64,5 +67,19 @@ public class GlobalPseudoOp extends PseudoOpInstruction {
 
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    GlobalPseudoOp inst = new GlobalPseudoOp();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(GlobalPseudoOp inst) {
+    inst.name = new String(name);
+    inst.size = size;
+    inst.align = align;
+    super.copyInstanceVars(inst);
   }
 }

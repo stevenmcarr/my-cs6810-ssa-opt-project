@@ -27,6 +27,9 @@ public class AndInstruction extends ThreeAddressIlocInstruction {
     rValues.add(source2);
   }
 
+  public AndInstruction() {
+  }
+
   /**
    * getOpcode
    *
@@ -53,5 +56,16 @@ public class AndInstruction extends ThreeAddressIlocInstruction {
    ImmediateOperand source = new ConstantOperand(lOpVal.intValue() & rOpVal.intValue());
 
    return new LoadIInstruction(source,(VirtualRegisterOperand)dest);
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    AndInstruction inst = new AndInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(AndInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

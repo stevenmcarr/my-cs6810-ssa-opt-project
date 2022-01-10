@@ -68,10 +68,15 @@ public abstract class OneAddressIlocInstruction extends IlocInstruction {
   }
 
   protected void assignLRToRValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
-      if (vr == source)
-        source = lro;
+    if (vr == source)
+      source = lro;
   }
 
   protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
+  }
+
+  protected void copyInstanceVars(OneAddressIlocInstruction inst) {
+    inst.source = source;
+    super.copyInstanceVars(inst);
   }
 }

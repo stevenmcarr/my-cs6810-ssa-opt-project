@@ -30,6 +30,9 @@ public class CbrInstruction extends TwoAddressIlocInstruction {
     rValues.add(dest);
   }
 
+  public CbrInstruction() {
+  }
+
   public String getTargetLabel() {
     return ((LabelOperand) dest).getLabel();
   }
@@ -79,5 +82,16 @@ public class CbrInstruction extends TwoAddressIlocInstruction {
   @Override
   public boolean isNecessary() {
     return false;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    CbrInstruction inst = new CbrInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(CbrInstruction inst) {
+    super.copyInstanceVars(inst);
   }
 }

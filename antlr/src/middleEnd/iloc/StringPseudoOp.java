@@ -30,6 +30,9 @@ public class StringPseudoOp extends PseudoOpInstruction {
     this.val = val;
   }
 
+  public StringPseudoOp() {
+  }
+
   /**
    * getOpcode
    *
@@ -59,5 +62,18 @@ public class StringPseudoOp extends PseudoOpInstruction {
 
   protected int getOperandType(Operand operand) {
     return Operand.INTEGER_TYPE;
+  }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    StringPseudoOp inst = new StringPseudoOp();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(StringPseudoOp inst) {
+    inst.name = new String(name);
+    inst.val = new String(val);
+    super.copyInstanceVars(inst);
   }
 }

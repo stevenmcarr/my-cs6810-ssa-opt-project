@@ -20,6 +20,9 @@ public class Comment extends IlocInstruction {
 		commentString = new String(str);
 	}
 
+	public Comment() {
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -112,5 +115,17 @@ public class Comment extends IlocInstruction {
 	@Override
 	protected void assignLRToLValue(VirtualRegisterOperand vr, LiveRangeOperand lro) {
 
+	}
+
+	@Override
+	public IlocInstruction deepCopy() {
+		Comment inst = new Comment();
+		copyInstanceVars(inst);
+		return inst;
+	}
+
+	protected void copyInstanceVars(Comment inst) {
+		inst.commentString = new String(commentString);
+		super.copyInstanceVars(inst);
 	}
 }

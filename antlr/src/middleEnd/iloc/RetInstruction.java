@@ -42,4 +42,15 @@ public class RetInstruction extends NoAddressIlocInstruction {
   public boolean isNecessary() {
     return true;
   }
+
+  @Override
+  public IlocInstruction deepCopy() {
+    RetInstruction inst = new RetInstruction();
+    copyInstanceVars(inst);
+    return inst;
+  }
+
+  protected void copyInstanceVars(RetInstruction inst) {
+    super.copyInstanceVars(inst);
+  }
 }
