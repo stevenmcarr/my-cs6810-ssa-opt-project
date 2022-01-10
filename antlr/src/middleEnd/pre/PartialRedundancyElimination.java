@@ -5,11 +5,14 @@ import java.util.List;
 import middleEnd.dfa.AnticipationAnalysis;
 import middleEnd.dfa.AvaliableExpressionsAnalysis;
 import middleEnd.iloc.IlocInstruction;
+import middleEnd.iloc.LabelOperand;
+import middleEnd.iloc.NopInstruction;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
 import middleEnd.utils.BasicBlockDFMap;
 import middleEnd.utils.Cfg;
 import middleEnd.utils.CfgEdge;
+import middleEnd.utils.CfgEdgeBasicBlockMap;
 import middleEnd.utils.CfgEdgeDFMap;
 import middleEnd.utils.CfgNode;
 import middleEnd.utils.DataFlowSet;
@@ -28,6 +31,7 @@ public class PartialRedundancyElimination extends OptimizationPass {
 	private BasicBlockDFMap deleteMap = new BasicBlockDFMap();
 	private VirtualRegisterSet emptySet;
 	private VirtualRegisterSet universe;
+	private CfgEdgeBasicBlockMap newEdgeBlockMap = new CfgEdgeBasicBlockMap();
 
 	public PartialRedundancyElimination(String prevPassA, String passA) {
 		super(prevPassA, passA);
@@ -107,9 +111,47 @@ public class PartialRedundancyElimination extends OptimizationPass {
 			}
 
 		}
+
+		addEdgeBlocks(cfg);
+	}
+
+	private void addEdgeBlocks(Cfg g) {
+		for (CfgNode n : g.getNodes()) {
+			BasicBlock b = (BasicBlock) n;
+			for (CfgEdge e : b.getPreds()) {
+				BasicBlock eb = newEdgeBlockMap.get(e);
+				if (eb != null) {
+					String label = b.getBlockLabel();
+					NopInstruction nop = new NopInstruction();
+					nop.setLabel(label);
+					eb.insertBefore(eb.getFirstInst(), nop);
+					updateLabels(b, e);
+				}
+
+			}
+		}
+	}
+
+	private void updateLabels(BasicBlock b, CfgEdge e) {
+		LabelOperand newLOp = LabelOperand.makeLabelOperand();
+		String oldLabel = b.getFirstInst().getLabel();
+		b.getFirstInst().setLabel(newLOp.getLabel());
+		for (CfgEdge p : b.getPreds()) {
+			if (p.getEdgeId() != e.getEdgeId()) {
+				((BasicBlock) p.getPred()).getLastInst().updateBranchTarget(newLOp, oldLabel);
+			}
+		}
 	}
 
 	private void insertOnEdge(CfgEdge e, VirtualRegisterSet insertEdge) {
+
+		BasicBlock b = newEdgeBlockMap.get(e);
+
+		if (b == null) {
+			b = new BasicBlock();
+			newEdgeBlockMap.put(e, b);
+		}
+		insertAtStartBlock(b, insertEdge);
 	}
 
 	private void insertAtEndBlock(BasicBlock b, VirtualRegisterSet insertEndBlock) {

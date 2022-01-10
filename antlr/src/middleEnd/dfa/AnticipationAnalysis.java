@@ -65,7 +65,7 @@ public class AnticipationAnalysis extends BackwardDataFlowProblem {
 				for (VirtualRegisterOperand op : inst.getAllLValues()) {
 					if (!antloc.get(op) && transp.get(op))
 						antloc.set(op);
-					for (IlocInstruction i : useMap.get(op))
+					for (IlocInstruction i : useMap.get(op.toString()))
 						for (VirtualRegisterOperand vr : i.getAllLValues())
 							transp.clear(vr);
 

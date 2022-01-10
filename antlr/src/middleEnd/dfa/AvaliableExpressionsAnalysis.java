@@ -77,7 +77,7 @@ public class AvaliableExpressionsAnalysis extends ForwardDataflowProblem {
 					if (operandsNotKilled)
 						gen.set(op);
 					killed.set(op);
-					for (IlocInstruction i : useMap.get(op))
+					for (IlocInstruction i : useMap.get(op.toString()))
 						for (VirtualRegisterOperand vr : i.getAllLValues())
 							prsv.clear(vr);
 

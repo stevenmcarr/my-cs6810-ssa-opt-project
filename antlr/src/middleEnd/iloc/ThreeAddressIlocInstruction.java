@@ -2,8 +2,6 @@ package middleEnd.iloc;
 
 import java.util.Hashtable;
 
-import javax.lang.model.SourceVersion;
-
 /**
  * <p>
  * Title: Nolife Compiler

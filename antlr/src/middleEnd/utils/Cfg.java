@@ -339,11 +339,11 @@ public class Cfg {
         pw.println("");
     }
 
-	public void buildLoopTree() {
+    public void buildLoopTree() {
         loopTree = (new LoopTree()).addCfg(this);
         loopTree.buildLoopTree();
     }
-    
+
     public LoopTree getLoopTree() {
         return loopTree;
     }

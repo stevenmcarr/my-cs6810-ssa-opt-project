@@ -241,4 +241,25 @@ public abstract class IlocInstruction {
       copy.rValues.add(op.deepCopy());
   }
 
+  public void updateBranchTarget(LabelOperand newLOp, String oldLabel) {
+    LabelOperand copy = (LabelOperand) newLOp.deepCopy();
+    if (this instanceof CbrInstruction) {
+      CbrInstruction cbr = (CbrInstruction) this;
+      if (cbr.getBranchTargetLabel() == oldLabel)
+        cbr.setBranchTargetLabel(copy);
+    } else if (this instanceof CbrneInstruction) {
+      CbrneInstruction cbrne = (CbrneInstruction) this;
+      if (cbrne.getBranchTargetLabel() == oldLabel)
+        cbrne.setBranchTargetLabel(copy);
+    } else if (this instanceof JumpIInstruction) {
+      JumpIInstruction jump = (JumpIInstruction) this;
+      if (jump.getBranchTargetLabel() == oldLabel)
+        jump.setBranchTargetLabel(copy);
+    } else if (this instanceof JumpInstruction) {
+      JumpInstruction jump = (JumpInstruction) this;
+      if (jump.getBranchTargetLabel() == oldLabel)
+        jump.setBranchTargetLabel(copy);
+    }
+  }
+
 }
