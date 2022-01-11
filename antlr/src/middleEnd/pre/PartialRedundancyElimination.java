@@ -7,6 +7,7 @@ import middleEnd.dfa.AvaliableExpressionsAnalysis;
 import middleEnd.iloc.IlocInstruction;
 import middleEnd.iloc.LabelOperand;
 import middleEnd.iloc.NopInstruction;
+import middleEnd.iloc.Operand;
 import middleEnd.iloc.VirtualRegisterOperand;
 import middleEnd.utils.BasicBlock;
 import middleEnd.utils.BasicBlockDFMap;
@@ -19,11 +20,13 @@ import middleEnd.utils.DataFlowSet;
 import middleEnd.utils.IlocRoutine;
 import middleEnd.utils.OptimizationPass;
 import middleEnd.utils.VRInstructionMap;
+import middleEnd.utils.VRUseMap;
 import middleEnd.utils.VirtualRegisterSet;
 
 public class PartialRedundancyElimination extends OptimizationPass {
 
 	private VRInstructionMap vrInstMap = new VRInstructionMap();
+	private VRUseMap useMap = new VRUseMap();
 	private CfgEdgeDFMap earliestMap = new CfgEdgeDFMap();
 	private CfgEdgeDFMap laterMap = new CfgEdgeDFMap();
 	private CfgEdgeDFMap insertMap = new CfgEdgeDFMap();
@@ -45,9 +48,15 @@ public class PartialRedundancyElimination extends OptimizationPass {
 		for (IlocRoutine rtn : routines) {
 			IlocInstruction i;
 			for (i = rtn.getFirstInst(); i != null; i = rtn.getNextInstruction(i)) {
-				for (VirtualRegisterOperand vr : i.getAllLValues())
+				for (VirtualRegisterOperand vr : i.getAllLValues()) {
 					if (!vrInstMap.containsKey(vr))
 						vrInstMap.put(vr, i);
+					if (!useMap.containsKey(vr))
+						useMap.put(vr, new VirtualRegisterSet());
+					for (Operand op : i.getRValues())
+						if (op instanceof VirtualRegisterOperand)
+							useMap.putVR(vr, (VirtualRegisterOperand) op);
+				}
 			}
 			rtn.buildCfg();
 			for (CfgNode n : rtn.getCfg().getNodes())
@@ -70,19 +79,21 @@ public class PartialRedundancyElimination extends OptimizationPass {
 	private void deleteInstructions(Cfg cfg) {
 		for (CfgNode n : cfg.getNodes()) {
 			BasicBlock b = (BasicBlock) n;
-			VirtualRegisterSet delete = (VirtualRegisterSet) deleteMap.get(b);
-			boolean done = false;
-			for (int index = -1; !done && (index = delete.nextSetBit(index)) != -1;) {
-				IlocInstruction lastNext = b.getNextInst(b.getLastInst());
-				for (IlocInstruction inst = b.getFirstInst(); !done
-						&& inst != lastNext; inst = b.getNextInst(inst)) {
-					if (inst.getLValue() != null && inst.getLValue().getRegisterId() == index) {
-						b.removeInst(inst);
-						done = true;
-					}
-				}
-			}
+			VirtualRegisterSet delete = (VirtualRegisterSet) deleteMap.get(b).clone();
+			IlocInstruction end = b.getNextInst(b.getLastInst());
+			IlocInstruction nextInst = null;
+			for (IlocInstruction inst = b.getFirstInst(); inst != end; inst = nextInst)
+				if (inst.getLValue() != null && delete.get(inst.getLValue()))
+					b.removeInst(inst);
+				else
+					updateDelete(delete, inst.getLValue());
 		}
+	}
+
+	private void updateDelete(VirtualRegisterSet delete, VirtualRegisterOperand lValue) {
+		VirtualRegisterSet uses = useMap.get(lValue).clone();
+		uses.flip(0, uses.size());
+		delete.and(uses);
 	}
 
 	private void insertInstructions(Cfg cfg) {
