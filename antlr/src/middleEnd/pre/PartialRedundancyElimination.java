@@ -59,6 +59,8 @@ public class PartialRedundancyElimination extends OptimizationPass {
 				}
 			}
 			rtn.buildCfg();
+			rtn.getCfg().buildPreOrder();
+			rtn.getCfg().buildPostOrder();
 			for (CfgNode n : rtn.getCfg().getNodes())
 				n.clearMarked();
 			AnticipationAnalysis anticpAnalysis = new AnticipationAnalysis(rtn.getCfg(),

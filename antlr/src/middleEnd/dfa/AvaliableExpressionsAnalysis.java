@@ -22,6 +22,9 @@ public class AvaliableExpressionsAnalysis extends ForwardDataflowProblem {
 	private HashMap<String, LinkedList<IlocInstruction>> useMap = new HashMap<String, LinkedList<IlocInstruction>>();
 
 	public AvaliableExpressionsAnalysis(Cfg g, int size) {
+		emptySet = new VirtualRegisterSet(size + 1);
+		universe = new VirtualRegisterSet(size + 1);
+		universe.set(0, size + 1);
 		for (CfgNode n : g.getNodes()) {
 			BasicBlock b = (BasicBlock) n;
 			Iterator<IlocInstruction> bIter = b.iterator();
@@ -52,7 +55,7 @@ public class AvaliableExpressionsAnalysis extends ForwardDataflowProblem {
 
 	@Override
 	public void initialize(Cfg g) {
-		for (CfgNode n : getNodeOrder(g)) {
+		for (CfgNode n : g.getNodes()) {
 			BasicBlock b = (BasicBlock) n;
 			VirtualRegisterSet in;
 			if (n.getPreds().isEmpty())

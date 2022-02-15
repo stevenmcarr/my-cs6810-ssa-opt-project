@@ -54,7 +54,7 @@ public class AnticipationAnalysis extends BackwardDataFlowProblem {
 
 	@Override
 	public void initialize(Cfg g) {
-		for (CfgNode n : getNodeOrder(g)) {
+		for (CfgNode n : g.getNodes()) {
 			BasicBlock b = (BasicBlock) n;
 			VirtualRegisterSet out = universe.clone();
 			VirtualRegisterSet antloc = emptySet.clone();

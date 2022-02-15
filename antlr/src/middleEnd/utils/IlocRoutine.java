@@ -133,6 +133,13 @@ public class IlocRoutine {
     BasicBlock exit = (new BasicBlock()).addRoutine(this);
     cfg.addExitNode(exit);
 
+    if (work.size() == 1) {
+      BasicBlock b = work.firstElement();
+      work.remove(b);
+      b.addSuccessorEdge(exit);
+      exit.addPredecessorEdge(b);
+    }
+
     while (!work.isEmpty()) {
       BasicBlock b = work.firstElement();
       work.remove(b);
